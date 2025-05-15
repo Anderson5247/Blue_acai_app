@@ -226,7 +226,7 @@
 
         /* Estilo específico para a seleção de sabor do Copo da Felicidade */
         #fsCopoFelicidadeFlavors .grid-2 label { /* Adapte conforme necessário */
-             border: 1px solid #ccc; /* Adiciona uma borda para diferenciar os sabores */
+             border: 1泸士solid #ccc; /* Adiciona uma borda para diferenciar os sabores */
              padding: 10px;
              border-radius: 5px;
              background-color: #f9f9f9;
@@ -431,7 +431,7 @@
              // Payment e Delivery não são desabilitados aqui pois se aplicam ao pedido geral.
         }
 
-         // Reseta as opções dependentes do item atual e prepara para o próximo item/seleção de produto principal
+         // Reseta as opções dependentes do item atual e prepara para a próxima seleção de produto principal
          // MOVIDA PARA CIMA PARA SER DEFINIDA ANTES DE SER CHAMADA
         function resetDependentOptions() {
              console.log("Resetando formulário parcial para o próximo item."); // Log para debug
@@ -481,6 +481,116 @@
              // Não mexe na seção de pedidos 'ordersSec' nem em 'orderPageTotal', pois eles mostram os itens JÁ adicionados.
              // renderOrders() é chamada por btnAdd para atualizar esta seção.
               console.log("Reset parcial completo."); // Log para debug
+         }
+
+
+        // Verifica se todas as condições para adicionar/finalizar um pedido estão prontas
+         function isOrderReadyToAdd() {
+              console.log("Verificando se o item atual está pronto para adicionar. State:", state); // Log para debug
+             // 1. Verifica se um produto principal foi selecionado
+             const isProdutoPrincipalSelected = state.produtoPrincipal && state.produtoPrincipal.type;
+             if (!isProdutoPrincipalSelected) {
+                  console.log("  -> Produto principal não selecionado."); // Log para debug
+                 return false;
+             }
+
+             // 2. Validação específica das opções do item selecionado (Açaí vs Copo Felicidade)
+             let itemSpecificValidity = false;
+             const noneAddValue = 'Nenhum Adicional';
+             const noneValue = 'Nenhuma';
+
+
+             if (state.produtoPrincipal.type === 'acai') {
+                  console.log("  -> Validando item Açaí."); // Log para debug
+                 // Lógica de validação para Açaí
+                 state.frutas = state.frutas || []; state.cremes = state.cremes || []; state.accomp = state.accomp || [];
+                 state.cover = state.cover || []; state.add = state.add || [];
+
+                 const checkSectionValidity = (fieldset, stateKey) => {
+                      // Se o fieldset está desabilitado, ele é válido por padrão
+                     if (!fieldset || fieldset.hasAttribute('disabled')) {
+                          // console.log(`    -> Fieldset "${fieldset?.id}" desabilitado. Válido.`); // Log para debug
+                          return true;
+                     }
+
+                      const itemsSelected = state[stateKey];
+                      // console.log(`    -> Validando fieldset "${fieldset.id}" (${stateKey}). Items no state:`, itemsSelected); // Log para debug
+
+
+                      // Deve haver pelo menos um item selecionado (incluindo 'Nenhuma'/'Nenhum Adicional') se o fieldset está habilitado
+                     if (!itemsSelected || itemsSelected.length === 0) {
+                          console.log(`    -> Fieldset "${fieldset.id}" habilitado, mas nenhum item selecionado.`); // Log para debug
+                         return false;
+                     }
+
+                      const noneOption = stateKey === 'add' ? noneAddValue : noneValue;
+
+                      // Se a opção "Nenhuma" ou "Nenhum Adicional" está selecionada, deve ser o ÚNICO item
+                     if (itemsSelected.includes(noneOption) && itemsSelected.length > 1) {
+                          console.log(`    -> Fieldset "${fieldset.id}" habilitado, "${noneOption}" selecionado junto com outros.`); // Log para debug
+                         return false;
+                     }
+
+                      // Validação de limite máximo é feita em setupChecks, não precisa repetir aqui a verificação da contagem vs max.
+
+                      console.log(`    -> Fieldset "${fieldset.id}" habilitado e seleção válida.`); // Log para debug
+                      return true; // Seleção válida para este fieldset habilitado
+                 };
+
+                 const frutasOk = checkSectionValidity(fs.frutas, 'frutas');
+                 const cremesOk = checkSectionValidity(fs.cremes, 'cremes');
+                 const accompOk = checkSectionValidity(fs.accomp, 'accomp');
+                 const coverOk = checkSectionValidity(fs.cover, 'cover');
+
+                 let addOk = true;
+                  // Verifica adicionais APENAS se o fieldset 'Deseja adicionais?' está habilitado
+                 if (!fs.askAdd.hasAttribute('disabled')) {
+                      console.log("  -> Validando adicionais (fieldset Deseja adicionais? habilitado)."); // Log para debug
+                      // Se "Deseja adicionais?" está habilitado, é obrigatório escolher Sim ou Não
+                     if (state.wantAdd === undefined) {
+                         console.log("    -> Escolha Sim/Não adicionais pendente."); // Log para debug
+                         return false; // Nada selecionado
+                     }
+                      // Se "Sim" foi escolhido, valida o fieldset de adicionais (que deve estar habilitado)
+                     if (state.wantAdd === 'Sim') {
+                          console.log("    -> Escolheu 'Sim', validando fieldset Adicionais."); // Log para debug
+                         addOk = checkSectionValidity(fs.add, 'add');
+                     }
+                      // Se "Não" foi escolhido, addOk já é true.
+                 } else {
+                      console.log("  -> Fieldset Deseja adicionais? desabilitado. Adicionais válidos por padrão."); // Log para debug
+                      addOk = true; // Adicionais são válidos por padrão se a seção está desabilitada
+                 }
+
+                 itemSpecificValidity = frutasOk && cremesOk && accompOk && coverOk && addOk;
+                  console.log("  -> Validade específica do item Açaí:", itemSpecificValidity); // Log para debug
+
+
+             } else if (state.produtoPrincipal.type === 'produto_especial' && state.produtoPrincipal.id === 'copo_felicidade') {
+                  console.log("  -> Validando item Copo da Felicidade."); // Log para debug
+                 // Lógica de validação para Copo da Felicidade:
+                 // Requer apenas que um sabor tenha sido selecionado
+                 const isFlavorSelected = state.selectedCopoFelicidadeFlavor !== undefined && state.selectedCopoFelicidadeFlavor !== null && state.selectedCopoFelicidadeFlavor !== ''; // Verifica se o sabor foi selecionado e não é vazio
+                  console.log("  -> Sabor Copo da Felicidade selecionado?", isFlavorSelected, "Sabor:", state.selectedCopoFelicidadeFlavor); // Log para debug
+
+                  // Não precisamos validar os fieldsets de açaí/adicionais aqui,
+                  // pois a lógica de seleção do produto principal já os desabilita.
+                  // A validação principal é apenas a seleção do sabor.
+
+                 itemSpecificValidity = isFlavorSelected; // Validação específica do item Copo Felicidade é APENAS a seleção do sabor
+                  console.log("  -> Validade específica do item Copo da Felicidade:", itemSpecificValidity); // Log para debug
+
+
+             } else {
+                 console.warn("  -> Tipo de produto desconhecido no state:", state.produtoPrincipal); // Log para debug
+                 itemSpecificValidity = false;
+             }
+
+             // A validação de pagamento e entrega é feita em checkIfCanFinish(),
+             // pois elas se aplicam ao pedido GERAL, não a cada item individualmente.
+             // Esta função isOrderReadyToAdd é apenas para saber se o item ATUAL está pronto para ser adicionado à lista.
+
+             return itemSpecificValidity; // Retorna apenas a validade específica do item atual
          }
 
 
@@ -1360,7 +1470,7 @@
          // Adiciona o item atual ao array de pedidos (se válido)
         btnAdd.onclick = () => {
              console.log("Clicou em Adicionar Outro Pedido. State atual:", state); // Log para debug
-            if (isOrderReadyToAdd()) {
+            if (isOrderReadyToAdd()) { // <- CHAMA isOrderReadyToAdd AQUI
                  console.log("Pedido atual pronto para adicionar."); // Log para debug
                  // Adiciona o pedido atual ao array de pedidos
                  // Cópia profunda do state para evitar que alterações futuras no state afetem pedidos já adicionados
@@ -1384,7 +1494,7 @@
              console.log("Clicou em Finalizar e Enviar. State atual:", state, "Pedidos:", orders); // Log para debug
 
             // Verifica se o pedido atual está pronto para adicionar
-            const currentItemReady = isOrderReadyToAdd();
+            const currentItemReady = isOrderReadyToAdd(); // <- CHAMA isOrderReadyToAdd AQUI
 
             // Se o item atual está pronto E não há pedidos na lista OU o item atual é diferente do último adicionado
             if (currentItemReady) {
@@ -1485,7 +1595,7 @@
                                   order.add.forEach(addon => {
                                       if (addon.includes('R$')) {
                                           const addonPriceMatch = addon.match(/R\$ (\d+[,.]\d{2})/);
-                                          if (addonPriceMatch) subtotalPedidoItem += parseFloat(addonPriceMatch[1].replace(',', '.'));
+                                          if (addonPriceMatch) subtotalPedidoItem += parseFloat(addonPriceMatch[1].replace(',', '.')); // Adiciona o preço
                                       }
                                       adicionaisExtras.push(addon.split(' - R$ ')[0]); // Pega apenas o nome
                                   });
@@ -1536,7 +1646,7 @@
 
                     // Adiciona a taxa de entrega ao valor total geral (se aplicável, baseado no primeiro pedido e se houver pedidos)
                      if (orders.length > 0 && infoEntregaPrimeiroPedido?.split(' - R$ ')[0] !== "Retirada" && taxaEntregaServidor > 0) {
-                         valorTotalGeralGeralServidor += taxaEntregaServidor; // Corrigido typo
+                         valorTotalGeralServidor += taxaEntregaServidor;
                      }
 
 
