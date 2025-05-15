@@ -1,0 +1,1435 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blue Açaí – Cardápio Interativo</title>
+    <style>
+        :root {
+            --purple: #5A0F8D;
+            --light-purple: #F3E5FF;
+            --dark-text: #333;
+            --card-bg: #fff;
+            --danger-red: #dc3545;
+            --danger-red-hover: #c82333;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: var(--light-purple);
+            color: var(--dark-text);
+        }
+
+        header {
+            background: var(--purple);
+            color: #fff;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        header img {
+            max-width: 120px;
+            margin-bottom: .5rem;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        fieldset {
+            border: none;
+            margin: 1rem 0;
+            transition: opacity .3s;
+        }
+
+        fieldset[disabled] {
+            opacity: .6;
+        }
+
+        fieldset[disabled] label {
+            pointer-events: none;
+        }
+
+        legend {
+            font-weight: bold;
+            margin-bottom: .5rem;
+            color: var(--purple);
+        }
+
+        legend .section-status {
+            font-weight: normal;
+            font-size: 0.85em;
+            color: #666;
+            margin-left: 5px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: .75rem;
+        }
+
+        label {
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            font-size: .95rem;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        label:hover:not(.disabled-item) {
+            background-color: #f0f0f0;
+        }
+
+        label.disabled-item {
+            text-decoration: line-through;
+            color: #aaa !important;
+            cursor: not-allowed;
+            /* pointer-events: none; remova para permitir que o javascript gerencie */
+        }
+         label.disabled-item input[type="checkbox"],
+         label.disabled-item input[type="radio"] {
+             cursor: not-allowed;
+         }
+
+
+        label input[type="checkbox"],
+        label input[type="radio"] {
+            margin-right: .5rem;
+            cursor: pointer;
+        }
+
+        label input[type="checkbox"]:disabled {
+            cursor: not-allowed;
+        }
+
+        .counter {
+            margin-left: .5rem;
+            color: var(--purple);
+            font-weight: normal;
+            font-size: .9rem;
+        }
+
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: .75rem;
+            margin-top: 1.5rem;
+        }
+
+        .buttons button {
+            padding: .75rem;
+            border: none;
+            border-radius: 4px;
+            background: var(--purple);
+            color: #fff;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .buttons button#btnCancel {
+            background-color: var(--danger-red);
+        }
+        .buttons button#btnCancel:hover:not(:disabled) {
+            background-color: var(--danger-red-hover);
+        }
+
+        .buttons button:hover:not(:disabled) {
+            background-color: #4a0c74;
+        }
+
+        .buttons button:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        #summary {
+            display: none;
+            white-space: pre-wrap;
+        }
+
+        #ordersSection {
+            border-top: 2px solid var(--purple);
+            margin-top: 1.5rem;
+            padding-top: 1rem;
+        }
+
+        #ordersList li {
+            margin-bottom: .75rem;
+            list-style: none;
+            padding-left: 1.5rem;
+            position: relative;
+            border-bottom: 1px dashed #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        #ordersList li::before {
+            content: '🍦';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 0.9em;
+        }
+
+        /* Estilos adaptados para incluir Copo da Felicidade na seção de produtos/tamanhos */
+        .produtos-opcoes { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
+        .produto-card { background: #fff; border: 2px solid #ccc; border-radius: 10px; padding: 1rem; width: 210px; text-align: center; transition: 0.3s; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; }
+        .produto-card input[type="radio"] { position: absolute; top: 10px; right: 10px; transform: scale(1.3); cursor: pointer; }
+        .produto-card:hover { border-color: var(--purple); transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0, 0, 0, 0.12); }
+        label.produto-card.selected { border-color: var(--purple); box-shadow: 0 5px 10px rgba(90, 15, 141, 0.2); background-color: #faf5ff; }
+        .produto-card img { width: 100%; max-height: 120px; object-fit: cover; border-radius: 8px; margin-bottom: 0.75rem; }
+        .produto-card strong { font-size: 1rem; color: #333; display: block; margin-top: 0.5rem; }
+        .produto-card span { font-size: 0.85rem; color: #555; margin-top: 0.25rem; display: block; line-height: 1.3; }
+        /* Remover estilos específicos de .tamanho-card para usar .produto-card */
+        .tamanhos-opcoes, .tamanho-card { /* Estes seletores não serão mais usados diretamente para o layout principal */ }
+
+
+        .pix-info-container {
+            background-color: #fdf1ff;
+            border: 1px solid var(--purple);
+            padding: 1rem;
+            margin-top: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .pix-info-container.hidden {
+            display: none;
+        }
+        .pix-info-container h3 { color: var(--purple); margin-bottom: 0.75rem; }
+        .pix-info-container p { margin-bottom: 0.5rem; line-height: 1.4; }
+        .pix-info-container small { color: #555; font-style: italic; }
+
+        #orderPageTotal {
+            text-align: right; margin-top: 1rem; font-weight: bold;
+            font-size: 1.1em; padding: 0.75rem; background-color: #f0f0f0;
+            border-top: 1px solid #ddd; border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+        }
+
+        /* Estilo específico para a seleção de sabor do Copo da Felicidade */
+        #fsCopoFelicidadeFlavors .grid-2 label { /* Adapte conforme necessário */
+             border: 1px solid #ccc; /* Adiciona uma borda para diferenciar os sabores */
+             padding: 10px;
+             border-radius: 5px;
+             background-color: #f9f9f9;
+        }
+         #fsCopoFelicidadeFlavors .grid-2 label.selected-radio {
+             border-color: var(--purple);
+             background-color: #e9d8f3; /* Cor de fundo mais clara ao selecionar */
+             font-weight: bold;
+         }
+
+
+    </style>
+</head>
+<body>
+    <header>
+        <img src="/images/logo.png" alt="Logomarca Blue Açaí" />
+        <h1>Blue Açaí</h1>
+        <p>Monte seu açaí como quiser!</p>
+    </header>
+    <main>
+        <div class="card">
+            <form id="formPedido">
+                <fieldset id="fsProdutoPrincipal">
+                     <legend>1. Escolha o Produto <span class="section-status">(Obrigatório)</span></legend>
+                     <div class="produtos-opcoes" id="boxProdutosPrincipais">
+                         </div>
+                </fieldset>
+
+                <fieldset id="fsCopoFelicidadeFlavors" disabled>
+                     <legend>2. Escolha o Sabor <span class="section-status">(Obrigatório)</span></legend>
+                     <div class="grid-2" id="boxCopoFelicidadeFlavors">
+                         </div>
+                 </fieldset>
+
+                <fieldset id="fsFrutas" disabled><legend>2. Frutas <span id="cntFrutas" class="counter">(0/?)</span></legend><div class="grid-2" id="boxFrutas"><label for="chk-morango"><input type="checkbox" value="Morango" id="chk-morango" data-item-id="morango" />Morango</label><label for="chk-banana"><input type="checkbox" value="Banana" id="chk-banana" data-item-id="banana" />Banana</label><label for="chk-kiwi"><input type="checkbox" value="Kiwi" id="chk-kiwi" data-item-id="kiwi" />Kiwi</label><label for="chk-maca"><input type="checkbox" value="Maçã" id="chk-maca" data-item-id="maca" />Maçã</label><label for="chk-uva"><input type="checkbox" value="Uva" id="chk-uva" data-item-id="uva" />Uva</label><label for="chk-frutas-nenhuma"><input type="checkbox" value="Nenhuma" id="chk-frutas-nenhuma" />Nenhuma das opções</label></div></fieldset>
+                <fieldset id="fsCremes" disabled><legend>3. Cremes <span id="cntCremes" class="counter">(0/?)</span></legend><div class="grid-2" id="boxCremes"><label for="chk-ninho"><input type="checkbox" value="Ninho" id="chk-ninho" data-item-id="ninho" />Ninho</label><label for="chk-maracuja"><input type="checkbox" value="Maracujá" id="chk-maracuja" data-item-id="maracuja" />Maracujá</label><label for="chk-morango-creme"><input type="checkbox" value="Morango" id="chk-morango-creme" data-item-id="morango_creme" />Morango</label><label for="chk-tutti-frutti-creme"><input type="checkbox" value="Tutti Frutti" id="chk-tutti-frutti-creme" data-item-id="tutti_frutti_creme" />Tutti Frutti</label><label for="chk-chocolate-avela"><input type="checkbox" value="Chocolate com Avelã" id="chk-chocolate-avela" data-item-id="chocolate_avela" />Chocolate c/Avelã</label><label for="chk-cremes-nenhum"><input type="checkbox" value="Nenhuma" id="chk-cremes-nenhum"/>Nenhuma das opções</label></div></fieldset>
+                <fieldset id="fsAccomp" disabled><legend>4. Acompanhamentos <span id="cntAccomp" class="counter">(0/?)</span></legend><div class="grid-2" id="boxAccomp"><label for="chk-amendoim-acomp"><input type="checkbox" value="Amendoim" id="chk-amendoim-acomp" data-item-id="amendoim_acomp" />Amendoim</label><label for="chk-pacoca-acomp"><input type="checkbox" value="Paçoca" id="chk-pacoca-acomp" data-item-id="pacoca_acomp" />Paçoca</label><label for="chk-granola-acomp"><input type="checkbox" value="Granola" id="chk-granola-acomp" data-item-id="granola_acomp" />Granola</label><label for="chk-farinha-lactea-acomp"><input type="checkbox" value="Farinha Láctea" id="chk-farinha-lactea-acomp" data-item-id="farinha_lactea_acomp" />Farinha Láctea</label><label for="chk-leite-po-acomp"><input type="checkbox" value="Leite em Pó" id="chk-leite-po-acomp" data-item-id="leite_po_acomp" />Leite em Pó</label><label for="chk-confetes-acomp"><input type="checkbox" value="Confetes" id="chk-confetes-acomp" data-item-id="confetes_acomp" />Confetes</label><label for="chk-tapioca-acomp"><input type="checkbox" value="Tapioca" id="chk-tapioca-acomp" data-item-id="tapioca_acomp" />Tapioca</label><label for="chk-uva-passa-acomp"><input type="checkbox" value="Uva Passa" id="chk-uva-passa-acomp" data-item-id="uva_passa_acomp" />Uva Passa</label><label for="chk-accomp-nenhum"><input type="checkbox" value="Nenhuma" id="chk-accomp-nenhum" />Nenhuma das opções</label></div></fieldset>
+                <fieldset id="fsCoverage" disabled><legend>5. Cobertura(s) <span id="cntCover" class="counter">(0/?)</span></legend><div class="grid-2" id="boxCoverage"><label for="chk-chocolate-cob"><input type="checkbox" value="Chocolate" id="chk-chocolate-cob" data-item-id="chocolate_cob" />Chocolate</label><label for="chk-morango-cob"><input type="checkbox" value="Morango" id="chk-morango-cob" data-item-id="morango_cob" />Morango</label><label for="chk-leite-condensado-cob"><input type="checkbox" value="Leite Condensado" id="chk-leite-condensado-cob" data-item-id="leite_condensado_cob" />Leite Condensado</label><label for="chk-tutti-frutti-cob"><input type="checkbox" value="Tutti Frutti" id="chk-tutti-frutti-cob" data-item-id="tutti_frutti_cob" />Tutti Frutti</label><label for="chk-ice-blue-cob"><input type="checkbox" value="Ice Blue" id="chk-ice-blue-cob" data-item-id="ice_blue_cob" />Ice Blue</label><label for="chk-kiwi-cob"><input type="checkbox" value="Kiwi" id="chk-kiwi-cob" data-item-id="kiwi_cob" />Kiwi</label><label for="chk-cover-nenhuma"><input type="checkbox" value="Nenhuma" id="chk-cover-nenhuma" />Nenhuma das opções</label></div></fieldset>
+                <fieldset id="fsAskAdd" disabled><legend>6. Deseja adicionais? <span class="section-status">(Obrigatório)</span></legend><div class="grid-2"><label><input type="radio" name="wantAdd" value="Sim" required />Sim</label><label><input type="radio" name="wantAdd" value="Não" />Não</label></div></fieldset>
+                <fieldset id="fsAdd" disabled><legend>7. Adicionais <span id="cntAdd" class="counter">(0/14)</span></legend><div class="grid-2" id="boxAdd"><label for="chk-ovomaltine-add"><input type="checkbox" value="Ovomaltine - R$ 1.00" id="chk-ovomaltine-add" data-item-id="ovomaltine_add" />Ovomaltine R$ 1.00</label><label for="chk-escureto-add"><input type="checkbox" value="Escureto - R$ 1.00" id="chk-escureto-add" data-item-id="escureto_add" />Escureto R$ 1.00</label><label for="chk-chocoball-add"><input type="checkbox" value="Chocoball - R$ 1.00" id="chk-chocoball-add" data-item-id="chocoball_add" />Chocoball R$ 1.00</label><label for="chk-amendoim-add"><input type="checkbox" value="Amendoim - R$ 1.00" id="chk-amendoim-add" data-item-id="amendoim_add" />Amendoim R$ 1.00</label><label for="chk-pacoca-add"><input type="checkbox" value="Paçoca - R$ 1.00" id="chk-pacoca-add" data-item-id="pacoca_add" />Paçoca R$ 1.00</label><label for="chk-granola-add"><input type="checkbox" value="Granola - R$ 1.00" id="chk-granola-add" data-item-id="granola_add" />Granola R$ 1.00</label><label for="chk-farinha-lactea-add"><input type="checkbox" value="Farinha Láctea - R$ 1.00" id="chk-farinha-lactea-add" data-item-id="farinha_lactea_add" />Farinha Láctea R$ 1.00</label><label for="chk-leite-po-add"><input type="checkbox" value="Leite em pó - R$ 1.00" id="chk-leite-po-add" data-item-id="leite_po_add" />Leite em pó R$ 1.00</label><label for="chk-confetes-add"><input type="checkbox" value="Confetes - R$ 1.00" id="chk-confetes-add" data-item-id="confetes_add" />Confetes R$ 1.00</label><label for="chk-tapioca-add"><input type="checkbox" value="Tapioca - R$ 1.00" id="chk-tapioca-add" data-item-id="tapioca_add" />Tapioca R$ 1.00</label><label for="chk-uva-passa-add"><input type="checkbox" value="Uva Passa - R$ 1.00" id="chk-uva-passa-add" data-item-id="uva_passa_add" />Uva Passa R$ 1.00</label><label for="chk-mms-add"><input type="checkbox" value="M&MS - R$ 1.00" id="chk-mms-add" data-item-id="mms_add" />M&MS R$ 1.00</label><label for="chk-marshmallow-add"><input type="checkbox" value="Marshmallow - R$ 1.00" id="chk-marshmallow-add" data-item-id="marshmallow_add" />Marshmallow R$ 1.00</label><label for="chk-doce-leite-add"><input type="checkbox" value="Doce de leite - R$ 1.00" id="chk-doce-leite-add" data-item-id="doce_leite_add" />Doce de leite R$ 1.00</label><label for="chk-add-nenhum"><input type="checkbox" value="Nenhuma" id="chk-add-nenhum" />Nenhum Adicional</label></div></fieldset>
+
+                <fieldset id="fsPayment" disabled>
+                    <legend>8. Forma de Pagamento <span class="section-status">(Obrigatório)</span></legend>
+                    <div class="grid-2">
+                        <label><input type="radio" name="payment" value="Pix" required />Pix</label>
+                        <label><input type="radio" name="payment" value="Dinheiro" />Dinheiro</label>
+                        <label><input type="radio" name="payment" value="Cartão" />Cartão</label>
+                    </div>
+                </fieldset>
+
+                <fieldset id="fsDelivery" disabled>
+                    <legend>9. Entrega ou Retirada <span class="section-status">(Obrigatório)</span></legend>
+                    <div class="grid-2">
+                        <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
+                        <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
+                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral (R$ 5.00)</label>
+                    </div>
+                </fieldset>
+
+                <div class="buttons">
+                    <button type="button" id="btnCancel">❌ Cancelar Pedido Atual</button>
+                    <button type="button" id="btnAdd" disabled>➕ Adicionar Outro Pedido</button>
+                    <button type="button" id="btnFinish" disabled>✅ Finalizar e Enviar</button>
+                </div>
+
+                <div id="pixInfo" class="pix-info-container hidden">
+                    <h3>Pagamento via PIX</h3>
+                    <p><strong>Nome:</strong> Bruna Raquel Carvalho Campos</p>
+                    <p><strong>Chave PIX (Celular):</strong> (98) 985016035</p>
+                    <p><small>Por favor, envie o comprovante após finalizar o pedido no WhatsApp.</small></p>
+                </div>
+
+            </form>
+        </div>
+
+        <div class="card" id="ordersSection" style="display:none;">
+            <h2>Seus Pedidos:</h2>
+            <ul id="ordersList"></ul>
+            <div id="orderPageTotal">
+                Total Geral (com frete): R$ <span id="orderPageTotalValue">0,00</span>
+            </div>
+        </div>
+
+        <div id="summary" style="display: none;"></div>
+    </main>
+
+    <script>
+        // --- SELETORES ---
+        const fs = {
+            produtoPrincipal: document.getElementById('fsProdutoPrincipal'), // Novo fieldset
+            copoFelicidadeFlavors: document.getElementById('fsCopoFelicidadeFlavors'), // Novo fieldset
+            frutas: document.getElementById('fsFrutas'),
+            cremes: document.getElementById('fsCremes'),
+            accomp: document.getElementById('fsAccomp'),
+            cover: document.getElementById('fsCoverage'),
+            askAdd: document.getElementById('fsAskAdd'),
+            add: document.getElementById('fsAdd'),
+            payment: document.getElementById('fsPayment'),
+            delivery: document.getElementById('fsDelivery')
+        };
+        const cnt = {
+            frutas: document.getElementById('cntFrutas'), cremes: document.getElementById('cntCremes'),
+            accomp: document.getElementById('cntAccomp'), cover: document.getElementById('cntCover'),
+            add: document.getElementById('cntAdd')
+        };
+        const boxProdutosPrincipais = document.getElementById('boxProdutosPrincipais'); // Nova div container
+        const boxCopoFelicidadeFlavors = document.getElementById('boxCopoFelicidadeFlavors'); // Nova div container
+        const btnAdd = document.getElementById('btnAdd');
+        const btnFinish = document.getElementById('btnFinish');
+        const btnCancel = document.getElementById('btnCancel');
+        const ordersSec = document.getElementById('ordersSection');
+        const ordersList = document.getElementById('ordersList');
+        const summaryEl = document.getElementById("summary");
+        const form = document.getElementById('formPedido');
+        const pixInfoDiv = document.getElementById('pixInfo');
+        const orderPageTotalValueEl = document.getElementById('orderPageTotalValue');
+
+        let state = {};
+        let orders = [];
+        let allItemsData = {};
+        let copoFelicidadeData = null; // Para armazenar os dados do Copo da Felicidade
+
+        // --- FUNÇÕES AUXILIARES ---
+        const enable = el => {
+            if (el) {
+                el.removeAttribute('disabled');
+                el.querySelectorAll('label').forEach(lbl => {
+                    // Verifica se o item está disponível antes de reativar ponteiros
+                    const input = lbl.querySelector('input');
+                     if (input && !input.disabled) { // Só reativa se o input NÃO estiver disabled pela disponibilidade
+                        lbl.style.pointerEvents = 'auto';
+                     }
+                });
+            }
+        };
+        const disable = el => {
+            if (el) {
+                el.setAttribute('disabled', '');
+                el.querySelectorAll('label').forEach(lbl => lbl.style.pointerEvents = 'none');
+            }
+        };
+
+        function clearCheckboxes(fieldset) {
+             if (fieldset) {
+                 fieldset.querySelectorAll('input[type="checkbox"]:checked').forEach(chk => chk.checked = false);
+             }
+         }
+
+        function clearRadios(name) {
+            document.querySelectorAll(`input[name="${name}"]:checked`).forEach(r => r.checked = false);
+             document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label')?.classList.remove('selected-radio')); // Limpa classe visual
+        }
+
+        function disableAllDependentFieldsets() {
+             // Desabilita todos os fieldsets relacionados a açaí e adicionais
+             [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add].forEach(disable);
+
+             // Limpa as seleções nesses fieldsets
+             clearCheckboxes(fs.frutas);
+             clearCheckboxes(fs.cremes);
+             clearCheckboxes(fs.accomp);
+             clearCheckboxes(fs.cover);
+             clearCheckboxes(fs.add);
+             clearRadios('wantAdd');
+
+             // Reseta contadores para 0/?
+             updateCounter(cnt.frutas, 0, '?');
+             updateCounter(cnt.cremes, 0, '?');
+             updateCounter(cnt.accomp, 0, '?');
+             updateCounter(cnt.cover, 0, '?');
+             updateCounter(cnt.add, 0, 14);
+
+             // Oculta informações PIX se a forma de pagamento não foi selecionada AINDA
+             if (!state.payment) {
+                 if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
+             }
+        }
+
+
+        // --- LÓGICA DE DISPONIBILIDADE E CARREGAMENTO DE ITENS ---
+        async function fetchAndApplyItemAvailability() {
+            try {
+                const response = await fetch('/api/items');
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                allItemsData = await response.json();
+
+                // Encontra os dados do Copo da Felicidade
+                const produtosEspeciais = allItemsData.produtos_especiais || [];
+                copoFelicidadeData = produtosEspeciais.find(item => item.id === 'copo_felicidade');
+
+                // Renderiza as opções de produtos principais (Tamanhos de Açaí + Copo da Felicidade)
+                renderProdutosPrincipais();
+
+                // Aplica a disponibilidade aos checkboxes existentes (frutas, cremes, etc.)
+                const updateCheckboxDisplay = (categoryKey, containerElement) => {
+                    if (!allItemsData[categoryKey] || !containerElement) return;
+                    allItemsData[categoryKey].forEach(item => {
+                        const checkbox = containerElement.querySelector(`input[data-item-id="${item.id}"]`);
+                        if (checkbox) {
+                            const label = checkbox.closest('label');
+                            if (!item.available) {
+                                checkbox.disabled = true;
+                                checkbox.checked = false; // Garante que não está checado se indisponível
+                                if (label) { label.classList.add('disabled-item'); label.title = 'Item indisponível'; }
+                            } else {
+                                checkbox.disabled = false;
+                                if (label) {
+                                    label.classList.remove('disabled-item');
+                                    label.title = '';
+                                    // Restaura pointer-events APENAS se o fieldset pai não estiver desabilitado
+                                     if (!checkbox.closest('fieldset[disabled]')) {
+                                        label.style.pointerEvents = 'auto';
+                                     }
+                                }
+                            }
+                        }
+                    });
+                };
+
+                updateCheckboxDisplay('frutas', fs.frutas);
+                updateCheckboxDisplay('cremes', fs.cremes);
+                updateCheckboxDisplay('acompanhamentos', fs.accomp);
+                updateCheckboxDisplay('coberturas', fs.cover);
+                updateCheckboxDisplay('adicionais', fs.add);
+
+                 // Adiciona event listeners para os inputs de produto principal (tamanho/copo felicidade)
+                setupProdutoPrincipalListeners();
+
+            } catch (error) {
+                console.error("Erro ao carregar disponibilidade:", error);
+                alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+                // Desabilitar tudo se o cardápio não carregar
+                disableAll();
+            }
+        }
+
+         // Nova função para renderizar as opções de produto principal (tamanho/copo felicidade)
+         function renderProdutosPrincipais() {
+             if (!boxProdutosPrincipais) return;
+
+             boxProdutosPrincipais.innerHTML = ''; // Limpa o container
+
+             // Adiciona as opções de tamanho de açaí (hardcoded como antes, mas usando a nova classe)
+             // Você pode tornar isso dinâmico buscando de allItemsData se os tamanhos estiverem lá
+             boxProdutosPrincipais.innerHTML += `
+                 <label class="produto-card" for="size-300" data-product-type="acai" data-price="10.00">
+                     <img src="/images/copo-pequeno.jpg" alt="Copo Pequeno" />
+                     <input type="radio" name="produtoPrincipal" value="Copo Pequeno (300ml)" id="size-300" required />
+                     <div>
+                         <strong>Copo Pequeno (300ml)</strong> - R$ 10.00
+                         <span>Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura</span>
+                     </div>
+                 </label>
+                 <label class="produto-card" for="size-500" data-product-type="acai" data-price="15.00">
+                     <img src="/images/copo-grande.jpg" alt="Copo Grande" />
+                     <input type="radio" name="produtoPrincipal" value="Copo Grande (500ml)" id="size-500" />
+                     <div>
+                         <strong>Copo Grande (500ml)</strong> - R$ 15.00
+                         <span>Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura</span>
+                     </div>
+                 </label>
+                 <label class="produto-card" for="size-1L" data-product-type="acai" data-price="40.00">
+                     <img src="/images/pote-felicidade.jpg" alt="Pote da Felicidade" /> <input type="radio" name="produtoPrincipal" value="Pote da Felicidade (1L)" id="size-1L" />
+                     <div>
+                         <strong>Pote da Felicidade (1 litro)</strong> - R$ 40.00
+                         <span>Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas</span>
+                     </div>
+                 </label>
+             `;
+
+             // Adiciona o Copo da Felicidade se estiver disponível
+             if (copoFelicidadeData && copoFelicidadeData.available) {
+                 boxProdutosPrincipais.innerHTML += `
+                     <label class="produto-card" for="prod-${copoFelicidadeData.id}" data-product-type="produto_especial" data-product-id="${copoFelicidadeData.id}" data-price="${copoFelicidadeData.price}">
+                         <img src="/images/copo-felicidade.jpg" alt="${copoFelicidadeData.name}" /> <input type="radio" name="produtoPrincipal" value="${copoFelicidadeData.name}" id="prod-${copoFelicidadeData.id}" />
+                         <div>
+                             <strong>${copoFelicidadeData.name}</strong> - R$ ${copoFelicidadeData.price.toFixed(2).replace('.', ',')}
+                             <span>${copoFelicidadeData.description}</span>
+                         </div>
+                     </label>
+                 `;
+
+                 // Renderiza as opções de sabor do Copo da Felicidade (no fieldset específico)
+                 renderCopoFelicidadeFlavors();
+             } else if (!copoFelicidadeData) {
+                 console.warn("Dados do Copo da Felicidade não encontrados em items.json");
+             } else if (!copoFelicidadeData.available) {
+                 console.log("Copo da Felicidade está indisponível.");
+                 // Opcional: Mostrar o card, mas desabilitado
+                 boxProdutosPrincipais.innerHTML += `
+                     <label class="produto-card disabled-item" data-product-type="produto_especial" data-product-id="copo_felicidade" title="Indisponível">
+                          <img src="/images/copo-felicidade.jpg" alt="Copo da Felicidade Indisponível" />
+                          <input type="radio" name="produtoPrincipal" value="Copo da Felicidade" disabled />
+                          <div>
+                             <strong>Copo da Felicidade</strong> - INDISPONÍVEL
+                             <span>${copoFelicidadeData.description}</span>
+                         </div>
+                     </label>
+                 `;
+             }
+         }
+
+         // Nova função para renderizar os sabores do Copo da Felicidade
+         function renderCopoFelicidadeFlavors() {
+             if (!boxCopoFelicidadeFlavors || !copoFelicidadeData || !copoFelicidadeData.flavors) return;
+
+             boxCopoFelicidadeFlavors.innerHTML = ''; // Limpa o container
+
+             copoFelicidadeData.flavors.forEach(flavor => {
+                 boxCopoFelicidadeFlavors.innerHTML += `
+                     <label for="flavor-${flavor.id}">
+                         <input type="radio" name="copoFelicidadeFlavor" value="${flavor.name}" id="flavor-${flavor.id}" data-flavor-id="${flavor.id}" />
+                         ${flavor.name}
+                         <small>(${flavor.internal_description})</small> </label>
+                 `;
+             });
+         }
+
+         // Nova função para configurar listeners dos produtos principais
+         function setupProdutoPrincipalListeners() {
+             document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
+                 radio.onchange = async (e) => {
+                     // Remove a classe 'selected' de todos os cards de produto
+                     document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected'));
+                     // Adiciona a classe 'selected' ao card clicado
+                     e.target.closest('.produto-card').classList.add('selected');
+
+                     resetDependentOptions(); // Reseta opções de açaí e adicionais
+
+                     const selectedProductCard = e.target.closest('.produto-card');
+                     const productType = selectedProductCard.dataset.productType; // 'acai' ou 'produto_especial'
+                     const productName = e.target.value; // Nome do produto/tamanho
+                     const productPrice = parseFloat(selectedProductCard.dataset.price); // Preço base
+
+                     state.produtoPrincipal = {
+                         type: productType,
+                         name: productName,
+                         price: productPrice,
+                         id: selectedProductCard.dataset.productId // Adiciona o ID para produtos especiais
+                     };
+                     state.size = productName; // Manter compatibilidade com a estrutura antiga de 'state' por enquanto
+
+                     if (productType === 'acai') {
+                         // Habilita fieldsets de açaí e configura limites baseados no tamanho
+                         let frutasMax = 0, cremesMax = 0, accompMax = 0, coberturaMax = 0;
+                         if (productName.startsWith('Copo Pequeno')) { frutasMax = 1; cremesMax = 1; accompMax = 3; coberturaMax = 1; }
+                         else if (productName.startsWith('Copo Grande')) { frutasMax = 2; cremesMax = 2; accompMax = 3; coberturaMax = 1; }
+                         else if (productName.startsWith('Pote da Felicidade')) { frutasMax = 3; cremesMax = 3; accompMax = 4; coberturaMax = 2; }
+
+                         state.fMax = frutasMax; state.cMax = cremesMax; state.aMax = accompMax; state.coMax = coberturaMax; state.addMax = 14; // Adicionais sempre 14 para açaí
+
+                         enable(fs.frutas); enable(fs.cremes); enable(fs.accomp); enable(fs.cover); enable(fs.askAdd);
+
+                         // Desabilita o fieldset de sabores do Copo da Felicidade
+                         disable(fs.copoFelicidadeFlavors);
+                         clearRadios('copoFelicidadeFlavor'); // Limpa seleção de sabor do copo felicidade
+                         state.selectedCopoFelicidadeFlavor = undefined; // Limpa o estado
+
+                         // Configura e reseta checkboxes e contadores para açaí
+                         setupChecks('boxFrutas', frutasMax, 'frutas');
+                         setupChecks('boxCremes', cremesMax, 'cremes');
+                         setupChecks('boxAccomp', accompMax, 'accomp');
+                         setupChecks('boxCoverage', coberturaMax, 'cover');
+                         setupChecks('boxAdd', 14, 'add'); // Sempre 14 para adicionais de açaí
+
+                         updateCounter(cnt.frutas, 0, frutasMax);
+                         updateCounter(cnt.cremes, 0, cremesMax);
+                         updateCounter(cnt.accomp, 0, accompMax);
+                         updateCounter(cnt.cover, 0, coberturaMax);
+                         updateCounter(cnt.add, 0, 14); // Reseta contador de adicionais para 0/14
+
+                         // Setup listeners para rádios de açaí
+                         setupRadioListener('wantAdd', 'askAdd');
+                         setupRadioListener('payment', 'payment');
+                         setupRadioListener('delivery', 'delivery');
+
+                     } else if (productType === 'produto_especial' && state.produtoPrincipal.id === 'copo_felicidade') {
+                         // Desabilita fieldsets de açaí e adicionais
+                         disableAllDependentFieldsets();
+
+                         // Habilita o fieldset de seleção de sabor do Copo da Felicidade
+                         enable(fs.copoFelicidadeFlavors);
+                         // Configura listeners para os rádios de sabor do Copo da Felicidade
+                         setupRadioListener('copoFelicidadeFlavor', 'copoFelicidadeFlavorSelected'); // Novo estágio 'copoFelicidadeFlavorSelected'
+                         // Não tem contadores para sabores do Copo da Felicidade
+
+                         // Habilita os fieldsets de pagamento e entrega
+                         enable(fs.payment);
+                         enable(fs.delivery); // Entrega/Retirada é obrigatório independentemente do produto
+
+                         // Setup listeners para rádios de pagamento e entrega
+                         setupRadioListener('payment', 'payment');
+                         setupRadioListener('delivery', 'delivery');
+                     }
+
+                     checkIfCanFinish(); // Verifica se os botões de ação podem ser habilitados
+                 };
+             });
+         }
+
+        // Adapta a função setupRadioListener para lidar com o novo nome 'produtoPrincipal'
+        // e o novo estágio 'copoFelicidadeFlavorSelected'
+        function setupRadioListener(name, stageToAdvance) {
+             document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                 // Remove listeners antigos para evitar duplicação
+                 const new_listener = ev => {
+                     state[name] = ev.target.value;
+                     // Lógica visual de seleção
+                     document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => {
+                         radioEl.closest('label')?.classList.remove('selected-radio');
+                     });
+                     ev.target.closest('label')?.classList.add('selected-radio');
+
+                     // Lógica específica para o Copo da Felicidade
+                     if (name === 'produtoPrincipal') {
+                         // A lógica principal está em setupProdutoPrincipalListeners,
+                         // este listener aqui serve mais para atualizar o state[name]
+                         // A chamada para advance('askAdd' ou similar) acontecerá no final do onchange do produtoPrincipal
+                     } else if (name === 'copoFelicidadeFlavor') {
+                         state.selectedCopoFelicidadeFlavor = ev.target.value; // Salva o sabor selecionado
+                         // Chama advance se houver lógica para este estágio (não há por enquanto, mas mantém o padrão)
+                         if (stageToAdvance === 'copoFelicidadeFlavorSelected') {
+                            // Nada específico para avançar aqui, apenas verifica se pode finalizar
+                         } else {
+                           advance(stageToAdvance); // Chama advance para outros estágios (payment, delivery)
+                         }
+
+                     } else { // Outros rádios (wantAdd, payment, delivery)
+                         advance(stageToAdvance);
+                     }
+
+                     checkIfCanFinish(); // Verifica se os botões podem ser habilitados após qualquer mudança de rádio
+                 };
+
+                 // Remove listener anterior antes de adicionar o novo (para evitar duplicação)
+                 if (r._currentListener) {
+                      r.removeEventListener('change', r._currentListener);
+                 }
+                 r.addEventListener('change', new_listener);
+                 r._currentListener = new_listener; // Armazena o listener para poder remover depois
+
+             });
+         }
+
+
+        function setupChecks(containerId, max, key) {
+             const box = document.getElementById(containerId);
+             if (!box) return;
+             const counterEl = cnt[key];
+             const allCheckboxesInBox = box.querySelectorAll('input[type=checkbox]');
+             const noneCheckbox = box.querySelector('input[value="Nenhuma"]');
+
+             // Inicializa ou filtra state[key] removendo itens desabilitados
+             if (!state[key]) state[key] = [];
+              state[key] = state[key].filter(itemName => {
+                  const chk = Array.from(allCheckboxesInBox).find(c => c.value === itemName);
+                  return chk && !chk.disabled; // Mantém no estado apenas itens selecionados que NÃO estão desabilitados
+              });
+
+
+             updateCounter(counterEl, state[key].filter(item => item !== 'Nenhuma').length, max); // Atualiza contador inicial
+
+             allCheckboxesInBox.forEach(chk => {
+                 // Remove listeners antigos para evitar duplicação
+                 if (chk._currentListener) {
+                     chk.removeEventListener('change', chk._currentListener);
+                 }
+
+                 // Adiciona novo listener
+                 const new_listener = () => {
+                     // Se o checkbox estiver desabilitado (por indisponibilidade), não faz nada
+                     if (chk.disabled && !chk.value.toLowerCase().includes("nenhuma")) return;
+
+                     const currentSelectedInBox = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')]; // Considera apenas checkboxes checados E NÃO desabilitados
+                     let isNoneChecked = noneCheckbox && noneCheckbox.checked;
+
+                     if (noneCheckbox) {
+                         if (chk === noneCheckbox && chk.checked) {
+                             // Se "Nenhuma" foi marcado, desmarca todos os outros na caixa
+                             allCheckboxesInBox.forEach(otherChk => {
+                                 if (otherChk !== noneCheckbox && !otherChk.disabled) otherChk.checked = false;
+                             });
+                             state[key] = ['Nenhuma'];
+                             isNoneChecked = true;
+                         } else if (chk !== noneCheckbox && chk.checked && isNoneChecked) {
+                             // Se outro item foi marcado enquanto "Nenhuma" estava marcado, desmarca "Nenhuma"
+                             noneCheckbox.checked = false;
+                             isNoneChecked = false;
+                             state[key] = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].filter(c => c !== noneCheckbox).map(i => i.value);
+                         } else {
+                              // Atualiza o estado com os itens selecionados (excluindo 'Nenhuma' se outros estiverem marcados)
+                              state[key] = currentSelectedInBox.filter(c => c !== noneCheckbox || !(noneCheckbox && noneCheckbox.checked)).map(i => i.value);
+                              // Se nada ficou selecionado e a opção "Nenhuma" existe, marca "Nenhuma"
+                              if (state[key].length === 0 && noneCheckbox) {
+                                  const noneLabel = noneCheckbox.closest('label');
+                                  if (noneLabel && !noneLabel.classList.contains('disabled-item')) { // Só marca se "Nenhuma" NÃO estiver desabilitado
+                                       noneCheckbox.checked = true;
+                                       state[key] = ['Nenhuma'];
+                                  }
+                              } else if (state[key].length > 0 && noneCheckbox) {
+                                   // Se algo foi selecionado, desmarca "Nenhuma" (caso não tenha sido desmarcado antes)
+                                   noneCheckbox.checked = false;
+                              }
+                         }
+                     } else { // Não há opção "Nenhuma" nesta caixa
+                         state[key] = currentSelectedInBox.map(i => i.value);
+                     }
+
+
+                     const actualSelectedCount = state[key].includes('Nenhuma') ? 0 : state[key].filter(item => item !== 'Nenhuma').length;
+
+                     // Verifica o limite máximo (apenas para categorias que têm limite)
+                     if (max !== undefined && actualSelectedCount > max) {
+                         chk.checked = false; // Desmarca o último item clicado se exceder o limite
+                          // Re-calcula o estado após desmarcar
+                          state[key] = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].filter(c => c !== noneCheckbox || !(noneCheckbox && noneCheckbox.checked)).map(i => i.value);
+                           if (state[key].length === 0 && noneCheckbox && noneCheckbox.checked) state[key] = ['Nenhuma'];
+
+
+                         updateCounter(counterEl, state[key].includes('Nenhuma') ? 0 : state[key].filter(item => item !== 'Nenhuma').length, max);
+                         alert(`Máximo ${max} ${key === 'add' ? 'adicionais' : key}.`);
+                         return; // Sai da função onchange após o alerta
+                     }
+
+                     updateCounter(counterEl, actualSelectedCount, max);
+                     checkIfCanFinish(); // Verifica se os botões podem ser habilitados
+                 };
+
+                 chk.addEventListener('change', new_listener);
+                 chk._currentListener = new_listener; // Armazena o listener
+             });
+         }
+
+        function updateCounter(element, count, max) {
+             if (element) {
+                 const categoryKey = element.id.replace('cnt', '').toLowerCase();
+                 let displayCount = count;
+                 // if (state[categoryKey] && state[categoryKey].includes('Nenhuma') && state[categoryKey].length === 1) displayCount = 0;
+                 // else if (state[categoryKey] && state[categoryKey].includes('Nenhuma')) displayCount = state[categoryKey].filter(item => item !== 'Nenhuma').length;
+                 const displayMax = max !== undefined ? max : '?';
+                 element.textContent = `( ${displayCount} / ${displayMax} )`;
+                 element.style.display = 'inline';
+             }
+         }
+
+
+         // Adapta a função checkIfCanFinish para lidar com o Copo da Felicidade
+         function checkIfCanFinish() {
+             // Verifica se o produto principal foi selecionado
+             const isProdutoPrincipalSelected = state.produtoPrincipal && state.produtoPrincipal.type;
+             if (!isProdutoPrincipalSelected) {
+                 btnAdd.disabled = true;
+                 btnFinish.disabled = true;
+                 return;
+             }
+
+             let canProceedWithItem = false;
+
+             if (state.produtoPrincipal.type === 'acai') {
+                 // Lógica de validação para Açaí (requer seleção de frutas, cremes, etc. se fieldset habilitado)
+                 const checkSectionValidity = (fieldset, categoryKey) => {
+                     // Se o fieldset está desabilitado (ex: pelo tamanho selecionado), ele é válido por padrão
+                     if (!fieldset || fieldset.hasAttribute('disabled')) return true;
+
+                     const items = state[categoryKey];
+                     // Deve haver itens selecionados (mesmo que seja 'Nenhuma')
+                     if (!items || items.length === 0) return false;
+
+                     // Se 'Nenhuma' está selecionado, deve ser o ÚNICO item
+                     if (items.includes('Nenhuma') && items.length > 1) return false;
+
+                     // Se não é 'Nenhuma', verifica o limite máximo (já tratado em setupChecks, mas bom verificar aqui também)
+                     // Esta verificação de limite máximo aqui é redundante se setupChecks está correta, mas não custa.
+                     // const max = state[`${categoryKey.charAt(0)}Max`]; // Ex: state.fMax para frutas
+                     // if (!items.includes('Nenhuma') && items.length > max) return false; // setupChecks já impede isso
+
+
+                     return true;
+                 };
+
+                  // Verifica a validade dos fieldsets de açaí e adicionais SE eles estiverem habilitados
+                 const frutasOk = checkSectionValidity(fs.frutas, 'frutas');
+                 const cremesOk = checkSectionValidity(fs.cremes, 'cremes');
+                 const accompOk = checkSectionValidity(fs.accomp, 'accomp');
+                 const coverOk = checkSectionValidity(fs.cover, 'cover');
+
+                 let addOk = true;
+                 // Verifica adicionais APENAS se o fieldset está habilitado e 'Sim' foi escolhido
+                 if (!fs.askAdd.hasAttribute('disabled') && state.wantAdd === 'Sim') {
+                     addOk = checkSectionValidity(fs.add, 'add');
+                 } else if (!fs.askAdd.hasAttribute('disabled') && state.wantAdd === undefined) {
+                     // Se o "Deseja adicionais?" está habilitado mas nada foi selecionado
+                     addOk = false; // Considera inválido
+                 } else if (fs.askAdd.hasAttribute('disabled')) {
+                      // Se "Deseja adicionais?" está desabilitado, é válido (porque as opções de açaí desabilitaram ele)
+                      addOk = true;
+                 } else if (state.wantAdd === 'Não') {
+                      // Se "Não" foi explicitamente escolhido, adicionais estão ok
+                      addOk = true;
+                 }
+
+
+                 canProceedWithItem = frutasOk && cremesOk && accompOk && coverOk && addOk;
+
+             } else if (state.produtoPrincipal.type === 'produto_especial' && state.produtoPrincipal.id === 'copo_felicidade') {
+                 // Lógica de validação para Copo da Felicidade (requer seleção de sabor)
+                 const isFlavorSelected = state.selectedCopoFelicidadeFlavor !== undefined; // Verifica se o sabor foi selecionado
+
+                 // Fieldsets de açaí e adicionais devem estar desabilitados (a função de seleção já cuida disso)
+                 const acaiFieldsetsDisabled = fs.frutas.hasAttribute('disabled') &&
+                                                fs.cremes.hasAttribute('disabled') &&
+                                                fs.accomp.hasAttribute('disabled') &&
+                                                fs.cover.hasAttribute('disabled') &&
+                                                fs.askAdd.hasAttribute('disabled') &&
+                                                fs.add.hasAttribute('disabled');
+
+
+                 canProceedWithItem = isFlavorSelected && acaiFieldsetsDisabled; // Requer sabor selecionado E fieldsets de açaí desabilitados
+             }
+
+
+             // Verifica se pagamento e entrega foram selecionados (obrigatórios para qualquer pedido)
+             const isPaymentAndDeliverySelected = state.payment !== undefined && state.delivery !== undefined;
+
+             // Habilita os botões APENAS se a validação do item atual E as opções de pagamento/entrega estiverem ok
+             if (isProdutoPrincipalSelected && canProceedWithItem && isPaymentAndDeliverySelected) {
+                 btnAdd.disabled = false;
+                 btnFinish.disabled = false;
+             } else {
+                 btnAdd.disabled = true;
+                 btnFinish.disabled = true;
+             }
+         }
+
+
+        // Adapta renderOrders para exibir Copo da Felicidade
+        function renderOrders() {
+            ordersSec.style.display = orders.length > 0 ? 'block' : 'none';
+            ordersList.innerHTML = '';
+            let totalGeralPedidosPagina = 0;
+            let taxaEntregaPagina = 0;
+            let localEntregaPagina = "Retirada"; // Valor padrão antes de processar pedidos
+
+            orders.forEach((o, i) => {
+                const li = document.createElement('li');
+                let itemDetailsHtml = ''; // HTML para os detalhes do item (frutas, cremes OU sabor)
+                let subTotalPedidoItem = 0; // Subtotal deste item específico
+
+                // Verifica o tipo de item para renderizar os detalhes corretamente
+                if (o.produtoPrincipal && o.produtoPrincipal.type === 'produto_especial' && o.produtoPrincipal.id === 'copo_felicidade') {
+                     // É um Copo da Felicidade
+                     itemDetailsHtml += `Sabor: ${o.selectedCopoFelicidadeFlavor || 'Não especificado'}`;
+                     subTotalPedidoItem = o.produtoPrincipal.price; // Preço base fixo
+                     // Adicionais e outras categorias de açaí não se aplicam aqui, mas vamos verificar se há adicionais adicionados por engano
+                     // (Embora a UI deva impedir isso)
+                     if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                          const adicionaisLista = o.add.map(item => {
+                               // Assumimos que adicionais aqui são os de R$ 1.00, mesmo para copo felicidade
+                               const parts = item.split(' - R$ ');
+                               if (parts.length === 2) subTotalPedidoItem += parseFloat(parts[1].replace(',', '.'));
+                               return parts[0];
+                          }).join(', ');
+                          itemDetailsHtml += `<br> Adicionais (Extras): ${adicionaisLista}`;
+                     }
+
+                     li.innerHTML = `
+                         <strong>Pedido ${i + 1}:</strong><br>
+                         Item: ${o.produtoPrincipal.name}<br>
+                         ${itemDetailsHtml}<br>
+                         Pagamento: ${o.payment}<br>
+                         Entrega/Retirada: ${o.delivery.split(' - R$ ')[0]}<br>
+                         <strong>Total do Item: R$ ${subTotalPedidoItem.toFixed(2).replace('.', ',')}</strong>`;
+
+                } else {
+                     // É um item de Açaí tradicional (Copo Pequeno, Grande, Pote)
+                    const displayFrutas = o.frutas?.length > 0 && !o.frutas.includes('Nenhuma') ? o.frutas.join(', ') : 'Nenhuma';
+                    const displayCremes = o.cremes?.length > 0 && !o.cremes.includes('Nenhuma') ? o.cremes.join(', ') : 'Nenhum';
+                    const displayAccomp = o.accomp?.length > 0 && !o.accomp.includes('Nenhuma') ? o.accomp.join(', ') : 'Nenhum';
+                    const displayCover = o.cover?.length > 0 && !o.cover.includes('Nenhuma') ? o.cover.join(', ') : 'Nenhuma';
+
+                     itemDetailsHtml += `Frutas: ${displayFrutas}<br>`;
+                     itemDetailsHtml += `Cremes: ${displayCremes}<br>`;
+                     itemDetailsHtml += `Acompanhamentos: ${displayAccomp}<br>`;
+                     itemDetailsHtml += `Coberturas: ${displayCover}<br>`;
+
+                     let displayAdd = 'Nenhum Adicional';
+                     if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                         displayAdd = o.add.map(item => item.split(' - R$ ')[0]).join(', ');
+                         itemDetailsHtml += `Adicionais: ${displayAdd}<br>`;
+                     } else {
+                         itemDetailsHtml += `Adicionais: Nenhum Adicional<br>`;
+                     }
+
+                     const priceMatch = o.size.match(/R\$ (\d+[,.]\d{2})/);
+                     subTotalPedidoItem = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
+
+                     // Adiciona o custo dos adicionais ao subtotal do açaí
+                     if (o.add && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                         o.add.forEach(addon => {
+                             if (addon.includes('R$')) {
+                                 const addonPriceMatch = addon.match(/R\$ (\d+[,.]\d{2})/);
+                                 if (addonPriceMatch) subTotalPedidoItem += parseFloat(addonPriceMatch[1].replace(',', '.'));
+                             }
+                         });
+                     }
+
+
+                    li.innerHTML = `
+                        <strong>Pedido ${i + 1}:</strong><br>
+                        Tamanho: ${o.size.split(' - R$ ')[0]}<br>
+                        ${itemDetailsHtml}
+                        Pagamento: ${o.payment}<br>
+                        Entrega/Retirada: ${o.delivery.split(' - R$ ')[0]}<br>
+                        <strong>Total do Açaí: R$ ${subTotalPedidoItem.toFixed(2).replace('.', ',')}</strong>`;
+                }
+
+                 totalGeralPedidosPagina += subTotalPedidoItem;
+
+                // A taxa de entrega e o local são baseados no PRIMEIRO pedido na lista
+                if (i === 0 && o.delivery) {
+                    localEntregaPagina = o.delivery.split(' - R$ ')[0];
+                    if (o.delivery.includes('R$')) {
+                        const deliveryPriceMatch = o.delivery.match(/R\$ (\d+[,.]\d{2})/);
+                        if (deliveryPriceMatch) taxaEntregaPagina = parseFloat(deliveryPriceMatch[1].replace(',', '.'));
+                    }
+                }
+                ordersList.appendChild(li);
+            });
+
+            // Adiciona a taxa de entrega ao total geral APENAS UMA VEZ (baseado no primeiro pedido)
+            if (localEntregaPagina !== "Retirada" && taxaEntregaPagina > 0 && orders.length > 0) {
+                totalGeralPedidosPagina += taxaEntregaPagina;
+            }
+            if (orderPageTotalValueEl) orderPageTotalValueEl.textContent = totalGeralPedidosPagina.toFixed(2).replace('.', ',');
+        }
+
+        // Adapta showSummary para incluir o Copo da Felicidade
+         function showSummary() {
+             let summaryText = "Novo Pedido Blue Açaí!\n\n";
+             let totalGeral = 0;
+             let deliveryFee = 0;
+             let deliveryLocation = "Retirada";
+
+             orders.forEach((o, i) => {
+                 let totalPricePedido = 0; // Total deste item específico
+
+                 summaryText += `*Pedido ${i + 1}:*\n`;
+
+                 // Verifica o tipo de item para formatar o resumo
+                 if (o.produtoPrincipal && o.produtoPrincipal.type === 'produto_especial' && o.produtoPrincipal.id === 'copo_felicidade') {
+                      // É um Copo da Felicidade
+                      summaryText += `Item: ${o.produtoPrincipal.name}\n`;
+                      summaryText += `Sabor: ${o.selectedCopoFelicidadeFlavor || 'Não especificado'}\n`;
+                      totalPricePedido = o.produtoPrincipal.price; // Preço base
+
+                      // Adicionais (se aplicam como extras)
+                      if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                           const adicionaisLista = o.add.map(item => {
+                                // Assumimos que adicionais aqui são os de R$ 1.00
+                                const parts = item.split(' - R$ ');
+                                if (parts.length === 2) totalPricePedido += parseFloat(parts[1].replace(',', '.'));
+                                return parts[0];
+                           }).join(', ');
+                           summaryText += `Adicionais (Extras): ${adicionaisLista}\n`;
+                      } else {
+                           summaryText += `Adicionais: Nenhum Adicional\n`;
+                      }
+
+
+                 } else {
+                      // É um item de Açaí tradicional
+                      summaryText += `Tamanho: ${o.size.split(' - R$ ')[0]}\n`;
+
+                      const displayFrutas = o.frutas?.length > 0 && !o.frutas.includes('Nenhuma') ? o.frutas.join(', ') : 'Nenhuma';
+                      const displayCremes = o.cremes?.length > 0 && !o.cremes.includes('Nenhuma') ? o.cremes.join(', ') : 'Nenhum';
+                      const displayAccomp = o.accomp?.length > 0 && !o.accomp.includes('Nenhuma') ? o.accomp.join(', ') : 'Nenhum';
+                      const displayCover = o.cover?.length > 0 && !o.cover.includes('Nenhuma') ? o.cover.join(', ') : 'Nenhuma';
+                      let displayAdd = 'Nenhum Adicional';
+
+                      summaryText += `Frutas: ${displayFrutas}\n`;
+                      summaryText += `Cremes: ${displayCremes}\n`;
+                      summaryText += `Acompanhamentos: ${displayAccomp}\n`;
+                      summaryText += `Coberturas: ${displayCover}\n`;
+
+                      if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                          displayAdd = o.add.map(item => item.split(' - R$ ')[0]).join(', ');
+                          summaryText += `Adicionais: ${displayAdd}\n`;
+                      } else {
+                           summaryText += `Adicionais: Nenhum Adicional\n`;
+                      }
+
+                      const priceMatch = o.size.match(/R\$ (\d+[,.]\d{2})/);
+                      totalPricePedido = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
+
+                      // Adiciona o custo dos adicionais
+                     if (o.add && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                          o.add.forEach(addon => {
+                              if (addon.includes('R$')) {
+                                  const addonPriceMatch = addon.match(/R\$ (\d+[,.]\d{2})/);
+                                  if (addonPriceMatch) totalPricePedido += parseFloat(addonPriceMatch[1].replace(',', '.'));
+                              }
+                          });
+                      }
+                 }
+
+                 totalGeral += totalPricePedido; // Adiciona o total do item ao total geral
+
+                 summaryText += `Pagamento: ${o.payment}\n`;
+                 summaryText += `Entrega/Retirada: ${o.delivery.split(' - R$ ')[0]}\n`; // Remove o preço da entrega aqui
+                 summaryText += `*Total do Pedido: R$ ${totalPricePedido.toFixed(2).replace('.', ',')}*\n\n`;
+
+                 // Captura informações de entrega APENAS do PRIMEIRO pedido
+                 if(i === 0) {
+                     deliveryLocation = o.delivery.split(' - R$ ')[0];
+                     if (o.delivery.includes('R$')) {
+                         const deliveryPriceMatch = o.delivery.match(/R\$ (\d+[,.]\d{2})/);
+                         if (deliveryPriceMatch) deliveryFee = parseFloat(deliveryPriceMatch[1].replace(',', '.'));
+                     }
+                 }
+             });
+
+             // Adiciona a taxa de entrega ao total geral APENAS UMA VEZ (se aplicável e se houver pedidos)
+             if (orders.length > 0 && deliveryLocation !== "Retirada" && deliveryFee > 0) {
+                 totalGeral += deliveryFee;
+                 summaryText += `*Taxa de Entrega (${deliveryLocation}): R$ ${deliveryFee.toFixed(2).replace('.', ',')}*\n\n`;
+             } else if (orders.length > 0 && deliveryLocation !== "Retirada" && deliveryFee === 0) {
+                  summaryText += `*Forma de Recebimento: ${deliveryLocation} (Taxa a combinar ou inclusa)*\n\n`; // Melhorar a mensagem se a taxa for 0 mas for entrega
+             } else if (orders.length > 0) {
+                 summaryText += `*Forma de Recebimento: Retirada*\n\n`;
+             }
+
+
+             summaryText += `*Total Geral do Pedido: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n\n`;
+             summaryEl.textContent = summaryText;
+         }
+
+        // Adaptação da função de envio do pedido para o servidor
+        btnFinish.onclick = async () => {
+            // Verifica se há pelo menos um pedido pronto para adicionar ou se já existem pedidos na lista
+            if (orders.length === 0 && isOrderReadyToAdd()) {
+                 orders.push({ ...state }); // Adiciona o pedido atual se for o primeiro
+             } else if (orders.length > 0 && isOrderReadyToAdd()) {
+                  // Verifica se o pedido atual é diferente do último adicionado antes de adicionar
+                 const lastOrder = orders[orders.length - 1];
+                 // Cria uma cópia limpa do estado para comparação, excluindo listeners e elementos DOM
+                 const cleanState = (s) => {
+                      const clean = { ...s };
+                      delete clean.fMax; delete clean.cMax; delete clean.aMax; delete clean.coMax; delete clean.addMax;
+                      // Pode precisar limpar mais propriedades dependendo de como 'state' é usado
+                      return clean;
+                 };
+                 if (JSON.stringify(cleanState(state)) !== JSON.stringify(cleanState(lastOrder))) {
+                      orders.push({ ...state });
+                 }
+             } else if (orders.length === 0 && !isOrderReadyToAdd()) {
+                  alert("Preencha o pedido antes de finalizar.");
+                  return; // Sai se não houver pedidos e o formulário atual não estiver completo
+              }
+
+
+            if (orders.length > 0) {
+                renderOrders(); // Renderiza a lista final de pedidos na página
+                showSummary(); // Gera o resumo final
+
+                const phoneNumber = '5598985016035';
+                const encodedText = encodeURIComponent(summaryEl.textContent);
+                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+
+                try {
+                    let pedidoCompletoParaServidor = [];
+                    let valorTotalGeralServidor = 0;
+                    let infoEntregaPrimeiroPedido = orders[0].delivery; // Pega a entrega do primeiro pedido
+                    let metodoPagamentoPrimeiroPedido = orders[0].payment; // Pega o pagamento do primeiro pedido
+                    let taxaEntregaServidor = 0;
+
+                    // Calcula a taxa de entrega com base no primeiro pedido
+                     if (infoEntregaPrimeiroPedido && infoEntregaPrimeiroPedido.includes('R$')) {
+                         const matchTaxa = infoEntregaPrimeiroPedido.match(/R\$ (\d+[,.]\d{2})/);
+                         if (matchTaxa) taxaEntregaServidor = parseFloat(matchTaxa[1].replace(',', '.'));
+                     }
+
+
+                    orders.forEach(order => {
+                         let subtotalPedidoItem = 0; // Subtotal deste item específico
+
+                         // Monta o objeto do item para enviar ao servidor
+                         let itemParaServidor = {};
+
+                         if (order.produtoPrincipal && order.produtoPrincipal.type === 'produto_especial' && order.produtoPrincipal.id === 'copo_felicidade') {
+                             // Item é um Copo da Felicidade
+                             itemParaServidor.itemType = 'produto_especial'; // Novo campo para identificar
+                             itemParaServidor.productId = order.produtoPrincipal.id;
+                             itemParaServidor.name = order.produtoPrincipal.name;
+                             itemParaServidor.selectedFlavor = order.selectedCopoFelicidadeFlavor || 'Não especificado'; // Inclui o sabor selecionado
+                             subtotalPedidoItem = order.produtoPrincipal.price; // Preço base
+
+                             // Processa adicionais (se adicionados acidentalmente ou como extras)
+                              if (order.add && order.add.length > 0 && !(order.add.length === 1 && (order.add[0] === 'Nenhuma' || order.add[0] === 'Nenhum Adicional'))) {
+                                   let adicionaisExtras = [];
+                                  order.add.forEach(addon => {
+                                      if (addon.includes('R$')) {
+                                          const addonPriceMatch = addon.match(/R\$ (\d+[,.]\d{2})/);
+                                          if (addonPriceMatch) subtotalPedidoItem += parseFloat(addonPriceMatch[1].replace(',', '.'));
+                                      }
+                                      adicionaisExtras.push(addon.split(' - R$ ')[0]);
+                                  });
+                                   // Adiciona os adicionais extras como um campo separado ou junto ao nome/sabor se preferir
+                                   itemParaServidor.adicionaisExtras = adicionaisExtras.join(', ');
+                              } else {
+                                  itemParaServidor.adicionaisExtras = 'Nenhum Adicional';
+                              }
+
+
+                         } else {
+                             // Item é um Açaí tradicional
+                             itemParaServidor.tamanho = order.size.split(' - R$ ')[0]; // Remove o preço do tamanho
+                             itemParaServidor.frutas = order.frutas?.includes('Nenhuma') ? 'Nenhuma' : (order.frutas?.join(', ') || 'Nenhuma');
+                             itemParaServidor.cremes = order.cremes?.includes('Nenhuma') ? 'Nenhuma' : (order.cremes?.join(', ') || 'Nenhum');
+                             itemParaServidor.acompanhamentos = order.accomp?.includes('Nenhuma') ? 'Nenhuma' : (order.accomp?.join(', ') || 'Nenhum');
+                             itemParaServidor.coberturas = order.cover?.includes('Nenhuma') ? 'Nenhuma' : (order.cover?.join(', ') || 'Nenhuma');
+
+                             let adicionaisFormatados = 'Nenhum Adicional';
+                             if (order.add && order.add.length > 0 && !(order.add.length === 1 && (order.add[0] === 'Nenhuma' || order.add[0] === 'Nenhum Adicional'))) {
+                                adicionaisFormatados = order.add.map(item => {
+                                     const parts = item.split(' - R$ ');
+                                     // Calcula o subtotal do item (tamanho + adicionais)
+                                     if (parts.length === 2) subtotalPedidoItem += parseFloat(parts[1].replace(',', '.'));
+                                     return parts[0]; // Pega apenas o nome do adicional
+                                 }).join(', ');
+                             }
+                              itemParaServidor.adicionais = adicionaisFormatados;
+
+
+                             const matchPrecoTamanho = order.size.match(/R\$ (\d+[,.]\d{2})/);
+                              if (matchPrecoTamanho) subtotalPedidoItem += parseFloat(matchPrecoTamanho[1].replace(',', '.')); // Adiciona o preço base do tamanho
+                         }
+
+                         itemParaServidor.totalPedido = subtotalPedidoItem.toFixed(2); // Total deste item
+
+                         // Adiciona campos comuns ao objeto do item para o servidor (pode ser redundante dependendo da necessidade)
+                         // itemParaServidor.pagamento = order.payment; // Melhor manter no payload geral
+                         // itemParaServidor.entrega = order.delivery.split(' - R$ ')[0]; // Melhor manter no payload geral
+
+                         pedidoCompletoParaServidor.push(itemParaServidor);
+                         valorTotalGeralServidor += subtotalPedidoItem; // Soma o subtotal deste item ao total geral
+                     });
+
+                    // Adiciona a taxa de entrega ao valor total geral (se aplicável)
+                     if (infoEntregaPrimeiroPedido.split(' - R$ ')[0] !== "Retirada" && taxaEntregaServidor > 0) {
+                         valorTotalGeralServidor += taxaEntregaServidor;
+                     }
+
+
+                    const payloadParaServidor = {
+                        pedidoCompleto: pedidoCompletoParaServidor, // Array com os detalhes de cada item
+                        valorTotal: parseFloat(valorTotalGeralServidor.toFixed(2)), // Valor total do pedido (itens + frete)
+                        metodoPagamento: metodoPagamentoPrimeiroPedido, // Pagamento do primeiro pedido
+                        tipoEntrega: infoEntregaPrimeiroPedido, // Entrega/Retirada do primeiro pedido (com preço)
+                        resumoParaAdmin: summaryEl.textContent // Resumo completo para o admin/WhatsApp
+                    };
+
+                    // Envia para o servidor
+                    const response = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payloadParaServidor),
+                    });
+
+                    if (response.ok) {
+                        console.log('Pedido enviado para o servidor!');
+                         // Limpa os pedidos da página e reseta o formulário APÓS enviar para o servidor
+                         orders = []; // Limpa o array de pedidos locais
+                         resetForm(); // Reseta o formulário e a exibição dos pedidos na página
+                    } else {
+                        console.error('Falha ao enviar pedido para o servidor.');
+                         alert("Houve um erro ao enviar seu pedido para o servidor. Por favor, tente novamente.");
+                         // Não limpa o formulário ou pedidos locais em caso de erro para que o cliente possa tentar novamente
+                    }
+                } catch (error) {
+                    console.error('Erro ao enviar pedido:', error);
+                     alert("Ocorreu um erro ao processar seu pedido. Por favor, verifique sua conexão ou tente novamente.");
+                     // Não limpa o formulário ou pedidos locais em caso de erro
+                }
+
+                 // Redireciona para o WhatsApp APENAS se o envio para o servidor foi bem-sucedido?
+                 // Ou sempre redireciona após tentar enviar? Vamos sempre redirecionar por enquanto.
+                 // Se o envio para o servidor falhar, o cliente ainda tem o resumo para enviar manualmente.
+                 console.log("Redirecionando para WhatsApp...");
+                 // Use window.location.href APENAS se o envio para o servidor for bem sucedido ou se não for crítico.
+                 // Para garantir que o pedido não se perca, talvez seja melhor abrir em uma nova aba.
+                 // window.open(whatsappURL, '_blank'); // Abre em nova aba
+                 window.location.href = whatsappURL; // Redireciona a aba atual
+                 // Note: Se o envio para o servidor falhar e você redirecionar, o admin não verá o pedido automaticamente.
+                 // Manter o redirecionamento para o WhatsApp é uma boa redundância.
+
+                // Desabilita os botões após tentar finalizar (independentemente do sucesso do envio ao servidor)
+                 disableAll();
+                 btnAdd.disabled = true;
+                 btnFinish.disabled = true;
+
+
+            } else {
+                 alert("Nenhum pedido para finalizar.");
+            }
+        };
+
+
+        btnCancel.onclick = () => {
+            if (confirm("Tem certeza que deseja cancelar todos os pedidos e recomeçar?")) {
+                orders = []; // Limpa os pedidos
+                resetForm(); // Reseta o formulário e a exibição
+            }
+        };
+
+        // Adaptação da função isOrderReadyToAdd para o Copo da Felicidade
+         function isOrderReadyToAdd() {
+             // Verifica se um produto principal (Açaí ou Copo da Felicidade) foi selecionado
+             if (!state.produtoPrincipal || !state.produtoPrincipal.type) {
+                 return false;
+             }
+
+             let itemSpecificValidity = false; // Validação específica para o tipo de item
+
+             if (state.produtoPrincipal.type === 'acai') {
+                 // Lógica de validação para Açaí (a mesma de antes)
+                 state.frutas = state.frutas || []; state.cremes = state.cremes || [];
+                 state.accomp = state.accomp || []; state.cover = state.cover || [];
+                 state.add = state.add || [];
+
+                 const checkSectionValidity = (fieldset, categoryKey, categoryMax) => {
+                      // Se o fieldset está desabilitado, ele é válido por padrão
+                     if (!fieldset || fieldset.hasAttribute('disabled')) return true;
+
+                      const itemsSelected = state[categoryKey];
+
+                      // Deve haver pelo menos um item selecionado (incluindo 'Nenhuma') se o fieldset está habilitado
+                     if (!itemsSelected || itemsSelected.length === 0) return false;
+
+                      // Se 'Nenhuma' está selecionado, deve ser o ÚNICO item
+                     if (itemsSelected.includes('Nenhuma') && itemsSelected.length > 1) return false;
+
+                      // Verifica limite máximo se não for 'Nenhuma' e tiver limite definido
+                     if (!itemsSelected.includes('Nenhuma') && categoryMax !== undefined && itemsSelected.length > categoryMax) return false;
+
+                      return true;
+                  };
+
+                 const frutasOk = checkSectionValidity(fs.frutas, 'frutas', state.fMax);
+                 const cremesOk = checkSectionValidity(fs.cremes, 'cremes', state.cMax);
+                 const accompOk = checkSectionValidity(fs.accomp, 'accomp', state.aMax);
+                 const coverOk = checkSectionValidity(fs.cover, 'cover', state.coMax);
+
+                 let addOk = true;
+                  // Verifica adicionais APENAS se o fieldset está habilitado
+                 if (!fs.askAdd.hasAttribute('disabled')) {
+                      // Se "Deseja adicionais?" está habilitado, é obrigatório escolher Sim ou Não
+                     if (state.wantAdd === undefined) return false; // Nada selecionado
+                      // Se "Sim" foi escolhido, valida o fieldset de adicionais
+                     if (state.wantAdd === 'Sim') {
+                         addOk = checkSectionValidity(fs.add, 'add', state.addMax);
+                     }
+                      // Se "Não" foi escolhido, addOk é true (já validado pelo radio)
+                 }
+
+
+                 itemSpecificValidity = frutasOk && cremesOk && accompOk && coverOk && addOk;
+
+             } else if (state.produtoPrincipal.type === 'produto_especial' && state.produtoPrincipal.id === 'copo_felicidade') {
+                 // Lógica de validação para Copo da Felicidade
+                 // Requer que um sabor tenha sido selecionado
+                 const isFlavorSelected = state.selectedCopoFelicidadeFlavor !== undefined;
+                 itemSpecificValidity = isFlavorSelected;
+             }
+
+             // Verifica se pagamento e entrega foram selecionados (obrigatório para qualquer pedido)
+             const isPaymentAndDeliverySelected = state.payment !== undefined && state.delivery !== undefined;
+
+             // O pedido está pronto para adicionar se a validação específica do item for ok
+             // E se pagamento e entrega estiverem selecionados (embora payment/delivery sejam do pedido GERAL, não do item)
+             // Vamos manter a validação de payment/delivery fora daqui, pois isOrderReadyToAdd é sobre se o *item* atual está pronto.
+             // A validação final para habilitar os botões (que inclui payment/delivery) está em checkIfCanFinish.
+             // Então, aqui só validamos as opções específicas do item (açaí ou copo felicidade + adicionais se aplicável).
+             return itemSpecificValidity;
+         }
+
+
+         // Adaptação da função resetPartial
+        function resetPartial() {
+             // Limpa APENAS as opções do item atual
+             state.produtoPrincipal = undefined; // Limpa a seleção do produto principal
+             state.size = undefined; // Mantém compatibilidade
+             state.fMax = state.cMax = state.aMax = state.coMax = state.addMax = undefined; // Limpa limites
+
+             state.frutas = []; state.cremes = []; state.accomp = []; state.cover = []; state.add = [];
+             state.wantAdd = undefined; state.payment = undefined; state.delivery = undefined;
+             state.selectedCopoFelicidadeFlavor = undefined; // Limpa sabor Copo Felicidade
+
+             // Desabilita fieldsets (exceto produtoPrincipal, payment, delivery)
+             [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add, fs.copoFelicidadeFlavors].forEach(disable);
+
+             // Limpa checkboxes e radios e reseta contadores nos fieldsets desabilitados
+             clearCheckboxes(fs.frutas); updateCounter(cnt.frutas, 0, '?');
+             clearCheckboxes(fs.cremes); updateCounter(cnt.cremes, 0, '?');
+             clearCheckboxes(fs.accomp); updateCounter(cnt.accomp, 0, '?');
+             clearCheckboxes(fs.cover); updateCounter(cnt.cover, 0, '?');
+             clearCheckboxes(fs.add); updateCounter(cnt.add, 0, 14);
+             clearRadios('wantAdd');
+             clearRadios('copoFelicidadeFlavor'); // Limpa rádios de sabor do Copo Felicidade
+
+             // Limpa a seleção de rádio e visual dos produtos principais
+             clearRadios('produtoPrincipal'); // Limpa os rádios de produto principal
+             document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected')); // Limpa a seleção visual dos cards
+
+              // Não limpa pagamento e entrega, pois eles se aplicam ao pedido geral (a menos que seja o primeiro item)
+              // Se você adicionou um item e clica em "Adicionar Outro", payment/delivery ficam selecionados para o próximo.
+              // Isso pode ser desejável ou não. Se quiser resetar payment/delivery também, descomente:
+             // clearRadios('payment');
+             // clearRadios('delivery');
+             // document.querySelectorAll('input[name="payment"]').forEach(r => r.closest('label')?.classList.remove('selected-radio'));
+             // document.querySelectorAll('input[name="delivery"]').forEach(r => r.closest('label')?.classList.remove('selected-radio'));
+             // state.payment = undefined; state.delivery = undefined;
+
+
+             // Garante que o fieldset de produto principal esteja habilitado para o próximo item
+             enable(fs.produtoPrincipal);
+
+             btnAdd.disabled = true;
+             btnFinish.disabled = true;
+             if(pixInfoDiv) pixInfoDiv.classList.add('hidden'); // Oculta info PIX se payment resetado
+         }
+
+
+        // Adaptação da função resetForm (reseta TUDO)
+         async function resetForm() {
+             state = {}; // Limpa TODO o estado
+             orders = []; // Limpa a lista de pedidos salvos
+
+             renderOrders(); // Atualiza a exibição (vai esconder a seção de pedidos)
+
+              if(pixInfoDiv) pixInfoDiv.classList.add('hidden'); // Oculta info PIX
+
+             // Re-busca e aplica a disponibilidade dos itens
+             await fetchAndApplyItemAvailability(); // Esta função também renderiza produtos principais e configura listeners
+
+             // Limpa todos os checkboxes e radios em todo o formulário
+             form.querySelectorAll('input[type="checkbox"]').forEach(chk => chk.checked = false);
+             form.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+             document.querySelectorAll('.selected-radio').forEach(label => label.classList.remove('selected-radio'));
+             document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected'));
+
+             // Reseta contadores para 0/?
+             updateCounter(cnt.frutas, 0, '?');
+             updateCounter(cnt.cremes, 0, '?');
+             updateCounter(cnt.accomp, 0, '?');
+             updateCounter(cnt.cover, 0, '?');
+             updateCounter(cnt.add, 0, 14);
+
+             // Desabilita todos os fieldsets, exceto o de produto principal
+             const allFieldsets = form.querySelectorAll('fieldset');
+             allFieldsets.forEach(f => {
+                 if (f.id !== 'fsProdutoPrincipal') disable(f);
+                 else enable(f); // Garante que o primeiro fieldset está habilitado
+             });
+              // Garante que o fieldset de sabores do Copo Felicidade também está desabilitado inicialmente
+             disable(fs.copoFelicidadeFlavors);
+
+
+             btnAdd.disabled = true;
+             btnFinish.disabled = true;
+
+             // Re-configura os listeners principais (já feito por fetchAndApplyItemAvailability via setupProdutoPrincipalListeners)
+             // mas pode ser útil ter as chamadas diretas aqui também se a lógica mudar
+             setupRadioListener('wantAdd', 'askAdd');
+             setupRadioListener('payment', 'payment');
+             setupRadioListener('delivery', 'delivery');
+              // Não precisamos re-configurar listeners para produtoPrincipal ou copoFelicidadeFlavor aqui
+              // porque renderProdutosPrincipais e renderCopoFelicidadeFlavors (chamados por fetchAndApplyItemAvailability)
+              // já cuidam disso através de setupProdutoPrincipalListeners e setupRadioListener('copoFelicidadeFlavor', ...)
+         }
+
+         // Adiciona um listener genérico para os rádios de pagamento para mostrar/ocultar info PIX
+         document.querySelectorAll('input[name="payment"]').forEach(radio => {
+              radio.addEventListener('change', (event) => {
+                  if (pixInfoDiv) {
+                      if (event.target.value === 'Pix' && event.target.checked) {
+                          pixInfoDiv.classList.remove('hidden');
+                      } else {
+                          pixInfoDiv.classList.add('hidden');
+                      }
+                  }
+              });
+         });
+
+
+         // Função auxiliar para desabilitar todos os fieldsets no formulário
+         function disableAll() { const allFieldsets = form.querySelectorAll('fieldset'); allFieldsets.forEach(disable); }
+
+        // --- CHAMADA INICIAL ---
+        // Ao carregar a página, resetamos o formulário e buscamos a disponibilidade
+        resetForm(); // Inicia o formulário e busca os dados
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+body {
+    font-family: 'Segoe UI', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f4f4;
+    color: #333;
+}
+
+header {
+    background-color: #5A0F8D; /* Mesmo roxo do seu tema */
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+main {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 1rem;
+    background-color: white;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+}
+
+.category {
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid #eee;
+}
+
+.category h2 {
+    color: #5A0F8D;
+    margin-top: 0;
+}
+
+.item-control {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.item-control input[type="checkbox"] {
+    margin-right: 0.75rem;
+    transform: scale(1.2);
+    cursor: pointer;
+}
+
+.item-control label {
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+button#saveButton {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1.1rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+}
+
+button#saveButton:hover {
+    background-color: #218838;
+}
+
+#statusMessage {
+    margin-top: 1rem;
+    text-align: center;
+    font-weight: bold;
+}

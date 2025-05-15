@@ -1,0 +1,243 @@
+{
+  "frutas": [
+    {
+      "id": "morango",
+      "name": "Morango",
+      "available": true
+    },
+    {
+      "id": "banana",
+      "name": "Banana",
+      "available": true
+    },
+    {
+      "id": "kiwi",
+      "name": "Kiwi",
+      "available": true
+    },
+    {
+      "id": "maca",
+      "name": "Maçã",
+      "available": true
+    },
+    {
+      "id": "uva",
+      "name": "Uva",
+      "available": true
+    }
+  ],
+  "cremes": [
+    {
+      "id": "ninho",
+      "name": "Ninho",
+      "available": true
+    },
+    {
+      "id": "maracuja",
+      "name": "Maracujá",
+      "available": true
+    },
+    {
+      "id": "morango_creme",
+      "name": "Morango (Creme)",
+      "available": true
+    },
+    {
+      "id": "tutti_frutti_creme",
+      "name": "Tutti Frutti (Creme)",
+      "available": true
+    },
+    {
+      "id": "chocolate_avela",
+      "name": "Chocolate c/Avelã",
+      "available": true
+    }
+  ],
+  "acompanhamentos": [
+    {
+      "id": "amendoim_acomp",
+      "name": "Amendoim",
+      "available": true
+    },
+    {
+      "id": "pacoca_acomp",
+      "name": "Paçoca",
+      "available": true
+    },
+    {
+      "id": "granola_acomp",
+      "name": "Granola",
+      "available": true
+    },
+    {
+      "id": "farinha_lactea_acomp",
+      "name": "Farinha Láctea",
+      "available": true
+    },
+    {
+      "id": "leite_po_acomp",
+      "name": "Leite em Pó",
+      "available": true
+    },
+    {
+      "id": "confetes_acomp",
+      "name": "Confetes",
+      "available": true
+    },
+    {
+      "id": "tapioca_acomp",
+      "name": "Tapioca",
+      "available": true
+    },
+    {
+      "id": "uva_passa_acomp",
+      "name": "Uva Passa",
+      "available": true
+    }
+  ],
+  "coberturas": [
+    {
+      "id": "chocolate_cob",
+      "name": "Chocolate",
+      "available": true
+    },
+    {
+      "id": "morango_cob",
+      "name": "Morango (Cobertura)",
+      "available": true
+    },
+    {
+      "id": "leite_condensado_cob",
+      "name": "Leite Condensado",
+      "available": true
+    },
+    {
+      "id": "tutti_frutti_cob",
+      "name": "Tutti Frutti (Cobertura)",
+      "available": true
+    },
+    {
+      "id": "ice_blue_cob",
+      "name": "Ice Blue",
+      "available": true
+    },
+    {
+      "id": "kiwi_cob",
+      "name": "Kiwi (Cobertura)",
+      "available": true
+    }
+  ],
+  "adicionais": [
+    {
+      "id": "ovomaltine_add",
+      "name": "Ovomaltine - R$ 1.00",
+      "originalValue": "Ovomaltine - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "escureto_add",
+      "name": "Escureto - R$ 1.00",
+      "originalValue": "Escureto - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "chocoball_add",
+      "name": "Chocoball - R$ 1.00",
+      "originalValue": "Chocoball - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "amendoim_add",
+      "name": "Amendoim (Adicional) - R$ 1.00",
+      "originalValue": "Amendoim - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "pacoca_add",
+      "name": "Paçoca (Adicional) - R$ 1.00",
+      "originalValue": "Paçoca - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "granola_add",
+      "name": "Granola (Adicional) - R$ 1.00",
+      "originalValue": "Granola - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "farinha_lactea_add",
+      "name": "Farinha Láctea (Adicional) - R$ 1.00",
+      "originalValue": "Farinha Láctea - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "leite_po_add",
+      "name": "Leite em pó (Adicional) - R$ 1.00",
+      "originalValue": "Leite em pó - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "confetes_add",
+      "name": "Confetes (Adicional) - R$ 1.00",
+      "originalValue": "Confetes - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "tapioca_add",
+      "name": "Tapioca (Adicional) - R$ 1.00",
+      "originalValue": "Tapioca - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "uva_passa_add",
+      "name": "Uva Passa (Adicional) - R$ 1.00",
+      "originalValue": "Uva Passa - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "mms_add",
+      "name": "M&MS - R$ 1.00",
+      "originalValue": "M&MS - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "marshmallow_add",
+      "name": "Marshmallow - R$ 1.00",
+      "originalValue": "Marshmallow - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "doce_leite_add",
+      "name": "Doce de leite - R$ 1.00",
+      "originalValue": "Doce de leite - R$ 1.00",
+      "available": true
+    }
+  ],
+  "produtos_especiais": [
+    {
+      "id": "copo_felicidade",
+      "name": "Copo da Felicidade",
+      "description": "Sobremesa em camadas com sabores irresistíveis. Escolha seu sabor favorito!",
+      "price": 12.00,
+      "available": true,
+      "requires_flavor_selection": true,
+      "flavors": [
+        {
+          "id": "ninho_escureto",
+          "name": "Ninho com Escureto",
+          "internal_description": "Creme de Ninho + Creme de Escureto (chocolate intenso)"
+        },
+        {
+          "id": "floresta_negra",
+          "name": "Floresta Negra",
+          "internal_description": "Creme Especial + Creme de Avelã"
+        },
+        {
+          "id": "doce_leite_chocolate_branco",
+          "name": "Doce de Leite com Chocolate Branco",
+          "internal_description": "Doce de leite + Creme de Chocolate Branco"
+        }
+      ]
+    }
+  ]
+}

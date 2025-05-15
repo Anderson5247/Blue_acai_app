@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Controle Blue Açaí</title>
+    <link rel="stylesheet" href="/css/admin_style.css"> <style>
+        /* Estilos gerais da página admin que podem estar no admin_style.css */
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        header {
+            background-color: #5A0F8D; /* Cor principal do tema */
+            color: white;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        main {
+            max-width: 900px; /* Aumentado um pouco para melhor visualização dos pedidos */
+            margin: 2rem auto;
+            padding: 1rem;
+        }
+
+        .admin-section {
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2.5rem;
+        }
+
+        .admin-section h2 {
+            color: var(--purple);
+            margin-top: 0;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+        
+        /* Estilos para controle de disponibilidade (do admin_style.css anterior) */
+        .category-admin { /* Adicionada para agrupar itens de disponibilidade */
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        .category-admin:last-child {
+            border-bottom: none;
+        }
+        .category-admin h3 {
+            color: #444;
+            font-size: 1.1em;
+            margin-bottom: 0.5rem;
+        }
+        .item-control-admin {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.3rem;
+        }
+        .item-control-admin input[type="checkbox"] {
+            margin-right: 0.5rem;
+            transform: scale(1.1);
+        }
+        #saveAvailabilityButton, #refreshOrdersButton { /* Estilo comum para botões */
+            display: inline-block; /* Mudado para inline-block para permitir outros elementos na mesma linha se necessário */
+            padding: 0.6rem 1.2rem;
+            background-color: #5A0F8D;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 1rem;
+        }
+        #saveAvailabilityButton:hover, #refreshOrdersButton:hover {
+            background-color: #4a0c74;
+        }
+        #availabilityStatusMessage {
+            margin-top: 0.8rem;
+            font-weight: bold;
+        }
+
+        /* Estilos para agrupamento de pedidos e botões de visualização */
+        .view-options {
+            margin-bottom: 1rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+        .view-options strong {
+            margin-right: 10px;
+            font-size: 1em;
+            color: #333;
+        }
+        .view-options button {
+            padding: 8px 15px; /* Aumentado padding */
+            margin-right: 8px;
+            cursor: pointer;
+            border: 1px solid #5A0F8D;
+            background-color: white;
+            color: #5A0F8D;
+            border-radius: 5px; /* Bordas mais arredondadas */
+            font-weight: 500; /* Peso da fonte */
+            transition: all 0.2s ease-in-out;
+        }
+        .view-options button:hover {
+            background-color: #f3e5ff; /* Lilás claro no hover */
+        }
+        .view-options button.active {
+            background-color: #5A0F8D;
+            color: white;
+            border-color: #5A0F8D;
+        }
+
+        .group-container {
+            margin-bottom: 2rem;
+            padding: 1rem;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            background-color: #fdfdff; /* Fundo ligeiramente diferente para cada grupo */
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+        }
+        .group-header {
+            background-color: #5A0F8D;
+            color: white;
+            padding: 0.75rem 1rem;
+            margin: -1rem -1rem 1rem -1rem; /* Para estender até as bordas do .group-container */
+            border-top-left-radius: 7px;
+            border-top-right-radius: 7px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .group-header h3 {
+            margin: 0;
+            font-size: 1.25em; /* Ajustado tamanho */
+        }
+        .group-total {
+            font-size: 1.05em; /* Ajustado tamanho */
+            font-weight: bold;
+        }
+        .order-item-admin { /* Estilos para cada item de pedido dentro do grupo */
+            padding: 0.8rem 0;
+            border-bottom: 1px dotted #ccc;
+        }
+        .order-item-admin:last-child {
+            border-bottom: none;
+            padding-bottom: 0;
+        }
+        .order-item-admin h4 {
+            margin-top: 0;
+            margin-bottom: 0.5rem;
+            color: #4a0c74; /* Roxo mais escuro para o título do pedido */
+            font-size: 1.05em;
+        }
+        .order-item-admin p {
+            margin-bottom: 0.3rem;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+        .order-item-admin hr {
+            display: none; /* Removida a linha hr, pois já temos border-bottom no item */
+        }
+        .order-item-admin ul {
+            list-style-type: none;
+            padding-left: 15px; /* Pequena indentação para os itens */
+            font-size: 0.9em;
+        }
+        .order-item-admin ul li {
+            margin-bottom: 0.2rem;
+        }
+
+        .summary-total {
+            font-size: 1.25em; /* Ajustado tamanho */
+            margin-bottom: 1.5rem; /* Mais espaço */
+            padding: 0.75rem; /* Ajustado padding */
+            background-color: #e9d8f3; /* Lilás mais suave */
+            border-left: 5px solid var(--purple); /* Destaque */
+            text-align: center;
+            border-radius: 4px;
+        }
+        .summary-total strong {
+            color: var(--purple);
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Painel de Controle - Blue Açaí</h1>
+    </header>
+    <main>
+        <section id="availabilityControl" class="admin-section">
+            <h2>Controle de Disponibilidade de Itens</h2>
+            <div id="itemsContainer">
+                <p>Carregando itens para controle de disponibilidade...</p>
+            </div>
+            <button id="saveAvailabilityButton">Salvar Alterações de Disponibilidade</button>
+            <p id="availabilityStatusMessage"></p>
+        </section>
+
+        <section id="orderManagement" class="admin-section">
+            <h2>Pedidos Registrados</h2>
+            <div class="summary-total">
+                <strong>Total Geral de Todos os Pedidos: R$ <span id="grandTotalAllTime">0.00</span></strong>
+            </div>
+
+            <div class="view-options">
+                <strong>Visualizar por:</strong>
+                <button id="viewByDayButton">Dia</button>
+                <button id="viewByMonthButton">Mês</button>
+                </div>
+            
+            <button id="refreshOrdersButton">Atualizar Lista de Pedidos</button>
+            
+            <div id="ordersReportContainer">
+                <p>Carregando pedidos...</p>
+            </div>
+        </section>
+    </main>
+    <script src="/js/admin_script.js"></script> </body>
+</html>
