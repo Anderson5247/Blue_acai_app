@@ -431,6 +431,58 @@
              // Payment e Delivery não são desabilitados aqui pois se aplicam ao pedido geral.
         }
 
+         // Reseta as opções dependentes do item atual e prepara para a próxima seleção de produto principal
+         // MOVIDA PARA CIMA PARA SER DEFINIDA ANTES DE SER CHAMADA
+        function resetDependentOptions() {
+             console.log("Resetando formulário parcial para o próximo item."); // Log para debug
+             // Limpa APENAS as opções e estado relacionados ao ITEM ATUAL
+             state.produtoPrincipal = undefined; // Limpa a seleção do produto principal
+             state.size = undefined; // Limpa o tamanho antigo (compatibilidade)
+             state.fMax = state.cMax = state.aMax = state.coMax = state.addMax = undefined; // Limpa limites
+
+             state.frutas = []; state.cremes = []; state.accomp = []; state.cover = []; state.add = []; // Limpa seleções de componentes/adicionais
+             state.wantAdd = undefined; // Limpa escolha Sim/Não adicionais
+             state.selectedCopoFelicidadeFlavor = undefined; // Limpa sabor Copo Felicidade
+
+             // NÃO reseta payment e delivery aqui, pois eles se aplicam ao pedido geral e podem já ter sido selecionados para o primeiro item.
+             // clearRadios('payment'); // Não limpar aqui
+             // clearRadios('delivery'); // Não limpar aqui
+             // document.querySelectorAll('input[name="payment"]').forEach(r => r.closest('label')?.classList.remove('selected-radio')); // Não limpar aqui
+             // document.querySelectorAll('input[name="delivery"]').forEach(r => r.closest('label')?.classList.remove('selected-radio')); // Não limpar aqui
+
+
+             // Desabilita todos os fieldsets dependentes de produto principal (açaí, adicionais, sabores copo felicidade)
+             [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add, fs.copoFelicidadeFlavors].forEach(disable);
+
+             // Limpa checkboxes e radios e reseta contadores nos fieldsets que foram desabilitados ou limpados
+             clearCheckboxes(fs.frutas); updateCounter(cnt.frutas, 0, '?');
+             clearCheckboxes(fs.cremes); updateCounter(cnt.cremes, 0, '?');
+             clearCheckboxes(fs.accomp); updateCounter(cnt.accomp, 0, '?');
+             clearCheckboxes(fs.cover); updateCounter(cnt.cover, 0, '?');
+             clearCheckboxes(fs.add); updateCounter(cnt.add, 0, 14);
+             clearRadios('wantAdd'); // Limpa rádios Sim/Não adicionais
+             clearRadios('copoFelicidadeFlavor'); // Limpa rádios de sabor do Copo Felicidade
+
+             // Limpa a seleção de rádio e visual dos produtos principais (tamanho/copo felicidade)
+             clearRadios('produtoPrincipal');
+             document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected')); // Limpa a seleção visual dos cards
+
+
+             // Garante que o fieldset de produto principal esteja habilitado para a próxima seleção
+             enable(fs.produtoPrincipal);
+
+             // Não oculta informações PIX aqui
+             // if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
+
+             // Desabilita botões Adicionar/Finalizar até que o próximo item esteja pronto
+             btnAdd.disabled = true;
+             btnFinish.disabled = true;
+
+             // Não mexe na seção de pedidos 'ordersSec' nem em 'orderPageTotal', pois eles mostram os itens JÁ adicionados.
+             // renderOrders() é chamada por btnAdd para atualizar esta seção.
+              console.log("Reset parcial completo."); // Log para debug
+         }
+
 
         // --- LÓGICA DE DISPONIBILIDADE E CARREGAMENTO DE ITENS ---
         // Busca dados de items.json, aplica disponibilidade e renderiza produtos principais
@@ -574,8 +626,10 @@
                      `;
                  }
              } else {
-                 console.warn("Dados do Copo da Felicade (copo_felicidade) não encontrados na categoria 'produtos_especiais' do items.json."); // Log para debug
+                 console.warn("Dados do Copo da Felicidade (copo_felicidade) não encontrados na categoria 'produtos_especiais' do items.json. Verifique o items.json."); // Log para debug
                   // Opcional: Adicionar uma mensagem na interface indicando que o produto especial não foi encontrado
+                  // ou desabilitar a seção de produto principal se nenhum produto for carregado.
+                  // Por enquanto, a seção ficará vazia.
              }
               console.log("Renderização de produtos principais completa."); // Log para debug
          }
@@ -588,7 +642,7 @@
                  return;
              }
              if (!copoFelicidadeData || !copoFelicidadeData.flavors || copoFelicidadeData.flavors.length === 0) {
-                 console.warn("Dados de sabores do Copo da Felicidade não encontrados ou vazios."); // Log para debug
+                 console.warn("Dados de sabores do Copo da Felicidade não encontrados ou vazios em items.json."); // Log para debug
                  boxCopoFelicidadeFlavors.innerHTML = '<p>Nenhuma opção de sabor disponível.</p>';
                  return;
              }
@@ -623,8 +677,8 @@
                       console.log("Evento 'change' disparado no rádio de produto principal:", e.target.value); // Log para debug
                      // Remove a classe 'selected' de todos os cards de produto
                      document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected'));
-                     // Adiciona a classe 'selected' ao card clicado (se existir, pois pode ser disabled-item)
-                     e.target.closest('.produto-card')?.classList.add('selected');
+                     // Adiciona a classe 'selected' ao card clicado (se existir e não for disabled-item)
+                     e.target.closest('.produto-card:not(.disabled-item)')?.classList.add('selected');
 
 
                      // Reseta as opções dependentes de açaí e adicionais E o fieldset de sabores do Copo da Felicidade
@@ -963,7 +1017,7 @@
                  state.cover = state.cover || []; state.add = state.add || [];
 
                  const checkSectionValidity = (fieldset, stateKey) => {
-                      // Se o fieldset está desabilitado, ele é válido por padrão
+                      // Se o fieldset está desabilitado (ex: pelo tamanho selecionado ou por ser copo felicidade), ele é válido por padrão
                      if (!fieldset || fieldset.hasAttribute('disabled')) {
                           // console.log(`    -> Fieldset "${fieldset?.id}" desabilitado. Válido.`); // Log para debug
                           return true;
@@ -979,8 +1033,9 @@
                          return false;
                      }
 
-                      // Se a opção "Nenhuma" ou "Nenhum Adicional" está selecionada, deve ser o ÚNICO item
                       const noneOption = stateKey === 'add' ? noneAddValue : noneValue;
+
+                      // Se a opção "Nenhuma" ou "Nenhum Adicional" está selecionada, deve ser o ÚNICO item
                      if (itemsSelected.includes(noneOption) && itemsSelected.length > 1) {
                           console.log(`    -> Fieldset "${fieldset.id}" habilitado, "${noneOption}" selecionado junto com outros.`); // Log para debug
                          return false;
@@ -1035,15 +1090,17 @@
 
                   // Adicionalmente, os fieldsets de açaí e adicionais DEVEM estar desabilitados.
                   // Isso é uma validação extra para garantir que a UI está no estado correto para Copo Felicidade.
-                  // Podemos adicionar a verificação dos fieldsets de açaí/adicionais aqui se quisermos garantir
-                  // que eles foram desabilitados corretamente, mas a validação principal é a seleção do sabor.
-                  // Por simplicidade, vamos focar na seleção do sabor e na habilitação do fieldset de sabor.
-                  const acaiFieldsetsDisabled = fs.frutas.hasAttribute('disabled') && fs.cremes.hasAttribute('disabled') && fs.accomp.hasAttribute('disabled') && fs.cover.hasAttribute('disabled') && fs.askAdd.hasAttribute('disabled') && fs.add.hasAttribute('disabled');
+                  const acaiFieldsetsDisabled = fs.frutas.hasAttribute('disabled') &&
+                                                 fs.cremes.hasAttribute('disabled') &&
+                                                 fs.accomp.hasAttribute('disabled') &&
+                                                 fs.cover.hasAttribute('disabled') &&
+                                                 fs.askAdd.hasAttribute('disabled') &&
+                                                 fs.add.hasAttribute('disabled');
                    console.log("  -> Fieldsets de açaí/adicionais desabilitados?", acaiFieldsetsDisabled); // Log para debug
 
 
                  // O item Copo da Felicidade é válido SE um sabor foi selecionado E o fieldset de sabores está habilitado E fieldsets de açaí/adicionais estão desabilitados
-                 itemSpecificValidity = isFlavorSelected && isFlavorFieldsetEnabled && acaiFieldsetsDisabled;
+                 itemSpecificValidity = isFlavorSelected && isFlavorFieldsetEnabled && acaiFieldsetsDisabled; // Verifica se sabor selecionado E fieldsets corretos habilitados/desabilitados
                   console.log("  -> Validade específica do item Copo da Felicidade:", itemSpecificValidity); // Log para debug
 
 
@@ -1140,7 +1197,7 @@
                      }
 
                      // Calcula o subtotal do açaí (preço do tamanho + adicionais)
-                     const priceMatch = o.size?.match(/R\$ (\d+[,.]\d{2})/);
+                     const priceMatch = o.size?.match(/R\$ (\d+[,.]\d{2})/); // Usa order.size antigo para pegar preço
                      subTotalPedidoItem = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
 
                      // Adiciona o custo dos adicionais ao subtotal do açaí
@@ -1169,10 +1226,10 @@
                  totalGeralPedidosPagina += subTotalPedidoItem; // Soma o subtotal do item ao total dos itens na página
 
                 // A taxa de entrega e o local são baseados no PRIMEIRO pedido na lista (se houver delivery no primeiro)
-                if (i === 0 && o.delivery) {
-                    localEntregaPagina = o.delivery.split(' - R$ ')[0];
-                    if (o.delivery.includes('R$')) {
-                        const deliveryPriceMatch = o.delivery.match(/R\$ (\d+[,.]\d{2})/);
+                if (i === 0 && orders.length > 0 && orders[0].delivery) { // Garante que orders[0] e orders[0].delivery existem
+                    localEntregaPagina = orders[0].delivery.split(' - R$ ')[0];
+                    if (orders[0].delivery.includes('R$')) {
+                        const deliveryPriceMatch = orders[0].delivery.match(/R\$ (\d+[,.]\d{2})/);
                         if (deliveryPriceMatch) taxaEntregaPagina = parseFloat(deliveryPriceMatch[1].replace(',', '.'));
                     } else {
                          taxaEntregaPagina = 0; // Garante que a taxa é 0 se não contiver R$
@@ -1205,6 +1262,7 @@
              let deliveryLocation = "Retirada";
              let metodoPagamento = "Não especificado"; // Para pegar o pagamento do primeiro item
 
+
              orders.forEach((o, i) => {
                  let totalPricePedido = 0; // Total deste item específico (produto base + adicionais extras)
 
@@ -1217,6 +1275,7 @@
                       summaryText += `Sabor: ${o.selectedCopoFelicidadeFlavor || 'Não especificado'}\n`;
                       totalPricePedido = o.produtoPrincipal?.price || 0; // Preço base (usa 0 se não definido)
 
+
                       // Adicionais (se aplicam como extras para Copo da Felicidade)
                       if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
                            const adicionaisLista = o.add.map(item => {
@@ -1228,36 +1287,11 @@
                            summaryText += `Adicionais (Extras): ${adicionaisLista}\n`;
                       } else {
                            summaryText += `Adicionais: Nenhum Adicional\n`;
+                      Text += `Adicionais: Nenhum Adicional\n`;
                       }
 
-
-                 } else {
-                      // É um item de Açaí tradicional
-                      // Usar o nome do produtoPrincipal se disponível, fallback para size
-                     summaryText += `Tamanho: ${o.produtoPrincipal?.name || (o.size ? o.size.split(' - R$ ')[0] : 'Açaí (Tamanho não especificado)')}\n`;
-
-
-                      const displayFrutas = o.frutas?.length > 0 && !o.frutas.includes('Nenhuma') ? o.frutas.join(', ') : 'Nenhuma';
-                      const displayCremes = o.cremes?.length > 0 && !o.cremes.includes('Nenhuma') ? o.cremes.join(', ') : 'Nenhum';
-                      const displayAccomp = o.accomp?.length > 0 && !o.accomp.includes('Nenhuma') ? o.accomp.join(', ') : 'Nenhum';
-                      const displayCover = o.cover?.length > 0 && !o.cover.includes('Nenhuma') ? o.cover.join(', ') : 'Nenhuma';
-                      let displayAdd = 'Nenhum Adicional';
-
-                      summaryText += `Frutas: ${displayFrutas}\n`;
-                      summaryText += `Cremes: ${displayCremes}\n`;
-                      summaryText += `Acompanhamentos: ${displayAccomp}\n`;
-                      summaryText += `Coberturas: ${displayCover}\n`;
-
-                      if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
-                          displayAdd = o.add.map(item => item.split(' - R$ ')[0]).join(', ');
-                          summaryText += `Adicionais: ${displayAdd}\n`;
-                      } else {
-                           summaryText += `Adicionais: Nenhum Adicional\n`;
-                      }
-
-                      // Calcula o subtotal do açaí (preço do tamanho + adicionais)
-                     const priceMatch = o.size?.match(/R\$ (\d+[,.]\d{2})/); // Usa order.size antigo para pegar preço
-                     totalPricePedido = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
+                      const priceMatch = o.size?.match(/R\$ (\d+[,.]\d{2})/); // Usa order.size antigo para pegar preço
+                      totalPricePedido = priceMatch ? parseFloat(priceMatch[1].replace(',', '.')) : 0;
 
                       // Adiciona o custo dos adicionais ao subtotal do açaí
                      if (o.add && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
@@ -1276,7 +1310,7 @@
                  totalGeral += totalPricePedido; // Adiciona o total do item ao total geral (antes de adicionar frete)
 
                   // Pagamento e Entrega/Retirada são do pedido GERAL, pegamos do primeiro item na lista 'orders'
-                  if(i === 0 && orders.length > 0) { // Garante que orders[0] existe
+                  if(i === 0 && orders.length > 0) { // Garante que orders[0] e orders[0].delivery existem
                       metodoPagamento = orders[0].payment || 'N/A';
                       deliveryLocation = orders[0].delivery ? orders[0].delivery.split(' - R$ ')[0] : 'N/A';
                        if (orders[0].delivery && orders[0].delivery.includes('R$')) {
@@ -1520,8 +1554,7 @@
                          // Redireciona para o WhatsApp APENAS SE o envio para o servidor foi bem-sucedido
                           console.log("Redirecionando para WhatsApp..."); // Log para debug
                           // Usar window.location.href redireciona a aba atual
-                          // Usar window.open(whatsappURL, '_blank') abre em nova aba (menos intrusivo)
-                          // Vamos manter window.location.href como estava antes.
+                          // Usar window.open(whatsappURL, '_blank') abre em nova aba (less intrusive)
                           window.location.href = whatsappURL;
 
                     } else {
@@ -1561,57 +1594,6 @@
             }
         };
 
-        // Reseta as opções dependentes do item atual e prepara para a próxima seleção de produto principal
-        function resetPartial() {
-             console.log("Resetando formulário parcial para o próximo item."); // Log para debug
-             // Limpa APENAS as opções e estado relacionados ao ITEM ATUAL
-             state.produtoPrincipal = undefined; // Limpa a seleção do produto principal
-             state.size = undefined; // Limpa o tamanho antigo (compatibilidade)
-             state.fMax = state.cMax = state.aMax = state.coMax = state.addMax = undefined; // Limpa limites
-
-             state.frutas = []; state.cremes = []; state.accomp = []; state.cover = []; state.add = []; // Limpa seleções de componentes/adicionais
-             state.wantAdd = undefined; // Limpa escolha Sim/Não adicionais
-             state.selectedCopoFelicidadeFlavor = undefined; // Limpa sabor Copo Felicidade
-
-             // NÃO reseta payment e delivery aqui, pois eles se aplicam ao pedido geral e podem já ter sido selecionados para o primeiro item.
-             // clearRadios('payment'); // Não limpar aqui
-             // clearRadios('delivery'); // Não limpar aqui
-             // document.querySelectorAll('input[name="payment"]').forEach(r => r.closest('label')?.classList.remove('selected-radio')); // Não limpar aqui
-             // document.querySelectorAll('input[name="delivery"]').forEach(r => r.closest('label')?.classList.remove('selected-radio')); // Não limpar aqui
-
-
-             // Desabilita todos os fieldsets dependentes de produto principal (açaí, adicionais, sabores copo felicidade)
-             [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add, fs.copoFelicidadeFlavors].forEach(disable);
-
-             // Limpa checkboxes e radios e reseta contadores nos fieldsets que foram desabilitados ou limpados
-             clearCheckboxes(fs.frutas); updateCounter(cnt.frutas, 0, '?');
-             clearCheckboxes(fs.cremes); updateCounter(cnt.cremes, 0, '?');
-             clearCheckboxes(fs.accomp); updateCounter(cnt.accomp, 0, '?');
-             clearCheckboxes(fs.cover); updateCounter(cnt.cover, 0, '?');
-             clearCheckboxes(fs.add); updateCounter(cnt.add, 0, 14);
-             clearRadios('wantAdd'); // Limpa rádios Sim/Não adicionais
-             clearRadios('copoFelicidadeFlavor'); // Limpa rádios de sabor do Copo Felicidade
-
-             // Limpa a seleção de rádio e visual dos produtos principais (tamanho/copo felicidade)
-             clearRadios('produtoPrincipal');
-             document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected')); // Limpa a seleção visual dos cards
-
-
-             // Garante que o fieldset de produto principal esteja habilitado para a próxima seleção
-             enable(fs.produtoPrincipal);
-
-             // Não oculta informações PIX aqui
-             // if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
-
-             // Desabilita botões Adicionar/Finalizar até que o próximo item esteja pronto
-             btnAdd.disabled = true;
-             btnFinish.disabled = true;
-
-             // Não mexe na seção de pedidos 'ordersSec' nem em 'orderPageTotal', pois eles mostram os itens JÁ adicionados.
-             // renderOrders() é chamada por btnAdd para atualizar esta seção.
-              console.log("Reset parcial completo."); // Log para debug
-         }
-
 
         // Reseta completamente o formulário e a lista de pedidos, preparando para um novo pedido GERAL
          async function resetForm() {
@@ -1626,7 +1608,7 @@
 
              // Re-busca e aplica a disponibilidade dos itens (renderiza produtos principais e configura listeners)
              // Esta é a primeira coisa que acontece ao carregar a página ou resetar tudo.
-             await fetchAndApplyItemAvailability(); // Esta função também renderiza produtos principais e configura seus listeners (produtoPrincipal, payment, delivery)
+             await fetchAndApplyItemAvailability(); // Esta função busca os dados, renderiza produtos/sabores e configura seus listeners (produtoPrincipal, payment, delivery, copoFelicidadeFlavor)
 
              // Limpa todos os checkboxes e radios em todo o formulário VISUALMENTE
              // Os seletores de rádio e checkboxes já devem ter seus listeners configurados por fetchAndApplyItemAvailability
@@ -1656,11 +1638,7 @@
              btnAdd.disabled = true;
              btnFinish.disabled = true;
 
-             // Listeners para wantAdd, payment e delivery já foram configurados em fetchAndApplyItemAvailability().
-             // setupRadioListener('wantAdd', 'askAdd'); // Não precisa reconfigurar aqui
-             // setupRadioListener('payment', 'paymentSelected'); // Não precisa reconfigurar aqui
-             // setupRadioListener('delivery', 'deliverySelected'); // Não precisa reconfigurar aqui
-
+             // Listeners já configurados em fetchAndApplyItemAvailability().
              console.log("Formulário resetado e pronto para um novo pedido."); // Log para debug
          }
 
