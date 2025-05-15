@@ -216,7 +216,7 @@
   "produtos_especiais": [
     {
       "id": "copo_felicidade",
-      "name": "Copo da Felicidade",
+      "name": "Copo da Felicidade (300ml)",
       "description": "Sobremesa em camadas com sabores irresistíveis. Escolha seu sabor favorito!",
       "price": 12.00,
       "available": true,
