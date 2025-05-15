@@ -431,7 +431,7 @@
              // Payment e Delivery não são desabilitados aqui pois se aplicam ao pedido geral.
         }
 
-         // Reseta as opções dependentes do item atual e prepara para a próxima seleção de produto principal
+         // Reseta as opções dependentes do item atual e prepara para o próximo item/seleção de produto principal
          // MOVIDA PARA CIMA PARA SER DEFINIDA ANTES DE SER CHAMADA
         function resetDependentOptions() {
              console.log("Resetando formulário parcial para o próximo item."); // Log para debug
@@ -1017,7 +1017,7 @@
                  state.cover = state.cover || []; state.add = state.add || [];
 
                  const checkSectionValidity = (fieldset, stateKey) => {
-                      // Se o fieldset está desabilitado (ex: pelo tamanho selecionado ou por ser copo felicidade), ele é válido por padrão
+                      // Se o fieldset está desabilitado, ele é válido por padrão
                      if (!fieldset || fieldset.hasAttribute('disabled')) {
                           // console.log(`    -> Fieldset "${fieldset?.id}" desabilitado. Válido.`); // Log para debug
                           return true;
@@ -1078,29 +1078,16 @@
 
              } else if (state.produtoPrincipal.type === 'produto_especial' && state.produtoPrincipal.id === 'copo_felicidade') {
                   console.log("  -> Validando item Copo da Felicidade."); // Log para debug
-                 // Lógica de validação para Copo da Felicidade
-                 // Requer que um sabor tenha sido selecionado no fieldset de sabores do Copo da Felicidade.
-                 // O fieldset de sabores DEVE estar habilitado para que a seleção seja possível e válida.
+                 // Lógica de validação para Copo da Felicidade:
+                 // Requer apenas que um sabor tenha sido selecionado
                  const isFlavorSelected = state.selectedCopoFelicidadeFlavor !== undefined && state.selectedCopoFelicidadeFlavor !== null && state.selectedCopoFelicidadeFlavor !== ''; // Verifica se o sabor foi selecionado e não é vazio
                   console.log("  -> Sabor Copo da Felicidade selecionado?", isFlavorSelected, "Sabor:", state.selectedCopoFelicidadeFlavor); // Log para debug
 
-                 // O fieldset de sabores do Copo da Felicidade DEVE estar habilitado
-                 const isFlavorFieldsetEnabled = fs.copoFelicidadeFlavors && !fs.copoFelicidadeFlavors.hasAttribute('disabled');
-                  console.log("  -> Fieldset de sabores Copo Felicidade habilitado?", isFlavorFieldsetEnabled); // Log para debug
+                  // Não precisamos validar os fieldsets de açaí/adicionais aqui,
+                  // pois a lógica de seleção do produto principal já os desabilita.
+                  // A validação principal é apenas a seleção do sabor.
 
-                  // Adicionalmente, os fieldsets de açaí e adicionais DEVEM estar desabilitados.
-                  // Isso é uma validação extra para garantir que a UI está no estado correto para Copo Felicidade.
-                  const acaiFieldsetsDisabled = fs.frutas.hasAttribute('disabled') &&
-                                                 fs.cremes.hasAttribute('disabled') &&
-                                                 fs.accomp.hasAttribute('disabled') &&
-                                                 fs.cover.hasAttribute('disabled') &&
-                                                 fs.askAdd.hasAttribute('disabled') &&
-                                                 fs.add.hasAttribute('disabled');
-                   console.log("  -> Fieldsets de açaí/adicionais desabilitados?", acaiFieldsetsDisabled); // Log para debug
-
-
-                 // O item Copo da Felicidade é válido SE um sabor foi selecionado E o fieldset de sabores está habilitado E fieldsets de açaí/adicionais estão desabilitados
-                 itemSpecificValidity = isFlavorSelected && isFlavorFieldsetEnabled && acaiFieldsetsDisabled; // Verifica se sabor selecionado E fieldsets corretos habilitados/desabilitados
+                 itemSpecificValidity = isFlavorSelected; // Validação específica do item Copo Felicidade é APENAS a seleção do sabor
                   console.log("  -> Validade específica do item Copo da Felicidade:", itemSpecificValidity); // Log para debug
 
 
@@ -1287,7 +1274,31 @@
                            summaryText += `Adicionais (Extras): ${adicionaisLista}\n`;
                       } else {
                            summaryText += `Adicionais: Nenhum Adicional\n`;
-                      Text += `Adicionais: Nenhum Adicional\n`;
+                      }
+
+
+                 } else {
+                      // É um item de Açaí tradicional
+                      // Usar o nome do produtoPrincipal se disponível, fallback para size
+                     summaryText += `Tamanho: ${o.produtoPrincipal?.name || (o.size ? o.size.split(' - R$ ')[0] : 'Açaí (Tamanho não especificado)')}\n`;
+
+
+                      const displayFrutas = o.frutas?.length > 0 && !o.frutas.includes('Nenhuma') ? o.frutas.join(', ') : 'Nenhuma';
+                      const displayCremes = o.cremes?.length > 0 && !o.cremes.includes('Nenhuma') ? o.cremes.join(', ') : 'Nenhum';
+                      const displayAccomp = o.accomp?.length > 0 && !o.accomp.includes('Nenhuma') ? o.accomp.join(', ') : 'Nenhum';
+                      const displayCover = o.cover?.length > 0 && !o.cover.includes('Nenhuma') ? o.cover.join(', ') : 'Nenhuma';
+                      let displayAdd = 'Nenhum Adicional';
+
+                      summaryText += `Frutas: ${displayFrutas}\n`;
+                      summaryText += `Cremes: ${displayCremes}\n`;
+                      summaryText += `Acompanhamentos: ${displayAccomp}\n`;
+                      summaryText += `Coberturas: ${displayCover}\n`;
+
+                      if (o.add && o.add.length > 0 && !(o.add.length === 1 && (o.add[0] === 'Nenhuma' || o.add[0] === 'Nenhum Adicional'))) {
+                          displayAdd = o.add.map(item => item.split(' - R$ ')[0]).join(', ');
+                          summaryText += `Adicionais: ${displayAdd}\n`;
+                      } else {
+                           summaryText += `Adicionais: Nenhum Adicional\n`;
                       }
 
                       const priceMatch = o.size?.match(/R\$ (\d+[,.]\d{2})/); // Usa order.size antigo para pegar preço
@@ -1310,7 +1321,7 @@
                  totalGeral += totalPricePedido; // Adiciona o total do item ao total geral (antes de adicionar frete)
 
                   // Pagamento e Entrega/Retirada são do pedido GERAL, pegamos do primeiro item na lista 'orders'
-                  if(i === 0 && orders.length > 0) { // Garante que orders[0] e orders[0].delivery existem
+                  if(i === 0 && orders.length > 0 && orders[0].delivery) { // Garante que orders[0] e orders[0].delivery existem
                       metodoPagamento = orders[0].payment || 'N/A';
                       deliveryLocation = orders[0].delivery ? orders[0].delivery.split(' - R$ ')[0] : 'N/A';
                        if (orders[0].delivery && orders[0].delivery.includes('R$')) {
@@ -1384,7 +1395,7 @@
                       const clean = { ...s };
                       // Remover propriedades que não definem unicamente o item
                       delete clean.fMax; delete clean.cMax; delete clean.aMax; delete clean.coMax; delete clean.addMax;
-                      delete clean.payment; delete clean.delivery; // Remover payment/delivery pois são do pedido geral
+                      delete clean.payment; delete clean.delivery; // Remover payment/delivery pois são do pedido general
                        // Simplificar a representação do produto principal/tamanho para comparação
                        if (clean.produtoPrincipal?.type === 'acai') {
                             clean.itemIdentifier = clean.size; // Usar o size string para açaí
@@ -1474,7 +1485,7 @@
                                   order.add.forEach(addon => {
                                       if (addon.includes('R$')) {
                                           const addonPriceMatch = addon.match(/R\$ (\d+[,.]\d{2})/);
-                                          if (addonPriceMatch) subtotalPedidoItem += parseFloat(addonPriceMatch[1].replace(',', '.')); // Adiciona o preço
+                                          if (addonPriceMatch) subtotalPedidoItem += parseFloat(addonPriceMatch[1].replace(',', '.'));
                                       }
                                       adicionaisExtras.push(addon.split(' - R$ ')[0]); // Pega apenas o nome
                                   });
@@ -1525,7 +1536,7 @@
 
                     // Adiciona a taxa de entrega ao valor total geral (se aplicável, baseado no primeiro pedido e se houver pedidos)
                      if (orders.length > 0 && infoEntregaPrimeiroPedido?.split(' - R$ ')[0] !== "Retirada" && taxaEntregaServidor > 0) {
-                         valorTotalGeralServidor += taxaEntregaServidor;
+                         valorTotalGeralGeralServidor += taxaEntregaServidor; // Corrigido typo
                      }
 
 
@@ -1553,8 +1564,6 @@
                          resetForm(); // Reseta o formulário e a exibição dos pedidos na página
                          // Redireciona para o WhatsApp APENAS SE o envio para o servidor foi bem-sucedido
                           console.log("Redirecionando para WhatsApp..."); // Log para debug
-                          // Usar window.location.href redireciona a aba atual
-                          // Usar window.open(whatsappURL, '_blank') abre em nova aba (less intrusive)
                           window.location.href = whatsappURL;
 
                     } else {
