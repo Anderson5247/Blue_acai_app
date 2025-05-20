@@ -216,26 +216,29 @@
   "produtos_especiais": [
     {
       "id": "copo_felicidade",
-      "name": "Copo da Felicidade (300ml)",
-      "description": "Sobremesa em camadas com sabores irresistíveis. Escolha seu sabor favorito!",
-      "price": 12.00,
+      "name": "Copo da Felicidade",
+      "description": "Uma experiência única em camadas de sabor.",
+      "price": 10.00,
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
         {
-          "id": "ninho_escureto",
-          "name": "Ninho com Escureto",
-          "internal_description": "Creme de Ninho + Creme de Escureto (chocolate intenso)"
+          "id": "ninho",
+          "name": "Ninho",
+          "internal_description": "creme especial + creme de ninho",
+          "available": true
         },
         {
           "id": "floresta_negra",
           "name": "Floresta Negra",
-          "internal_description": "Creme Especial + Creme de Avelã"
+          "internal_description": "creme especial + floresta negra",
+          "available": true
         },
         {
-          "id": "doce_leite_chocolate_branco",
-          "name": "Doce de Leite com Chocolate Branco",
-          "internal_description": "Doce de leite + Creme de Chocolate Branco"
+          "id": "flocos",
+          "name": "Flocos Delícia",
+          "internal_description": "creme especial + flocos",
+          "available": true
         }
       ]
     }
