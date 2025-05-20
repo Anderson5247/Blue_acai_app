@@ -223,9 +223,9 @@
       "requires_flavor_selection": true,
       "flavors": [
         {
-          "id": "ninho",
-          "name": "Ninho",
-          "internal_description": "creme especial + creme de ninho",
+          "id": "escureto",
+          "name": "Escureto",
+          "internal_description": "creme especial + creme de escureto",
           "available": true
         },
         {
