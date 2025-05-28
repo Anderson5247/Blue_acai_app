@@ -219,8 +219,8 @@
       "name": "Copo da Felicidade",
       "description": "Uma experiência única em camadas de sabor.",
       "price": 10.00,
-      "available": true,
-      "requires_flavor_selection": false,
+      "available": false,
+      "requires_flavor_selection": true,
       "flavors": [
         {
           "id": "escureto",
