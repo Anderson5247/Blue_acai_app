@@ -57,7 +57,7 @@
     {
       "id": "amendoim_acomp",
       "name": "Amendoim",
-      "available": true
+      "available": false
     },
     {
       "id": "pacoca_acomp",
@@ -150,7 +150,7 @@
       "id": "amendoim_add",
       "name": "Amendoim (Adicional) - R$ 1.00",
       "originalValue": "Amendoim - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "pacoca_add",
