@@ -45,7 +45,7 @@
     {
       "id": "tutti_frutti_creme",
       "name": "Tutti Frutti (Creme)",
-      "available": false
+      "available": true
     },
     {
       "id": "chocolate_avela",
