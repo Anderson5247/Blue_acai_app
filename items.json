@@ -3,7 +3,7 @@
     {
       "id": "morango",
       "name": "Morango",
-      "available": false
+      "available": true
     },
     {
       "id": "banana",
