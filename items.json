@@ -109,7 +109,7 @@
     {
       "id": "leite_condensado_cob",
       "name": "Leite Condensado",
-      "available": false
+      "available": true
     },
     {
       "id": "tutti_frutti_cob",
