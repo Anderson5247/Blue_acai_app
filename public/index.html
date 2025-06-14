@@ -333,7 +333,11 @@
 
         <div id="summary" style="display: none;"></div>
     </main>
-
+    
+    <div id="shopClosedContainer" class="card" style="display: none; text-align: center; padding: 2rem; margin: 1rem auto; max-width: 800px;">
+        <h2>Estamos Fechados no Momento</h2>
+        <p id="closedMessageText" style="margin-top: 1rem; font-size: 1.1em; line-height: 1.6;"></p>
+    </div>
     <script>
         // --- SELETORES ---
         const fs = {
@@ -355,10 +359,7 @@
         };
         const boxProdutosPrincipais = document.getElementById('boxProdutosPrincipais');
         const boxCopoFelicidadeFlavors = document.getElementById('boxCopoFelicidadeFlavors');
-        // Os boxes para frutas, cremes, etc., não são mais necessários como seletores diretos aqui
-        // pois as seções são referenciadas por fs.frutas, fs.cremes, etc. (que são os fieldsets).
-        // Os IDs 'boxFrutas', 'boxCremes' etc., referem-se aos divs DENTRO dos fieldsets.
-
+        
         const btnAdd = document.getElementById('btnAdd');
         const btnFinish = document.getElementById('btnFinish');
         const btnCancel = document.getElementById('btnCancel');
@@ -369,6 +370,12 @@
         const pixInfoDiv = document.getElementById('pixInfo');
         const orderPageTotalValueEl = document.getElementById('orderPageTotalValue');
 
+        // --- NOVOS SELETORES ---
+        const formCard = document.querySelector('#formPedido').closest('.card');
+        const shopClosedContainer = document.getElementById('shopClosedContainer');
+        const closedMessageEl = document.querySelector('#shopClosedContainer #closedMessageText');
+
+
         let state = {};
         let orders = [];
         let allItemsData = {};
@@ -377,10 +384,9 @@
         const enable = el => {
             if (el) {
                 el.removeAttribute('disabled');
-                // Habilita pointer-events em labels dentro do fieldset, exceto se o input estiver desabilitado por disponibilidade
                 el.querySelectorAll('label').forEach(lbl => {
                      const input = lbl.querySelector('input');
-                     if (input && input.disabled) { // Input desabilitado por disponibilidade
+                     if (input && input.disabled) { 
                          lbl.style.pointerEvents = 'none';
                      } else {
                          lbl.style.pointerEvents = 'auto';
@@ -446,11 +452,6 @@
              updateCounter(cnt.accomp, 0, '?'); updateCounter(cnt.cover, 0, '?');
              updateCounter(cnt.add, 0, 14);
              
-             // Visualmente, o produto principal não é desmarcado aqui,
-             // mas o estado (state.produtoPrincipal) foi limpo. A UI é atualizada quando outro é selecionado.
-             // clearRadios('produtoPrincipal'); // Descomentar se quiser desmarcar visualmente o produto
-             // document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected')); // Descomentar se quiser remover a borda
-
              enable(fs.produtoPrincipal);
              btnAdd.disabled = true;
              btnFinish.disabled = orders.length === 0;
@@ -465,11 +466,10 @@
             }
 
             const noneAddValue = 'Nenhum Adicional';
-            const noneValue = 'Nenhuma'; // Usado para frutas, cremes etc.
+            const noneValue = 'Nenhuma'; 
 
             if (state.produtoPrincipal.type === 'acai') {
                 console.log("  -> Validando Açaí.");
-                // Garante que os arrays de estado existam
                 state.frutas = state.frutas || []; state.cremes = state.cremes || [];
                 state.accomp = state.accomp || []; state.cover = state.cover || [];
                 state.add = state.add || [];
@@ -482,9 +482,8 @@
                     const itemsSelected = state[stateKey];
                     if (!itemsSelected || itemsSelected.length === 0) {
                         console.log(`    -> Fieldset "${sectionName}" habilitado, mas nenhum item selecionado no estado.`);
-                        return false; // Nenhuma seleção, incluindo "Nenhuma", é inválido.
+                        return false; 
                     }
-                    // Verifica se "Nenhuma" está selecionada junto com outros itens
                     const noneOptionValue = stateKey === 'add' ? noneAddValue : noneValue;
                     if (itemsSelected.includes(noneOptionValue) && itemsSelected.length > 1) {
                         console.log(`    -> Fieldset "${sectionName}" habilitado, "${noneOptionValue}" selecionado com outros itens.`);
@@ -500,15 +499,14 @@
                 const coverOk = checkSectionValidity(fs.cover, 'cover', 'Coberturas');
 
                 let addOk = true;
-                if (fs.askAdd && !fs.askAdd.hasAttribute('disabled')) { // Se a pergunta sobre adicionais está habilitada
+                if (fs.askAdd && !fs.askAdd.hasAttribute('disabled')) { 
                     if (state.wantAdd === undefined) {
                         console.log("    -> Escolha Sim/Não para adicionais pendente.");
-                        return false; // Obrigatório selecionar Sim ou Não
+                        return false; 
                     }
                     if (state.wantAdd === 'Sim') {
                         addOk = checkSectionValidity(fs.add, 'add', 'Adicionais');
                     }
-                    // Se 'Não', addOk permanece true (nenhum adicional é uma escolha válida)
                 }
                 const isValid = frutasOk && cremesOk && accompOk && coverOk && addOk;
                 console.log("  -> Validade do Açaí:", isValid, `{frutas: ${frutasOk}, cremes: ${cremesOk}, accomp: ${accompOk}, cover: ${coverOk}, add: ${addOk}}`);
@@ -520,8 +518,6 @@
                                          state.selectedCopoFelicidadeFlavor !== null &&
                                          state.selectedCopoFelicidadeFlavor !== '';
                 console.log("  -> Sabor selecionado?", isFlavorSelected, "Sabor:", state.selectedCopoFelicidadeFlavor);
-                // Se o Copo da Felicidade pudesse ter adicionais, a lógica seria aqui.
-                // Por ora, apenas a seleção do sabor é obrigatória.
                 return isFlavorSelected;
             } else {
                 console.warn("  -> Tipo de produto desconhecido:", state.produtoPrincipal);
@@ -540,6 +536,24 @@
                 allItemsData = await response.json();
                 console.log("fetchAndApplyItemAvailability: Dados recebidos:", allItemsData);
 
+                // --- INÍCIO DA MODIFICAÇÃO PARA VERIFICAR STATUS DA LOJA ---
+                if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
+                    console.log("Loja está fechada. Exibindo mensagem.");
+                    if (formCard) formCard.style.display = 'none';
+                    if (ordersSec) ordersSec.style.display = 'none';
+                    
+                    if (shopClosedContainer && closedMessageEl) {
+                        closedMessageEl.innerText = allItemsData.shopInfo.closedMessage;
+                        shopClosedContainer.style.display = 'block';
+                    }
+                    return; // Interrompe a execução para não carregar o cardápio
+                }
+
+                // Se a loja estiver aberta, garante que o cardápio está visível e a mensagem escondida
+                if (formCard) formCard.style.display = 'block';
+                if (shopClosedContainer) shopClosedContainer.style.display = 'none';
+                // --- FIM DA MODIFICAÇÃO ---
+
                 const produtosEspeciais = allItemsData.produtos_especiais || [];
                 copoFelicidadeData = produtosEspeciais.find(item => item.id === 'copo_felicidade');
 
@@ -550,7 +564,6 @@
                     const checkboxes = fieldsetElement.querySelectorAll('input[type="checkbox"]');
                     checkboxes.forEach(checkbox => {
                         const itemId = checkbox.dataset.itemId;
-                        // Para opções "Nenhuma", não há data-item-id, então pulamos
                         if (!itemId && !checkbox.value.toLowerCase().includes("nenhum")) return;
 
                         let itemData = null;
@@ -559,7 +572,7 @@
                         }
                         
                         const label = checkbox.closest('label');
-                        if (itemData) { // Se for um item específico (não "Nenhuma")
+                        if (itemData) { 
                             if (!itemData.available) {
                                 checkbox.disabled = true;
                                 checkbox.checked = false;
@@ -572,7 +585,6 @@
                                 }
                             }
                         } else if (checkbox.value.toLowerCase().includes("nenhum")) {
-                            // Opção "Nenhuma" sempre habilitada, a menos que a seção toda esteja desabilitada
                             checkbox.disabled = false;
                              if (label) { label.classList.remove('disabled-item'); label.title = '';}
                         }
@@ -682,13 +694,11 @@
                     document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected'));
                     e.target.closest('.produto-card:not(.disabled-item)')?.classList.add('selected');
 
-                    // Salva payment e delivery se já existirem no estado, antes de resetar o resto
                     const savedPayment = state.payment;
                     const savedDelivery = state.delivery;
 
                     resetPartialForItemSelection(); 
 
-                    // Restaura payment e delivery ao estado para o novo item
                     state.payment = savedPayment;
                     state.delivery = savedDelivery;
                     if (state.payment) document.querySelector(`input[name="payment"][value="${state.payment}"]`)?.closest('label')?.classList.add('selected-radio');
@@ -717,7 +727,6 @@
                         disable(fs.copoFelicidadeFlavors);
                         clearRadios('copoFelicidadeFlavor'); state.selectedCopoFelicidadeFlavor = undefined;
 
-                        // Passa o elemento fieldset diretamente para setupChecks
                         setupChecks(fs.frutas, fMax, 'frutas');
                         setupChecks(fs.cremes, cMax, 'cremes');
                         setupChecks(fs.accomp, aMax, 'accomp');
@@ -728,7 +737,6 @@
                         console.log(" -> Tipo: Copo da Felicidade. Configurando sabores.");
                         disableAllAcaiAndAddonFieldsets(); 
                         enable(fs.copoFelicidadeFlavors); 
-                        // A seção de adicionais NÃO é habilitada aqui para o Copo da Felicidade
                     } else {
                         disableAllAcaiAndAddonFieldsets();
                         disable(fs.copoFelicidadeFlavors);
@@ -774,8 +782,8 @@
               console.log(`setupRadioListener: Concluído para "${name}".`);
          }
 
-        function setupChecks(fieldsetElement, max, key) { // Recebe o fieldsetElement
-             const box = fieldsetElement.querySelector('.grid-2'); // Encontra o div .grid-2 dentro do fieldset
+        function setupChecks(fieldsetElement, max, key) { 
+             const box = fieldsetElement.querySelector('.grid-2'); 
              if (!box) { console.error(`Div .grid-2 não encontrado em fieldset para "${key}"`); return; }
              console.log(`setupChecks: Configurando para "${key}" (max: ${max}) em fieldset ${fieldsetElement.id}`);
              
@@ -790,13 +798,10 @@
                  return chk && !chk.disabled;
              });
              
-             // MODIFICAÇÃO IMPORTANTE:
-             // Se a seção (fieldset) NÃO está desabilitada, E o estado para ela está vazio,
-             // E a opção "Nenhuma" existe e está habilitada, marca "Nenhuma" como padrão.
              if (fieldsetElement && !fieldsetElement.hasAttribute('disabled')) {
                  if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
                      noneCheckbox.checked = true;
-                     state[key] = [noneValue]; // Atualiza o estado
+                     state[key] = [noneValue]; 
                      console.log(`    -> Opção "${noneValue}" para "${key}" marcada como padrão.`);
                  }
              }
@@ -918,8 +923,7 @@
 
                 if (orderItem.produtoPrincipal?.type === 'produto_especial' && orderItem.produtoPrincipal?.id === 'copo_felicidade') {
                     itemDetailsHtml += `Sabor: ${orderItem.selectedCopoFelicidadeFlavor || 'Não especificado'}`;
-                    // Note: Adicionais para Copo da Felicidade foram desabilitados na seleção
-                } else { // Açaí
+                } else { 
                     const displayFrutas = orderItem.frutas?.length > 0 && !orderItem.frutas.includes('Nenhuma') ? orderItem.frutas.join(', ') : 'Nenhuma';
                     const displayCremes = orderItem.cremes?.length > 0 && !orderItem.cremes.includes('Nenhuma') ? orderItem.cremes.join(', ') : 'Nenhum';
                     const displayAccomp = orderItem.accomp?.length > 0 && !orderItem.accomp.includes('Nenhuma') ? orderItem.accomp.join(', ') : 'Nenhum';
@@ -1030,8 +1034,8 @@
                 if (savedDelivery) document.querySelector(`input[name="delivery"][value="${savedDelivery}"]`)?.closest('label')?.classList.add('selected-radio');
                 if (pixInfoDiv && state.payment === 'Pix') pixInfoDiv.classList.remove('hidden'); else if (pixInfoDiv) pixInfoDiv.classList.add('hidden');
                 
-                document.querySelectorAll('.produto-card.selected').forEach(card => card.classList.remove('selected')); // Desmarca card do produto
-                clearRadios('produtoPrincipal'); // Desmarca radio do produto
+                document.querySelectorAll('.produto-card.selected').forEach(card => card.classList.remove('selected'));
+                clearRadios('produtoPrincipal');
 
                 checkIfCanFinish();
             } else {
@@ -1133,7 +1137,7 @@
             if (!orderState) return null;
             const clean = { ...orderState };
             delete clean.fMax; delete clean.cMax; delete clean.aMax; delete clean.coMax; delete clean.addMax;
-            delete clean.payment; delete clean.delivery; // Compara apenas o item em si
+            delete clean.payment; delete clean.delivery;
             return clean;
         }
 
@@ -1158,7 +1162,7 @@
              });
              disable(fs.copoFelicidadeFlavors);
              
-             await fetchAndApplyItemAvailability(); // Re-busca dados e configura disponibilidade/listeners
+             await fetchAndApplyItemAvailability();
              
              updateCounter(cnt.frutas, 0, '?'); updateCounter(cnt.cremes, 0, '?');
              updateCounter(cnt.accomp, 0, '?'); updateCounter(cnt.cover, 0, '?');
