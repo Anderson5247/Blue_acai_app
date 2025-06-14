@@ -95,7 +95,12 @@
         let allItemsData = {};
 
         const qs = (selector) => document.querySelector(selector);
+        const qsa = (selector) => document.querySelectorAll(selector);
         
+        const enable = el => { if (el) el.disabled = false; };
+        const disable = el => { if (el) el.disabled = true; };
+        const updateCounter = (element, count, max) => { if (element) element.textContent = `( ${count} / ${max ?? '?'} )`; };
+
         function updateButtonStates() {
             const itemValid = validateCurrentItem();
             const finalFieldsValid = !!state.payment && !!state.delivery;
@@ -169,52 +174,76 @@
         
         function generateSummaryText() {
             let totalGeral = 0;
+            const itemsPayload = [];
             let adminText = "Blue Açaí - Novo Pedido!\n\n";
+
             orders.forEach((order, i) => {
                 let subTotal = order.produtoPrincipal.price;
+                const itemPayload = { produto: order.produtoPrincipal.name, tipo: order.produtoPrincipal.type };
+                
                 adminText += `*Item ${i + 1}:* ${order.produtoPrincipal.name}\n`;
+
                 if(order.produtoPrincipal.type === 'acai') {
                     const formatList = (list) => (list && !list.includes('Nenhuma') && !list.includes('Nenhum Adicional')) ? list.join(', ') : 'Nenhum';
-                    adminText += `*Frutas:* ${formatList(order.frutas)}\n`;
-                    adminText += `*Cremes:* ${formatList(order.cremes)}\n`;
-                    adminText += `*Acompanhamentos:* ${formatList(order.accomp)}\n`;
-                    adminText += `*Coberturas:* ${formatList(order.cover)}\n`;
+                    itemPayload.frutas = formatList(order.frutas);
+                    itemPayload.cremes = formatList(order.cremes);
+                    itemPayload.acompanhamentos = formatList(order.accomp);
+                    itemPayload.coberturas = formatList(order.cover);
+
+                    adminText += `*Frutas:* ${itemPayload.frutas}\n`;
+                    adminText += `*Cremes:* ${itemPayload.cremes}\n`;
+                    adminText += `*Acompanhamentos:* ${itemPayload.acompanhamentos}\n`;
+                    adminText += `*Coberturas:* ${itemPayload.coberturas}\n`;
+
                     if (order.wantAdd === 'Sim' && order.add && !order.add.includes('Nenhum Adicional')) {
                         order.add.forEach(() => subTotal += 1.00);
                         const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
-                        adminText += `*Adicionais:* *${formattedAdicionais}*\n`;
+                        itemPayload.adicionais = formattedAdicionais;
+                        adminText += `*Adicionais:* *${itemPayload.adicionais}*\n`;
                     } else {
-                        adminText += `*Adicionais:* Nenhum\n`;
+                        itemPayload.adicionais = 'Nenhum';
+                        adminText += `*Adicionais:* ${itemPayload.adicionais}\n`;
                     }
                 } else if (order.produtoPrincipal.type === 'produto_especial') {
-                    adminText += `*Sabor:* ${order.selectedFlavor || 'N/A'}\n`;
+                    itemPayload.sabor = order.selectedFlavor || 'N/A';
+                    adminText += `*Sabor:* ${itemPayload.sabor}\n`;
                 }
+
                 adminText += '\n'; 
+                itemPayload.totalPedido = subTotal.toFixed(2);
+                itemsPayload.push(itemPayload);
                 totalGeral += subTotal;
             });
+            
             const deliveryFeeMatch = state.delivery?.match(/R\$ (\d+[.,]\d{2})/);
             const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
             totalGeral += deliveryFee;
+
             adminText = adminText.trimEnd();
             adminText += `\n\n------------------------------\n`;
             adminText += `*Pagamento:* ${state.payment}\n`;
             adminText += `*Entrega/Retirada:* <span class="math-inline">\{state\.delivery\.split\(' \- R</span>')[0]}\n`;
             if (deliveryFee > 0) adminText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
             adminText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n`;
-            const payloadForServer = { pedidoCompleto: orders.map(o => ({...o})), valorTotal: totalGeral, metodoPagamento: state.payment, tipoEntrega: state.delivery, resumoParaAdmin: adminText };
+            
+            const payloadForServer = { pedidoCompleto: itemsPayload, valorTotal: totalGeral, metodoPagamento: state.payment, tipoEntrega: state.delivery, resumoParaAdmin: adminText };
             return { admin: adminText, payload: payloadForServer };
         }
 
         function setupListeners() {
             const form = qs('#formPedido');
+
             const setupCheckListeners = (fieldset, max, key) => {
                 const newBox = fieldset.querySelector('.grid-2').cloneNode(true);
                 fieldset.querySelector('.grid-2').parentNode.replaceChild(newBox, fieldset.querySelector('.grid-2'));
+                
                 const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
+                
                 state[key] = [];
                 if (noneCheckbox && !noneCheckbox.disabled) { noneCheckbox.checked = true; state[key].push(noneCheckbox.value); }
                 updateCounter(fieldset.querySelector('.counter'), 0, max);
+                
                 newBox.addEventListener('change', e => {
                     if (e.target.type !== 'checkbox') return;
                     const chk = e.target;
@@ -243,14 +272,17 @@
             form.addEventListener('change', e => {
                 const target = e.target;
                 if (target.type !== 'radio') return;
+                
                 const name = target.name;
                 qsa(`input[name="${name}"]`).forEach(r => r.closest('label')?.classList.remove('selected-radio', 'selected'));
                 target.closest('label')?.classList.add('selected-radio', 'selected');
 
                 if (name === 'produtoPrincipal') {
                     Object.keys(state).forEach(key => { if(key !== 'payment' && key !== 'delivery') delete state[key]; });
+                    
                     const acaiFieldsets = [qs('#fsFrutas'), qs('#fsCremes'), qs('#fsAccomp'), qs('#fsCoverage'), qs('#fsAskAdd'), qs('#fsAdd')];
                     const specialFieldsets = qsa('.special-flavors-fs');
+
                     const selectedCard = target.closest('.produto-card');
                     const { productType, productId, price } = selectedCard.dataset;
                     state.produtoPrincipal = { type: productType, id: productId, name: target.value, price: parseFloat(price) };
@@ -258,6 +290,7 @@
                     if (productType === 'acai') {
                         specialFieldsets.forEach(disable);
                         acaiFieldsets.forEach(enable);
+                        
                         let limits = {};
                         if (productId === 'size-300') limits = { f: 1, c: 1, a: 3, co: 1 };
                         else if (productId === 'size-500') limits = { f: 2, c: 2, a: 3, co: 1 };
@@ -375,13 +408,14 @@
                 }
                 
                 const renderOptionsHTML = (items, type, name) => 
-                    items.map(item => `
-                        <label class="<span class="math-inline">\{\!item\.available ? 'disabled\-item' \: ''\}"\>
-<input type\="</span>{type}" name="<span class="math-inline">\{name\}" value\="</span>{item.name}" data-item-id="${item.id}" ${!item.available ? 'disabled' : ''} />
+                    items.map(item => {
+                        const value = item.originalValue || item.name;
+                        return `<label class="<span class="math-inline">\{\!item\.available ? 'disabled\-item' \: ''\}"\>
+<input type\="</span>{type}" name="<span class="math-inline">\{name\}" value\="</span>{value}" data-item-id="${item.id}" ${!item.available ? 'disabled' : ''} />
                             <span class="math-inline">\{item\.name\.split\(' \- R</span>')[0]} <span class="math-inline">\{type \=\=\= 'checkbox' && item\.name\.includes\('R</span>') ? ` - R$ ${item.name.split(' - R$')[1]}`:''}
-                        </label>
-                    `).join('');
-                
+                        </label>`
+                    }).join('');
+
                 ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(cat => {
                     const container = qs(`#box${cat.charAt(0).toUpperCase() + cat.slice(1)}`);
                     if (container) container.innerHTML = renderOptionsHTML(allItemsData[cat], 'checkbox', `${cat}[]`);
@@ -427,3 +461,4 @@
 </body>
 </html>
 }
+Quais foram as principais causas dos erros?
