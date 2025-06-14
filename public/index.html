@@ -175,18 +175,37 @@
         #ordersList li {
             margin-bottom: .75rem;
             list-style: none;
-            padding-left: 1.5rem;
-            position: relative;
+            padding: 0.5rem;
             border-bottom: 1px dashed #eee;
-            padding-bottom: 0.5rem;
+            position: relative;
         }
-
-        #ordersList li::before {
-            content: '🍦';
-            position: absolute;
-            left: 0;
-            top: 0;
-            font-size: 0.9em;
+        
+        /* NOVO: Estilo para o container do item no pedido */
+        .order-item-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .order-item-details {
+            flex-grow: 1;
+        }
+        
+        /* NOVO: Estilo para o botão de repetir */
+        .repeat-item-btn {
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            background-color: var(--light-purple);
+            color: var(--purple);
+            border: 1px solid var(--purple);
+            border-radius: 5px;
+            cursor: pointer;
+            flex-shrink: 0; /* Impede que o botão encolha */
+            transition: background-color 0.2s;
+        }
+        .repeat-item-btn:hover {
+            background-color: var(--purple);
+            color: #fff;
         }
 
         .produtos-opcoes { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
@@ -343,7 +362,7 @@
 
 
     <script>
-        // --- SELETORES ---
+        // --- SELETORES GLOBAIS ---
         const fs = {
             produtoPrincipal: document.getElementById('fsProdutoPrincipal'),
             specialFlavorFieldsets: document.querySelectorAll('.special-flavors-fs'),
@@ -364,17 +383,14 @@
             add: document.getElementById('cntAdd')
         };
         const boxProdutosPrincipais = document.getElementById('boxProdutosPrincipais');
-        
         const btnAdd = document.getElementById('btnAdd');
         const btnFinish = document.getElementById('btnFinish');
         const btnCancel = document.getElementById('btnCancel');
         const ordersSec = document.getElementById('ordersSection');
         const ordersList = document.getElementById('ordersList');
-        const summaryEl = document.getElementById("summary");
         const form = document.getElementById('formPedido');
         const pixInfoDiv = document.getElementById('pixInfo');
         const orderPageTotalValueEl = document.getElementById('orderPageTotalValue');
-
         const formCard = document.querySelector('#formPedido').closest('.card');
         const shopClosedContainer = document.getElementById('shopClosedContainer');
         const closedMessageEl = document.querySelector('#shopClosedContainer #closedMessageText');
@@ -384,119 +400,74 @@
         let allItemsData = {};
 
         // --- FUNÇÕES UTILITÁRIAS ---
-        const enable = el => {
-            if (el) {
-                el.removeAttribute('disabled');
-                el.querySelectorAll('label').forEach(lbl => {
-                     const input = lbl.querySelector('input');
-                     if (!input || !input.disabled) {
-                         lbl.style.pointerEvents = 'auto';
-                     }
-                });
-            }
-        };
-        const disable = el => {
-            if (el) {
-                el.setAttribute('disabled', '');
-                el.querySelectorAll('label').forEach(lbl => lbl.style.pointerEvents = 'none');
-            }
-        };
-        const clearCheckboxes = fieldset => {
-             if (fieldset) fieldset.querySelectorAll('input[type="checkbox"]').forEach(chk => chk.checked = false);
-        };
+        const enable = el => { if (el) el.removeAttribute('disabled'); };
+        const disable = el => { if (el) el.setAttribute('disabled', ''); };
+        const clearCheckboxes = fieldset => { if (fieldset) fieldset.querySelectorAll('input[type="checkbox"]').forEach(chk => chk.checked = false); };
         const clearRadios = name => {
             document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
                 r.checked = false;
                 r.closest('label')?.classList.remove('selected-radio');
             });
         };
-        const updateCounter = (element, count, max) => {
-             if (element) element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
-        };
+        const updateCounter = (element, count, max) => { if (element) element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`; };
 
         // --- LÓGICA DE ESTADO E FORMULÁRIO ---
-        function disableAllAcaiAndAddonFieldsets() {
+        function disableAllAcaiOptions() {
              [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add].forEach(f => {
                 disable(f);
                 clearCheckboxes(f);
              });
-             state.frutas = []; updateCounter(cnt.frutas, 0, '?');
-             state.cremes = []; updateCounter(cnt.cremes, 0, '?');
-             state.accomp = []; updateCounter(cnt.accomp, 0, '?');
-             state.cover = []; updateCounter(cnt.cover, 0, '?');
-             state.add = []; updateCounter(cnt.add, 0, 14);
-             state.wantAdd = undefined; clearRadios('wantAdd');
         }
 
-        function resetPartialForItemSelection() {
+        function resetCurrentItemState() {
              state = {
                 payment: state.payment,
                 delivery: state.delivery
              };
-            
-            disableAllAcaiAndAddonFieldsets();
+            disableAllAcaiOptions();
             fs.specialFlavorFieldsets.forEach(f => disable(f));
-
             enable(fs.produtoPrincipal);
             btnAdd.disabled = true;
             btnFinish.disabled = orders.length === 0;
         }
 
-        async function resetForm() {
+        async function resetFullForm() {
              state = {};
              orders = [];
              renderOrders();
              if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
              form.reset();
-             document.querySelectorAll('.selected-radio, .produto-card.selected').forEach(el => el.classList.remove('selected', 'selected-radio'));
-             
+             document.querySelectorAll('.selected-radio, .produto-card.selected').forEach(el => el.classList.remove('selected-radio', 'selected'));
              await fetchAndApplyItemAvailability();
-             
              btnAdd.disabled = true; 
              btnFinish.disabled = true;
         }
 
         // --- LÓGICA DE VALIDAÇÃO ---
-        function validateCurrentOrderItem() {
-            if (!state.produtoPrincipal || !state.produtoPrincipal.type) return false;
-
-            if (state.produtoPrincipal.type === 'acai') {
-                const checkSection = (fieldset, stateKey, noneValue) => {
-                    if (fieldset.hasAttribute('disabled')) return true;
-                    const items = state[stateKey];
-                    if (!items || items.length === 0) return false;
-                    if (items.includes(noneValue) && items.length > 1) return false;
-                    return true;
+        function validateCurrentItem() {
+            if (!state.produtoPrincipal) return false;
+            const { type, id } = state.produtoPrincipal;
+            if (type === 'acai') {
+                const checkSection = (stateKey) => {
+                    const items = state[stateKey] || [];
+                    const noneValue = stateKey === 'add' ? 'Nenhum Adicional' : 'Nenhuma';
+                    return items.length > 0 && !(items.includes(noneValue) && items.length > 1);
                 };
-
-                const frutasOk = checkSection(fs.frutas, 'frutas', 'Nenhuma');
-                const cremesOk = checkSection(fs.cremes, 'cremes', 'Nenhuma');
-                const accompOk = checkSection(fs.accomp, 'accomp', 'Nenhuma');
-                const coverOk = checkSection(fs.cover, 'cover', 'Nenhuma');
-
-                let addOk = true;
-                if (!fs.askAdd.hasAttribute('disabled')) {
-                    if (state.wantAdd === undefined) return false;
-                    if (state.wantAdd === 'Sim') addOk = checkSection(fs.add, 'add', 'Nenhum Adicional');
-                }
-                return frutasOk && cremesOk && accompOk && coverOk && addOk;
-            } 
-            
-            if (state.produtoPrincipal.type === 'produto_especial') {
-                const productData = allItemsData.produtos_especiais.find(p => p.id === state.produtoPrincipal.id);
-                if (productData && productData.requires_flavor_selection) return !!state.selectedFlavor;
-                return true;
+                if (!fs.askAdd.disabled && state.wantAdd === undefined) return false;
+                return checkSection('frutas') && checkSection('cremes') && checkSection('accomp') && checkSection('cover') && (state.wantAdd === 'Não' || checkSection('add'));
+            }
+            if (type === 'produto_especial') {
+                const productData = allItemsData.produtos_especiais.find(p => p.id === id);
+                return !productData.requires_flavor_selection || !!state.selectedFlavor;
             }
             return false;
         }
 
-        function checkIfCanFinish() {
-            const itemValid = validateCurrentOrderItem();
-            const paymentSelected = !!state.payment;
-            const deliverySelected = !!state.delivery;
-            
-            btnAdd.disabled = !(itemValid && paymentSelected && deliverySelected);
-            btnFinish.disabled = (orders.length === 0 && btnAdd.disabled) || (!paymentSelected || !deliverySelected);
+        function updateButtonStates() {
+            const itemValid = validateCurrentItem();
+            const finalFieldsValid = !!state.payment && !!state.delivery;
+            btnAdd.disabled = !(itemValid && finalFieldsValid);
+            btnFinish.disabled = orders.length === 0 && btnAdd.disabled;
         }
 
         // --- RENDERIZAÇÃO E SETUP DE LISTENERS ---
@@ -518,24 +489,8 @@
                 formCard.style.display = 'block';
                 if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-                renderProdutosPrincipais();
-                
-                const updateCheckboxDisplay = (categoryKey, fieldsetElement) => {
-                    if (!allItemsData[categoryKey] || !fieldsetElement) return;
-                    const checkboxes = fieldsetElement.querySelectorAll('input[type="checkbox"]');
-                    checkboxes.forEach(checkbox => {
-                        const itemId = checkbox.dataset.itemId;
-                        if (!itemId) return; // Pula a opção "Nenhuma"
-                        const itemData = allItemsData[categoryKey].find(item => item.id === itemId);
-                        if (itemData) {
-                            checkbox.disabled = !itemData.available;
-                            checkbox.closest('label').classList.toggle('disabled-item', !itemData.available);
-                        }
-                    });
-                };
-                ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(key => updateCheckboxDisplay(key, fs[key] || document.getElementById('fs' + key.charAt(0).toUpperCase() + key.slice(1))));
-
-                setupAllListeners();
+                renderMainProducts();
+                setupListeners();
                 enable(fs.payment);
                 enable(fs.delivery);
             } catch (error) {
@@ -544,7 +499,7 @@
             }
         }
 
-        function renderProdutosPrincipais() {
+        function renderMainProducts() {
              if (!boxProdutosPrincipais) return;
              boxProdutosPrincipais.innerHTML = '';
              const acaiProducts = [
@@ -571,182 +526,150 @@
              (allItemsData.produtos_especiais || []).forEach(prod => boxProdutosPrincipais.innerHTML += renderCard(prod, 'produto_especial'));
         }
 
-        function renderSpecialProductFlavors(productData) {
-            const fieldset = document.getElementById(`fs-${productData.id}`);
-            const targetBox = document.getElementById(`box-${productData.id}`);
-            if (!fieldset || !targetBox) return;
+        function setupListeners() {
+            form.addEventListener('change', e => {
+                if (e.target.type !== 'radio') return;
+                
+                const name = e.target.name;
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label').classList.remove('selected-radio', 'selected'));
+                const parentLabel = e.target.closest('label');
+                if (parentLabel) parentLabel.classList.add('selected-radio', 'selected');
 
-            targetBox.innerHTML = '';
-            productData.flavors.forEach(flavor => {
-                targetBox.innerHTML += `
-                    <label class="${!flavor.available ? 'disabled-item' : ''}">
-                        <input type="radio" name="flavor-${productData.id}" value="${flavor.name}" ${!flavor.available ? 'disabled' : ''} />
-                        <span>${flavor.name}</span>
-                        ${flavor.internal_description ? `<small>(${flavor.internal_description})</small>` : ''}
-                    </label>`;
-            });
-            enable(fieldset);
-        }
-
-        function setupAllListeners() {
-            // Listener para Produtos Principais
-            document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
-                 radio.addEventListener('change', (e) => {
-                    document.querySelectorAll('.produto-card.selected').forEach(l => l.classList.remove('selected'));
-                    e.target.closest('label').classList.add('selected');
-                    
-                    resetPartialForItemSelection();
-
+                if (name === 'produtoPrincipal') {
+                    resetCurrentItemState();
                     const selectedCard = e.target.closest('.produto-card');
                     const productType = selectedCard.dataset.productType;
                     const productId = selectedCard.dataset.productId;
-                    const productPrice = parseFloat(selectedCard.dataset.price);
-
-                    state.produtoPrincipal = { type: productType, name: e.target.value, price: productPrice, id: productId };
+                    state.produtoPrincipal = { type: productType, name: e.target.value, price: parseFloat(selectedCard.dataset.price), id: productId };
                     
                     if (productType === 'acai') {
                         let limits = {};
                         if (productId === 'size-300') limits = { f: 1, c: 1, a: 3, co: 1 };
                         else if (productId === 'size-500') limits = { f: 2, c: 2, a: 3, co: 1 };
                         else if (productId === 'size-1L') limits = { f: 3, c: 3, a: 4, co: 2 };
-                        state.fMax = limits.f; state.cMax = limits.c; state.aMax = limits.a; state.coMax = limits.co;
                         
                         [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd].forEach(enable);
-                        setupChecks(fs.frutas, limits.f, 'frutas');
-                        setupChecks(fs.cremes, limits.c, 'cremes');
-                        setupChecks(fs.accomp, limits.a, 'accomp');
-                        setupChecks(fs.cover, limits.co, 'cover');
+                        setupCheckListeners(fs.frutas, limits.f, 'frutas');
+                        setupCheckListeners(fs.cremes, limits.c, 'cremes');
+                        setupCheckListeners(fs.accomp, limits.a, 'accomp');
+                        setupCheckListeners(fs.cover, limits.co, 'cover');
                     } else if (productType === 'produto_especial') {
                         const productData = allItemsData.produtos_especiais.find(p => p.id === productId);
-                        if (productData && productData.requires_flavor_selection) {
-                            renderSpecialProductFlavors(productData);
+                        if (productData?.requires_flavor_selection) {
+                            const fieldset = document.getElementById(`fs-${productId}`);
+                            const targetBox = document.getElementById(`box-${productId}`);
+                            if (fieldset && targetBox) {
+                                targetBox.innerHTML = productData.flavors.map(flavor => `
+                                    <label class="${!flavor.available ? 'disabled-item' : ''}">
+                                        <input type="radio" name="flavor-${productId}" value="${flavor.name}" ${!flavor.available ? 'disabled' : ''} />
+                                        <span>${flavor.name}</span>
+                                        ${flavor.internal_description ? `<small>(${flavor.internal_description})</small>` : ''}
+                                    </label>`).join('');
+                                enable(fieldset);
+                            }
                         }
                     }
-                    checkIfCanFinish();
-                 });
+                } else if (name.startsWith('flavor-')) {
+                    state.selectedFlavor = e.target.value;
+                } else if (name === 'wantAdd') {
+                    state.wantAdd = e.target.value;
+                    state.wantAdd === 'Sim' ? enable(fs.add) : disable(fs.add);
+                    if (state.wantAdd === 'Sim') setupCheckListeners(fs.add, 14, 'add');
+                } else if (name === 'payment' || name === 'delivery') {
+                    state[name] = e.target.value;
+                    if (name === 'payment') pixInfoDiv.classList.toggle('hidden', e.target.value !== 'Pix');
+                }
+                updateButtonStates();
             });
 
-            // Listeners para checkboxes de Açaí
-            const setupChecks = (fieldset, max, key) => {
-                const originalBox = fieldset.querySelector('.grid-2');
-                const newBox = originalBox.cloneNode(true);
-                originalBox.parentNode.replaceChild(newBox, originalBox);
+            function setupCheckListeners(fieldset, max, key) {
+                const newBox = fieldset.querySelector('.grid-2').cloneNode(true);
+                fieldset.querySelector('.grid-2').parentNode.replaceChild(newBox, fieldset.querySelector('.grid-2'));
                 
                 const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
                 
                 state[key] = [];
-                if (noneCheckbox) {
-                    noneCheckbox.checked = true;
-                    state[key].push(noneCheckbox.value);
-                }
+                if (noneCheckbox) { noneCheckbox.checked = true; state[key].push(noneCheckbox.value); }
                 updateCounter(cnt[key], 0, max);
                 
-                checkboxes.forEach(chk => {
-                    chk.addEventListener('change', () => {
-                        if (chk === noneCheckbox && chk.checked) {
-                            checkboxes.forEach(other => { if(other !== chk) other.checked = false; });
-                        } else if(chk.checked && noneCheckbox) {
-                            noneCheckbox.checked = false;
-                        }
-
-                        state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
-                        let count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
-
-                        if (count > max) {
-                            chk.checked = false;
-                            alert(`Máximo de ${max} opções para esta categoria.`);
-                            state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
-                            count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
-                        }
-                        
-                        if (count === 0 && noneCheckbox && !noneCheckbox.disabled) {
-                            noneCheckbox.checked = true;
-                            state[key] = [noneCheckbox.value];
-                        }
-
-                        updateCounter(cnt[key], count, max);
-                        checkIfCanFinish();
-                    });
-                });
-            };
-
-            // Listener para todos os radios (sabores, pagamento, etc.)
-            form.addEventListener('change', e => {
-                if (e.target.type !== 'radio') return;
-
-                const name = e.target.name;
-                document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label').classList.remove('selected-radio'));
-                e.target.closest('label').classList.add('selected-radio');
-                
-                if(name.startsWith('flavor-')) {
-                    state.selectedFlavor = e.target.value;
-                } else if (name === 'wantAdd') {
-                    state.wantAdd = e.target.value;
-                    if(state.wantAdd === 'Sim') {
-                        enable(fs.add);
-                        setupChecks(fs.add, 14, 'add');
-                    } else {
-                        disable(fs.add);
+                newBox.addEventListener('change', e => {
+                    if (e.target.type !== 'checkbox') return;
+                    
+                    const chk = e.target;
+                    if (chk === noneCheckbox && chk.checked) {
+                        checkboxes.forEach(other => { if(other !== chk) other.checked = false; });
+                    } else if(chk.checked && noneCheckbox) {
+                        noneCheckbox.checked = false;
                     }
-                } else if (name === 'payment' || name === 'delivery') {
-                    state[name] = e.target.value;
-                    if (name === 'payment') pixInfoDiv.classList.toggle('hidden', e.target.value !== 'Pix');
-                }
-                checkIfCanFinish();
-            });
 
-            // Listeners para botões
-            btnCancel.addEventListener('click', () => {
-                if (confirm("Tem certeza que deseja limpar o formulário e o pedido atual?")) resetForm();
-            });
+                    state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+                    let count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
 
+                    if (count > max) {
+                        chk.checked = false;
+                        alert(`Máximo de ${max} opções para esta categoria.`);
+                        state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
+                    }
+                    
+                    count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
+                    if (count === 0 && noneCheckbox) {
+                        noneCheckbox.checked = true;
+                        state[key] = [noneCheckbox.value];
+                    }
+
+                    updateCounter(cnt[key], count, max);
+                    updateButtonStates();
+                });
+            }
+
+            btnCancel.addEventListener('click', () => { if (confirm("Deseja limpar tudo?")) resetFullForm(); });
             btnAdd.addEventListener('click', () => {
                 orders.push(JSON.parse(JSON.stringify(state)));
                 renderOrders();
                 resetPartialForItemSelection();
-                document.querySelectorAll('input[name="produtoPrincipal"]').forEach(r => r.checked = false);
+                clearRadios('produtoPrincipal');
                 document.querySelectorAll('.produto-card.selected').forEach(l => l.classList.remove('selected'));
-                checkIfCanFinish();
+                updateButtonStates();
             });
-
             btnFinish.addEventListener('click', async () => {
-                 if (btnAdd.disabled === false) { 
+                if (validateCurrentItem()) {
                     orders.push(JSON.parse(JSON.stringify(state)));
-                    renderOrders();
                 }
-                if (orders.length === 0) {
-                    alert("Seu pedido está vazio.");
-                    return;
-                }
+                if (orders.length === 0) return alert("Seu pedido está vazio.");
                 
+                renderOrders(); // Final render to be sure
                 const summary = generateSummaryText();
                 const phoneNumber = '5598985016035';
                 const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(summary.admin)}`;
-
-                const payload = {
-                    pedidoCompleto: summary.items,
-                    valorTotal: summary.total,
-                    metodoPagamento: state.payment,
-                    tipoEntrega: state.delivery,
-                    resumoParaAdmin: summary.admin
-                };
 
                 try {
                     btnFinish.disabled = true;
                     const response = await fetch('/api/orders', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(summary.payload)
                     });
-                    if (!response.ok) throw new Error('Falha ao registrar pedido no servidor.');
+                    if (!response.ok) throw new Error('Falha ao registrar pedido.');
                     
-                    alert("Pedido enviado com sucesso! Você será redirecionado para o WhatsApp.");
+                    alert("Pedido enviado! Redirecionando para o WhatsApp.");
                     window.location.href = whatsappURL;
-                    await resetForm();
+                    await resetFullForm();
                 } catch (error) {
                     alert(`Erro de conexão. Envie o pedido manualmente no WhatsApp:\n\n${summary.admin}`);
                     btnFinish.disabled = false;
+                }
+            });
+            
+            // NOVO: Listener para o botão de repetir
+            ordersList.addEventListener('click', e => {
+                if (e.target.classList.contains('repeat-item-btn')) {
+                    const indexToRepeat = parseInt(e.target.dataset.orderIndex, 10);
+                    if (!isNaN(indexToRepeat) && orders[indexToRepeat]) {
+                        const itemToRepeat = JSON.parse(JSON.stringify(orders[indexToRepeat]));
+                        orders.push(itemToRepeat);
+                        renderOrders();
+                    }
                 }
             });
         }
@@ -770,7 +693,7 @@
                     details += `Coberturas: ${formatList(order.cover)}<br>`;
                     if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
                         order.add.forEach(addon => subTotal += 1.00);
-                        details += `Adicionais: ${formatList(order.add)}`;
+                        details += `Adicionais: ${order.add.map(a => a.split(' - R$')[0]).join(', ')}`;
                     } else {
                         details += `Adicionais: Nenhum`;
                     }
@@ -779,7 +702,17 @@
                 }
                 
                 const li = document.createElement('li');
-                li.innerHTML = `<strong>Item ${i+1}: ${order.produtoPrincipal.name}</strong><br>${details}<br><strong>Subtotal: R$ ${subTotal.toFixed(2).replace('.', ',')}</strong>`;
+                // NOVO: Adicionado um container e o botão de repetir
+                li.innerHTML = `
+                    <div class="order-item-container">
+                        <div class="order-item-details">
+                            <strong>Item ${i+1}: ${order.produtoPrincipal.name}</strong><br>
+                            ${details}<br>
+                            <strong>Subtotal: R$ ${subTotal.toFixed(2).replace('.', ',')}</strong>
+                        </div>
+                        <button type="button" class="repeat-item-btn" data-order-index="${i}">Repetir Item</button>
+                    </div>
+                `;
                 ordersList.appendChild(li);
                 totalGeral += subTotal;
             });
@@ -805,15 +738,19 @@
                     itemPayload.acompanhamentos = formatList(order.accomp);
                     itemPayload.coberturas = formatList(order.cover);
 
-                    // Lógica para Adicionais
+                    adminText += `*Frutas:* ${itemPayload.frutas}\n`;
+                    adminText += `*Cremes:* ${itemPayload.cremes}\n`;
+                    adminText += `*Acompanhamentos:* ${itemPayload.acompanhamentos}\n`;
+                    adminText += `*Coberturas:* ${itemPayload.coberturas}\n`;
+
                     if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
                         order.add.forEach(addon => subTotal += 1.00);
                         const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
                         itemPayload.adicionais = formattedAdicionais;
-                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* *${itemPayload.adicionais}*\n`;
+                        adminText += `*Adicionais:* *${itemPayload.adicionais}*\n`;
                     } else {
                         itemPayload.adicionais = 'Nenhum';
-                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* ${itemPayload.adicionais}\n`;
+                        adminText += `*Adicionais:* ${itemPayload.adicionais}\n`;
                     }
                 } else if (order.produtoPrincipal.type === 'produto_especial') {
                     itemPayload.sabor = order.selectedFlavor || 'N/A';
@@ -831,18 +768,27 @@
             const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
             totalGeral += deliveryFee;
 
-            adminText += `------------------------------\n`;
+            adminText = adminText.trim();
+            adminText += `\n\n------------------------------\n`;
             adminText += `*Pagamento:* ${state.payment}\n`;
             adminText += `*Entrega/Retirada:* ${state.delivery.split(' - R$')[0]}\n`;
             if (deliveryFee > 0) adminText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
             adminText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n`;
 
-            return { admin: adminText, items: itemsPayload, total: totalGeral };
+            const payloadForServer = {
+                pedidoCompleto: itemsPayload,
+                valorTotal: totalGeral,
+                metodoPagamento: state.payment,
+                tipoEntrega: state.delivery,
+                resumoParaAdmin: adminText
+            };
+
+            return { admin: adminText, payload: payloadForServer };
         }
 
         // --- INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', () => {
-            resetForm();
+            resetFullForm();
         });
     </script>
 </body>
