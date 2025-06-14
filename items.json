@@ -222,27 +222,27 @@
       "id": "copo_felicidade",
       "name": "Copo da Felicidade",
       "description": "Uma experiência única em camadas de sabor.",
-      "price": 10.00,
+      "price": 8.00,
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
         {
-          "id": "ninho",
-          "name": "Ninho",
-          "internal_description": "creme especial + creme de ninho",
+          "id": "Delícia",
+          "name": "Delícia",
+          "internal_description": "Doce de leite + ganache + escureto",
           "available": true
         },
         {
           "id": "floresta_negra",
           "name": "Floresta Negra",
           "internal_description": "creme especial + floresta negra",
-          "available": true
+          "available": false
         },
         {
           "id": "flocos",
           "name": "Flocos Delícia",
           "internal_description": "creme especial + flocos",
-          "available": true
+          "available": false
         }
       ]
     },
@@ -250,27 +250,27 @@
       "id": "fatia_bolo_doce_amor",
       "name": "Fatia de Bolo 'Doce Amor'",
       "description": "Deliciosas fatias de bolo para adoçar o seu dia.",
-      "price": 12.00,
+      "price": 7.00,
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
         {
-          "id": "brigadeiro",
-          "name": "Brigadeiro",
-          "internal_description": "Massa de chocolate com recheio e cobertura de brigadeiro.",
+          "id": "Fatia",
+          "name": "Fatia recheada",
+          "internal_description": "Massa branca com recheio de doce de leite e ganache e cobertura de creme de bobom garoto.",
           "available": true
         },
         {
           "id": "prestigio",
           "name": "Prestígio",
           "internal_description": "Massa de chocolate com recheio cremoso de coco.",
-          "available": true
+          "available": false
         },
         {
           "id": "ninho_nutella",
           "name": "Ninho com Nutella",
           "internal_description": "Massa branca com recheio de Ninho e Nutella.",
-          "available": true
+          "available": false
         }
       ]
     }
