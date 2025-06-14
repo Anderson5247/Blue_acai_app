@@ -95,12 +95,7 @@
         let allItemsData = {};
 
         const qs = (selector) => document.querySelector(selector);
-        const qsa = (selector) => document.querySelectorAll(selector);
         
-        const enable = el => { if (el) el.disabled = false; };
-        const disable = el => { if (el) el.disabled = true; };
-        const updateCounter = (element, count, max) => { if (element) element.textContent = `( ${count} / ${max ?? '?'} )`; };
-
         function updateButtonStates() {
             const itemValid = validateCurrentItem();
             const finalFieldsValid = !!state.payment && !!state.delivery;
@@ -147,7 +142,7 @@
                     details += `Coberturas: ${formatList(order.cover)}<br>`;
                     if (order.wantAdd === 'Sim' && order.add && !order.add.includes('Nenhum Adicional')) {
                         order.add.forEach(() => subTotal += 1.00);
-                        details += `Adicionais: ${order.add.map(a => a.split(' - R$')[0]).join(', ')}`;
+                        details += `Adicionais: <span class="math-inline">\{order\.add\.map\(a \=\> a\.split\(' \- R</span>')[0]).join(', ')}`;
                     } else {
                         details += `Adicionais: Nenhum`;
                     }
@@ -158,11 +153,11 @@
                 const li = document.createElement('li');
                 li.innerHTML = `<div class="order-item-container">
                                     <div class="order-item-details">
-                                        <strong>Item ${i + 1}: ${order.produtoPrincipal.name}</strong><br>
-                                        <small>${details}</small><br>
-                                        <strong>Subtotal: R$ ${subTotal.toFixed(2).replace('.', ',')}</strong>
-                                    </div>
-                                    <button type="button" class="repeat-item-btn" data-order-index="${i}">Repetir Item</button>
+                                        <strong>Item ${i + 1}: <span class="math-inline">\{order\.produtoPrincipal\.name\}</strong\><br\>
+<small\></span>{details}</small><br>
+                                        <strong>Subtotal: R$ <span class="math-inline">\{subTotal\.toFixed\(2\)\.replace\('\.', ','\)\}</strong\>
+</div\>
+<button type\="button" class\="repeat\-item\-btn" data\-order\-index\="</span>{i}">Repetir Item</button>
                                 </div>`;
                 qs('#ordersList').appendChild(li);
                 totalGeral += subTotal;
@@ -175,18 +170,15 @@
         function generateSummaryText() {
             let totalGeral = 0;
             let adminText = "Blue Açaí - Novo Pedido!\n\n";
-
             orders.forEach((order, i) => {
                 let subTotal = order.produtoPrincipal.price;
                 adminText += `*Item ${i + 1}:* ${order.produtoPrincipal.name}\n`;
-
                 if(order.produtoPrincipal.type === 'acai') {
                     const formatList = (list) => (list && !list.includes('Nenhuma') && !list.includes('Nenhum Adicional')) ? list.join(', ') : 'Nenhum';
                     adminText += `*Frutas:* ${formatList(order.frutas)}\n`;
                     adminText += `*Cremes:* ${formatList(order.cremes)}\n`;
                     adminText += `*Acompanhamentos:* ${formatList(order.accomp)}\n`;
                     adminText += `*Coberturas:* ${formatList(order.cover)}\n`;
-
                     if (order.wantAdd === 'Sim' && order.add && !order.add.includes('Nenhum Adicional')) {
                         order.add.forEach(() => subTotal += 1.00);
                         const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
@@ -197,40 +189,32 @@
                 } else if (order.produtoPrincipal.type === 'produto_especial') {
                     adminText += `*Sabor:* ${order.selectedFlavor || 'N/A'}\n`;
                 }
-
                 adminText += '\n'; 
                 totalGeral += subTotal;
             });
-            
             const deliveryFeeMatch = state.delivery?.match(/R\$ (\d+[.,]\d{2})/);
             const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
             totalGeral += deliveryFee;
-
             adminText = adminText.trimEnd();
             adminText += `\n\n------------------------------\n`;
             adminText += `*Pagamento:* ${state.payment}\n`;
-            adminText += `*Entrega/Retirada:* ${state.delivery.split(' - R$')[0]}\n`;
+            adminText += `*Entrega/Retirada:* <span class="math-inline">\{state\.delivery\.split\(' \- R</span>')[0]}\n`;
             if (deliveryFee > 0) adminText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
             adminText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n`;
-            
             const payloadForServer = { pedidoCompleto: orders.map(o => ({...o})), valorTotal: totalGeral, metodoPagamento: state.payment, tipoEntrega: state.delivery, resumoParaAdmin: adminText };
             return { admin: adminText, payload: payloadForServer };
         }
 
         function setupListeners() {
             const form = qs('#formPedido');
-
             const setupCheckListeners = (fieldset, max, key) => {
                 const newBox = fieldset.querySelector('.grid-2').cloneNode(true);
                 fieldset.querySelector('.grid-2').parentNode.replaceChild(newBox, fieldset.querySelector('.grid-2'));
-                
                 const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
-                
                 state[key] = [];
                 if (noneCheckbox && !noneCheckbox.disabled) { noneCheckbox.checked = true; state[key].push(noneCheckbox.value); }
                 updateCounter(fieldset.querySelector('.counter'), 0, max);
-                
                 newBox.addEventListener('change', e => {
                     if (e.target.type !== 'checkbox') return;
                     const chk = e.target;
@@ -259,17 +243,14 @@
             form.addEventListener('change', e => {
                 const target = e.target;
                 if (target.type !== 'radio') return;
-                
                 const name = target.name;
                 qsa(`input[name="${name}"]`).forEach(r => r.closest('label')?.classList.remove('selected-radio', 'selected'));
                 target.closest('label')?.classList.add('selected-radio', 'selected');
 
                 if (name === 'produtoPrincipal') {
                     Object.keys(state).forEach(key => { if(key !== 'payment' && key !== 'delivery') delete state[key]; });
-                    
                     const acaiFieldsets = [qs('#fsFrutas'), qs('#fsCremes'), qs('#fsAccomp'), qs('#fsCoverage'), qs('#fsAskAdd'), qs('#fsAdd')];
                     const specialFieldsets = qsa('.special-flavors-fs');
-
                     const selectedCard = target.closest('.produto-card');
                     const { productType, productId, price } = selectedCard.dataset;
                     state.produtoPrincipal = { type: productType, id: productId, name: target.value, price: parseFloat(price) };
@@ -277,7 +258,6 @@
                     if (productType === 'acai') {
                         specialFieldsets.forEach(disable);
                         acaiFieldsets.forEach(enable);
-                        
                         let limits = {};
                         if (productId === 'size-300') limits = { f: 1, c: 1, a: 3, co: 1 };
                         else if (productId === 'size-500') limits = { f: 2, c: 2, a: 3, co: 1 };
@@ -293,12 +273,12 @@
                         const productData = allItemsData.produtos_especiais.find(p => p.id === productId);
                         if (productData?.requires_flavor_selection) {
                             const fieldset = qs(`#fs-${productId}`);
-                            const targetBox = qs(`#box-${productId}`);
-                            if (fieldset && targetBox) {
+                            if (fieldset) {
+                                const targetBox = qs(`#box-${productId}`);
                                 targetBox.innerHTML = productData.flavors.map(flavor => `
-                                    <label class="${!flavor.available ? 'disabled-item' : ''}">
-                                        <input type="radio" name="flavor-${productId}" value="${flavor.name}" ${!flavor.available ? 'disabled' : ''} />
-                                        <span>${flavor.name}</span>
+                                    <label class="<span class="math-inline">\{\!flavor\.available ? 'disabled\-item' \: ''\}"\>
+<input type\="radio" name\="flavor\-</span>{productId}" value="${flavor.name}" <span class="math-inline">\{\!flavor\.available ? 'disabled' \: ''\} /\>
+<span\></span>{flavor.name}</span>
                                         ${flavor.internal_description ? `<small>(${flavor.internal_description})</small>` : ''}
                                     </label>`).join('');
                                 enable(fieldset);
@@ -327,7 +307,7 @@
                 resetFullForm(false);
                 state.payment = payment;
                 state.delivery = delivery;
-                if(state.payment) qs(`input[name="payment"][value="${state.payment}"]`).closest('label').classList.add('selected-radio');
+                if(state.payment) qs(`input[name="payment"][value="${state.payment}"]`)?.closest('label').classList.add('selected-radio');
                 if(state.delivery) qs(`input[name="delivery"][value="${state.delivery}"]`)?.closest('label').classList.add('selected-radio');
                 renderOrders();
             });
@@ -341,7 +321,7 @@
                 renderOrders();
                 const summary = generateSummaryText();
                 const phoneNumber = '5598985016035';
-                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(summary.admin)}`;
+                const whatsappURL = `https://wa.me/<span class="math-inline">\{phoneNumber\}?text\=</span>{encodeURIComponent(summary.admin)}`;
 
                 try {
                     qs('#btnFinish').disabled = true;
@@ -369,9 +349,6 @@
         
         async function resetFullForm(fetchData = true) {
             Object.keys(state).forEach(key => delete state[key]);
-            if (fetchData) {
-                orders.length = 0;
-            }
             qs('#formPedido').reset();
             qsa('.selected, .selected-radio').forEach(el => el.classList.remove('selected', 'selected-radio'));
             qsa('fieldset:not(#fsProdutoPrincipal)').forEach(disable);
@@ -398,14 +375,13 @@
                 }
                 
                 const renderOptionsHTML = (items, type, name) => 
-                    items.map(item => {
-                        const value = item.originalValue || item.name;
-                        return `<label class="${!item.available ? 'disabled-item' : ''}">
-                            <input type="${type}" name="${name}" value="${value}" data-item-id="${item.id}" ${!item.available ? 'disabled' : ''} />
-                            ${item.name.split(' - R$')[0]} ${type === 'checkbox' && item.name.includes('R$') ? ` - R$ ${item.name.split(' - R$')[1]}`:''}
-                        </label>`
-                    }).join('');
-
+                    items.map(item => `
+                        <label class="<span class="math-inline">\{\!item\.available ? 'disabled\-item' \: ''\}"\>
+<input type\="</span>{type}" name="<span class="math-inline">\{name\}" value\="</span>{item.name}" data-item-id="${item.id}" ${!item.available ? 'disabled' : ''} />
+                            <span class="math-inline">\{item\.name\.split\(' \- R</span>')[0]} <span class="math-inline">\{type \=\=\= 'checkbox' && item\.name\.includes\('R</span>') ? ` - R$ ${item.name.split(' - R$')[1]}`:''}
+                        </label>
+                    `).join('');
+                
                 ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(cat => {
                     const container = qs(`#box${cat.charAt(0).toUpperCase() + cat.slice(1)}`);
                     if (container) container.innerHTML = renderOptionsHTML(allItemsData[cat], 'checkbox', `${cat}[]`);
@@ -425,12 +401,12 @@
                 const renderCard = (prod, type) => {
                     const imgMap = { 'copo_felicidade': '/images/copo-felicidade.jpg', 'fatia_bolo_doce_amor': '/images/fatia-bolo.jpg' };
                     const img = imgMap[prod.id] || prod.img || '/images/logo.png';
-                    return `<label class="produto-card ${!prod.available ? 'disabled-item' : ''}" for="prod-${prod.id}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}">
-                                <img src="${img}" alt="${prod.name}" />
-                                <input type="radio" name="produtoPrincipal" value="${prod.name}" id="prod-${prod.id}" ${!prod.available ? 'disabled' : ''}/>
-                                <div>
-                                    <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
-                                    <span>${prod.description}</span>
+                    return `<label class="produto-card <span class="math-inline">\{\!prod\.available ? 'disabled\-item' \: ''\}" for\="prod\-</span>{prod.id}" data-product-type="<span class="math-inline">\{type\}" data\-product\-id\="</span>{prod.id}" data-price="<span class="math-inline">\{prod\.price\}"\>
+<img src\="</span>{img}" alt="<span class="math-inline">\{prod\.name\}" /\>
+<input type\="radio" name\="produtoPrincipal" value\="</span>{prod.name}" id="prod-${prod.id}" <span class="math-inline">\{\!prod\.available ? 'disabled' \: ''\}/\>
+<div\>
+<strong\></span>{prod.name}</strong> - R$ <span class="math-inline">\{prod\.price\.toFixed\(2\)\.replace\('\.', ','\)\}
+<span\></span>{prod.description}</span>
                                 </div>
                             </label>`;
                 };
@@ -450,3 +426,4 @@
     </script>
 </body>
 </html>
+}
