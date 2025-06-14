@@ -430,7 +430,7 @@
 
         function resetPartialForItemSelection() {
              state = {
-                payment: state.payment, // Mantém pagamento e entrega
+                payment: state.payment,
                 delivery: state.delivery
              };
             
@@ -496,7 +496,7 @@
             const deliverySelected = !!state.delivery;
             
             btnAdd.disabled = !(itemValid && paymentSelected && deliverySelected);
-            btnFinish.disabled = orders.length === 0 || !paymentSelected || !deliverySelected;
+            btnFinish.disabled = (orders.length === 0 && btnAdd.disabled) || (!paymentSelected || !deliverySelected);
         }
 
         // --- RENDERIZAÇÃO E SETUP DE LISTENERS ---
@@ -628,7 +628,6 @@
 
             // Listeners para checkboxes de Açaí
             const setupChecks = (fieldset, max, key) => {
-                // CLONE-AND-REPLACE: Limpa listeners antigos para garantir que os limites sejam atualizados
                 const originalBox = fieldset.querySelector('.grid-2');
                 const newBox = originalBox.cloneNode(true);
                 originalBox.parentNode.replaceChild(newBox, originalBox);
@@ -636,7 +635,7 @@
                 const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
                 
-                state[key] = []; // Reset no estado ao configurar
+                state[key] = [];
                 if (noneCheckbox) {
                     noneCheckbox.checked = true;
                     state[key].push(noneCheckbox.value);
@@ -712,7 +711,7 @@
             });
 
             btnFinish.addEventListener('click', async () => {
-                 if (btnAdd.disabled === false) { // Se o item atual é válido mas não foi adicionado
+                 if (btnAdd.disabled === false) { 
                     orders.push(JSON.parse(JSON.stringify(state)));
                     renderOrders();
                 }
@@ -796,6 +795,7 @@
             orders.forEach((order, i) => {
                 let subTotal = order.produtoPrincipal.price;
                 const itemPayload = { produto: order.produtoPrincipal.name, tipo: order.produtoPrincipal.type };
+                
                 adminText += `*Item ${i+1}:* ${order.produtoPrincipal.name}\n`;
 
                 if(order.produtoPrincipal.type === 'acai') {
@@ -804,18 +804,24 @@
                     itemPayload.cremes = formatList(order.cremes);
                     itemPayload.acompanhamentos = formatList(order.accomp);
                     itemPayload.coberturas = formatList(order.cover);
+
+                    // Lógica para Adicionais
                     if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
                         order.add.forEach(addon => subTotal += 1.00);
-                        itemPayload.adicionais = formatList(order.add);
+                        const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
+                        itemPayload.adicionais = formattedAdicionais;
+                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* *${itemPayload.adicionais}*\n`;
                     } else {
                         itemPayload.adicionais = 'Nenhum';
+                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* ${itemPayload.adicionais}\n`;
                     }
-                    adminText += `Frutas: ${itemPayload.frutas}\nCremes: ${itemPayload.cremes}\nAcompanhamentos: ${itemPayload.acompanhamentos}\nCoberturas: ${itemPayload.coberturas}\nAdicionais: ${itemPayload.adicionais}\n`;
-
                 } else if (order.produtoPrincipal.type === 'produto_especial') {
                     itemPayload.sabor = order.selectedFlavor || 'N/A';
-                    adminText += `Sabor: ${itemPayload.sabor}\n`;
+                    adminText += `*Sabor:* ${itemPayload.sabor}\n`;
                 }
+
+                adminText += '\n'; // Linha em branco entre os itens
+
                 itemPayload.totalPedido = subTotal.toFixed(2);
                 itemsPayload.push(itemPayload);
                 totalGeral += subTotal;
@@ -841,4 +847,3 @@
     </script>
 </body>
 </html>
-}
