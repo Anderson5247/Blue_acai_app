@@ -188,24 +188,6 @@
             top: 0;
             font-size: 0.9em;
         }
-        
-        .order-item-actions {
-            margin-top: 8px;
-        }
-        
-        .btn-repeat {
-            background: #f0f0f0;
-            border: 1px solid #ddd;
-            color: #333;
-            padding: 4px 10px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8em;
-        }
-        .btn-repeat:hover {
-            background-color: #e0e0e0;
-        }
-
 
         .produtos-opcoes { display: flex; justify-content: center; gap: 1.5rem; flex-wrap: wrap; margin-top: 1rem; }
         .produto-card { background: var(--card-bg); border: 2px solid #ccc; border-radius: 10px; padding: 1rem; width: 210px; text-align: center; transition: 0.3s; box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; position: relative; }
@@ -246,13 +228,7 @@
             border-bottom-right-radius: 8px;
         }
 
-        .special-flavors-fs {
-             display: none; /* Hide by default */
-        }
-        .special-flavors-fs.active {
-             display: block; /* Show when active */
-        }
-         .special-flavors-fs .grid-2 label {
+        .special-flavors-fs .grid-2 label {
              border: 1px solid #ccc;
              padding: 10px;
              border-radius: 5px;
@@ -298,7 +274,15 @@
                      <div class="produtos-opcoes" id="boxProdutosPrincipais"></div>
                 </fieldset>
 
-                <div id="specialFlavorsContainer"></div>
+                <fieldset id="fs-copo_felicidade" class="special-flavors-fs" disabled>
+                     <legend>2. Escolha o Sabor do Copo <span class="section-status">(Obrigatório)</span></legend>
+                     <div class="grid-2" id="box-copo_felicidade"></div>
+                </fieldset>
+                
+                <fieldset id="fs-fatia_bolo_doce_amor" class="special-flavors-fs" disabled>
+                     <legend>2. Escolha o Sabor do Bolo <span class="section-status">(Obrigatório)</span></legend>
+                     <div class="grid-2" id="box-fatia_bolo_doce_amor"></div>
+                </fieldset>
 
                 <fieldset id="fsFrutas" disabled><legend>2. Frutas <span id="cntFrutas" class="counter">(0/?)</span></legend><div class="grid-2" id="boxFrutas"><label for="chk-morango"><input type="checkbox" value="Morango" id="chk-morango" data-item-id="morango" />Morango</label><label for="chk-banana"><input type="checkbox" value="Banana" id="chk-banana" data-item-id="banana" />Banana</label><label for="chk-kiwi"><input type="checkbox" value="Kiwi" id="chk-kiwi" data-item-id="kiwi" />Kiwi</label><label for="chk-maca"><input type="checkbox" value="Maçã" id="chk-maca" data-item-id="maca" />Maçã</label><label for="chk-uva"><input type="checkbox" value="Uva" id="chk-uva" data-item-id="uva" />Uva</label><label for="chk-frutas-nenhuma"><input type="checkbox" value="Nenhuma" id="chk-frutas-nenhuma" />Nenhuma das opções</label></div></fieldset>
                 <fieldset id="fsCremes" disabled><legend>3. Cremes <span id="cntCremes" class="counter">(0/?)</span></legend><div class="grid-2" id="boxCremes"><label for="chk-ninho"><input type="checkbox" value="Ninho" id="chk-ninho" data-item-id="ninho" />Ninho</label><label for="chk-maracuja"><input type="checkbox" value="Maracujá" id="chk-maracuja" data-item-id="maracuja" />Maracujá</label><label for="chk-morango-creme"><input type="checkbox" value="Morango (Creme)" id="chk-morango-creme" data-item-id="morango_creme" />Morango (Creme)</label><label for="chk-tutti-frutti-creme"><input type="checkbox" value="Tutti Frutti (Creme)" id="chk-tutti-frutti-creme" data-item-id="tutti_frutti_creme" />Tutti Frutti (Creme)</label><label for="chk-chocolate-avela"><input type="checkbox" value="Chocolate com Avelã" id="chk-chocolate-avela" data-item-id="chocolate_avela" />Chocolate c/Avelã</label><label for="chk-cremes-nenhum"><input type="checkbox" value="Nenhuma" id="chk-cremes-nenhum"/>Nenhuma das opções</label></div></fieldset>
@@ -362,6 +346,7 @@
         // --- SELETORES ---
         const fs = {
             produtoPrincipal: document.getElementById('fsProdutoPrincipal'),
+            specialFlavorFieldsets: document.querySelectorAll('.special-flavors-fs'),
             frutas: document.getElementById('fsFrutas'),
             cremes: document.getElementById('fsCremes'),
             accomp: document.getElementById('fsAccomp'),
@@ -379,7 +364,6 @@
             add: document.getElementById('cntAdd')
         };
         const boxProdutosPrincipais = document.getElementById('boxProdutosPrincipais');
-        const specialFlavorsContainer = document.getElementById('specialFlavorsContainer');
         
         const btnAdd = document.getElementById('btnAdd');
         const btnFinish = document.getElementById('btnFinish');
@@ -403,7 +387,6 @@
         const enable = el => {
             if (el) {
                 el.removeAttribute('disabled');
-                el.classList.add('active'); // Added for special flavors visibility
                 el.querySelectorAll('label').forEach(lbl => {
                      const input = lbl.querySelector('input');
                      if (!input || !input.disabled) {
@@ -415,7 +398,6 @@
         const disable = el => {
             if (el) {
                 el.setAttribute('disabled', '');
-                el.classList.remove('active'); // Added for special flavors visibility
                 el.querySelectorAll('label').forEach(lbl => lbl.style.pointerEvents = 'none');
             }
         };
@@ -438,16 +420,12 @@
                 disable(f);
                 clearCheckboxes(f);
              });
-             // Hide all special flavor sections
-             document.querySelectorAll('.special-flavors-fs').forEach(f => disable(f));
-
              state.frutas = []; updateCounter(cnt.frutas, 0, '?');
              state.cremes = []; updateCounter(cnt.cremes, 0, '?');
              state.accomp = []; updateCounter(cnt.accomp, 0, '?');
              state.cover = []; updateCounter(cnt.cover, 0, '?');
              state.add = []; updateCounter(cnt.add, 0, 14);
              state.wantAdd = undefined; clearRadios('wantAdd');
-             state.selectedFlavor = undefined;
         }
 
         function resetPartialForItemSelection() {
@@ -457,6 +435,7 @@
              };
             
             disableAllAcaiAndAddonFieldsets();
+            fs.specialFlavorFieldsets.forEach(f => disable(f));
 
             enable(fs.produtoPrincipal);
             btnAdd.disabled = true;
@@ -505,10 +484,8 @@
             
             if (state.produtoPrincipal.type === 'produto_especial') {
                 const productData = allItemsData.produtos_especiais.find(p => p.id === state.produtoPrincipal.id);
-                if (productData && productData.requires_flavor_selection) {
-                    return !!state.selectedFlavor;
-                }
-                return true; // Special product without flavor selection is always valid
+                if (productData && productData.requires_flavor_selection) return !!state.selectedFlavor;
+                return true;
             }
             return false;
         }
@@ -525,53 +502,7 @@
         // --- RENDERIZAÇÃO E SETUP DE LISTENERS ---
         async function fetchAndApplyItemAvailability() {
             try {
-                // Faking API call for demonstration
-                const fakeResponse = {
-                    ok: true,
-                    json: () => Promise.resolve({
-                        "shopInfo": {
-                            "isOpen": true,
-                            "closedMessage": "Voltamos amanhã às 14h!\\nObrigado pela preferência."
-                        },
-                        "produtos_especiais": [
-                            {
-                                "id": "copo_felicidade",
-                                "name": "Copo da Felicidade (Especial)",
-                                "description": "Escolha um sabor delicioso para seu copo especial.",
-                                "price": 18.00,
-                                "available": true,
-                                "requires_flavor_selection": true,
-                                "flavors": [
-                                    { "name": "Ninho com Nutella", "available": true, "internal_description": "Creme de Ninho e Nutella" },
-                                    { "name": "Sensação", "available": true, "internal_description": "Creme de morango e chocolate" },
-                                    { "name": "Oreo", "available": false, "internal_description": "Creme com pedaços de Oreo" }
-                                ]
-                            },
-                            {
-                                "id": "fatia_bolo_doce_amor",
-                                "name": "Fatia de Bolo 'Doce Amor'",
-                                "description": "A melhor fatia de bolo da região, escolha o sabor.",
-                                "price": 12.50,
-                                "available": true,
-                                "requires_flavor_selection": true,
-                                "flavors": [
-                                    { "name": "Red Velvet", "available": true, "internal_description": null },
-                                    { "name": "Chocolate com Brigadeiro", "available": true, "internal_description": null },
-                                    { "name": "Cenoura com Chocolate", "available": true, "internal_description": null }
-                                ]
-                            }
-                        ],
-                        // other categories...
-                        "frutas": [ { "id": "morango", "available": true }, { "id": "banana", "available": true }, { "id": "kiwi", "available": false }, { "id": "maca", "available": true }, { "id": "uva", "available": true } ],
-                        "cremes": [ { "id": "ninho", "available": true }, { "id": "maracuja", "available": true }, { "id": "morango_creme", "available": true }, { "id": "tutti_frutti_creme", "available": false }, { "id": "chocolate_avela", "available": true } ],
-                        "acompanhamentos": [ { "id": "amendoim_acomp", "available": true }, { "id": "pacoca_acomp", "available": true }, { "id": "granola_acomp", "available": true }, { "id": "farinha_lactea_acomp", "available": true }, { "id": "leite_po_acomp", "available": true }, { "id": "confetes_acomp", "available": true }, { "id": "tapioca_acomp", "available": false }, { "id": "uva_passa_acomp", "available": true } ],
-                        "coberturas": [ { "id": "chocolate_cob", "available": true }, { "id": "morango_cob", "available": true }, { "id": "leite_condensado_cob", "available": true }, { "id": "tutti_frutti_cob", "available": true }, { "id": "ice_blue_cob", "available": true }, { "id": "kiwi_cob", "available": false } ],
-                        "adicionais": [ { "id": "ovomaltine_add", "available": true }, { "id": "escureto_add", "available": true }, { "id": "chocoball_add", "available": true }, { "id": "amendoim_add", "available": true }, { "id": "pacoca_add", "available": true }, { "id": "granola_add", "available": true }, { "id": "farinha_lactea_add", "available": true }, { "id": "leite_po_add", "available": true }, { "id": "confetes_add", "available": true }, { "id": "tapioca_add", "available": true }, { "id": "uva_passa_add", "available": true }, { "id": "mms_add", "available": false }, { "id": "marshmallow_add", "available": true }, { "id": "doce_leite_add", "available": true } ]
-                    })
-                };
-                
-                // const response = await fetch('/api/items');
-                const response = fakeResponse; // Using the fake response
+                const response = await fetch('/api/items');
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 allItemsData = await response.json();
 
@@ -588,14 +519,13 @@
                 if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
                 renderProdutosPrincipais();
-                createSpecialProductFieldsets();
                 
                 const updateCheckboxDisplay = (categoryKey, fieldsetElement) => {
                     if (!allItemsData[categoryKey] || !fieldsetElement) return;
                     const checkboxes = fieldsetElement.querySelectorAll('input[type="checkbox"]');
                     checkboxes.forEach(checkbox => {
                         const itemId = checkbox.dataset.itemId;
-                        if (!itemId) return;
+                        if (!itemId) return; // Pula a opção "Nenhuma"
                         const itemData = allItemsData[categoryKey].find(item => item.id === itemId);
                         if (itemData) {
                             checkbox.disabled = !itemData.available;
@@ -603,12 +533,7 @@
                         }
                     });
                 };
-                ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(key => {
-                    const fieldsetId = 'fs' + key.charAt(0).toUpperCase() + key.slice(1);
-                    const fieldset = document.getElementById(fieldsetId) || fs[key]; // Fallback for `fs.add`
-                    updateCheckboxDisplay(key, fieldset);
-                });
-
+                ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(key => updateCheckboxDisplay(key, fs[key] || document.getElementById('fs' + key.charAt(0).toUpperCase() + key.slice(1))));
 
                 setupAllListeners();
                 enable(fs.payment);
@@ -618,32 +543,6 @@
                 alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
             }
         }
-        
-        function createSpecialProductFieldsets() {
-            if (!specialFlavorsContainer || !allItemsData.produtos_especiais) return;
-            specialFlavorsContainer.innerHTML = ''; // Limpa antes de criar
-
-            allItemsData.produtos_especiais.forEach(prod => {
-                if (prod.requires_flavor_selection) {
-                    const fieldset = document.createElement('fieldset');
-                    fieldset.id = `fs-${prod.id}`;
-                    fieldset.className = 'special-flavors-fs';
-                    fieldset.disabled = true;
-
-                    const legend = document.createElement('legend');
-                    legend.innerHTML = `2. Escolha o Sabor do(a) ${prod.name} <span class="section-status">(Obrigatório)</span>`;
-                    
-                    const gridDiv = document.createElement('div');
-                    gridDiv.className = 'grid-2';
-                    gridDiv.id = `box-${prod.id}`;
-
-                    fieldset.appendChild(legend);
-                    fieldset.appendChild(gridDiv);
-                    specialFlavorsContainer.appendChild(fieldset);
-                }
-            });
-        }
-
 
         function renderProdutosPrincipais() {
              if (!boxProdutosPrincipais) return;
@@ -681,7 +580,7 @@
             productData.flavors.forEach(flavor => {
                 targetBox.innerHTML += `
                     <label class="${!flavor.available ? 'disabled-item' : ''}">
-                        <input type="radio" name="flavor" value="${flavor.name}" ${!flavor.available ? 'disabled' : ''} />
+                        <input type="radio" name="flavor-${productData.id}" value="${flavor.name}" ${!flavor.available ? 'disabled' : ''} />
                         <span>${flavor.name}</span>
                         ${flavor.internal_description ? `<small>(${flavor.internal_description})</small>` : ''}
                     </label>`;
@@ -737,13 +636,11 @@
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
                 
                 state[key] = [];
-                if (noneCheckbox && !noneCheckbox.disabled) {
+                if (noneCheckbox) {
                     noneCheckbox.checked = true;
                     state[key].push(noneCheckbox.value);
-                } else { // Handle case where "Nenhum" is disabled
-                     state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
                 }
-                updateCounter(cnt[key], state[key].filter(v => !v.toLowerCase().includes('nenhum')).length, max);
+                updateCounter(cnt[key], 0, max);
                 
                 checkboxes.forEach(chk => {
                     chk.addEventListener('change', () => {
@@ -779,10 +676,10 @@
                 if (e.target.type !== 'radio') return;
 
                 const name = e.target.name;
-                document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label')?.classList.remove('selected-radio'));
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label').classList.remove('selected-radio'));
                 e.target.closest('label').classList.add('selected-radio');
                 
-                if(name === 'flavor') {
+                if(name.startsWith('flavor-')) {
                     state.selectedFlavor = e.target.value;
                 } else if (name === 'wantAdd') {
                     state.wantAdd = e.target.value;
@@ -795,7 +692,6 @@
                 } else if (name === 'payment' || name === 'delivery') {
                     state[name] = e.target.value;
                     if (name === 'payment') pixInfoDiv.classList.toggle('hidden', e.target.value !== 'Pix');
-                    renderOrders(); // Recalculate total on delivery change
                 }
                 checkIfCanFinish();
             });
@@ -815,7 +711,7 @@
             });
 
             btnFinish.addEventListener('click', async () => {
-                 if (btnAdd.disabled === false && validateCurrentOrderItem()) { 
+                 if (btnAdd.disabled === false) { 
                     orders.push(JSON.parse(JSON.stringify(state)));
                     renderOrders();
                 }
@@ -828,27 +724,29 @@
                 const phoneNumber = '5598985016035';
                 const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(summary.admin)}`;
 
-                alert("Simulação: Pedido seria enviado e você redirecionado para o WhatsApp.\n\n" + summary.admin);
-                console.log("Payload para o servidor:", {
+                const payload = {
                     pedidoCompleto: summary.items,
                     valorTotal: summary.total,
                     metodoPagamento: state.payment,
                     tipoEntrega: state.delivery,
                     resumoParaAdmin: summary.admin
-                });
-                // window.location.href = whatsappURL; // Comentado para não redirecionar
-                await resetForm();
-            });
-            
-            // Listener for "Repeat Item" button using event delegation
-            ordersList.addEventListener('click', (e) => {
-                if (e.target.classList.contains('btn-repeat')) {
-                    const index = parseInt(e.target.dataset.index, 10);
-                    if (index >= 0 && index < orders.length) {
-                        const itemToRepeat = JSON.parse(JSON.stringify(orders[index]));
-                        orders.splice(index + 1, 0, itemToRepeat);
-                        renderOrders();
-                    }
+                };
+
+                try {
+                    btnFinish.disabled = true;
+                    const response = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    if (!response.ok) throw new Error('Falha ao registrar pedido no servidor.');
+                    
+                    alert("Pedido enviado com sucesso! Você será redirecionado para o WhatsApp.");
+                    window.location.href = whatsappURL;
+                    await resetForm();
+                } catch (error) {
+                    alert(`Erro de conexão. Envie o pedido manualmente no WhatsApp:\n\n${summary.admin}`);
+                    btnFinish.disabled = false;
                 }
             });
         }
@@ -858,7 +756,7 @@
             ordersSec.style.display = orders.length > 0 ? 'block' : 'none';
             ordersList.innerHTML = '';
             let totalGeral = 0;
-            const deliveryFeeMatch = state.delivery ? String(state.delivery).match(/R\$ (\d+[,.]\d{2})/) : null;
+            const deliveryFeeMatch = state.delivery ? state.delivery.match(/R\$ (\d+[,.]\d{2})/) : null;
             const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
 
             orders.forEach((order, i) => {
@@ -881,14 +779,7 @@
                 }
                 
                 const li = document.createElement('li');
-                li.innerHTML = `
-                    <strong>Item ${i+1}: ${order.produtoPrincipal.name}</strong><br>
-                    ${details}<br>
-                    <strong>Subtotal: R$ ${subTotal.toFixed(2).replace('.', ',')}</strong>
-                    <div class="order-item-actions">
-                        <button class="btn-repeat" data-index="${i}">🔁 Repetir</button>
-                    </div>
-                `;
+                li.innerHTML = `<strong>Item ${i+1}: ${order.produtoPrincipal.name}</strong><br>${details}<br><strong>Subtotal: R$ ${subTotal.toFixed(2).replace('.', ',')}</strong>`;
                 ordersList.appendChild(li);
                 totalGeral += subTotal;
             });
@@ -913,18 +804,16 @@
                     itemPayload.cremes = formatList(order.cremes);
                     itemPayload.acompanhamentos = formatList(order.accomp);
                     itemPayload.coberturas = formatList(order.cover);
-                    adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n`;
-
 
                     // Lógica para Adicionais
                     if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
                         order.add.forEach(addon => subTotal += 1.00);
                         const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
                         itemPayload.adicionais = formattedAdicionais;
-                        adminText += `*Adicionais:* *${itemPayload.adicionais}*\n`;
+                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* *${itemPayload.adicionais}*\n`;
                     } else {
                         itemPayload.adicionais = 'Nenhum';
-                        adminText += `*Adicionais:* ${itemPayload.adicionais}\n`;
+                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* ${itemPayload.adicionais}\n`;
                     }
                 } else if (order.produtoPrincipal.type === 'produto_especial') {
                     itemPayload.sabor = order.selectedFlavor || 'N/A';
@@ -938,13 +827,13 @@
                 totalGeral += subTotal;
             });
             
-            const deliveryFeeMatch = state.delivery ? String(state.delivery).match(/R\$ (\d+[,.]\d{2})/) : null;
+            const deliveryFeeMatch = state.delivery ? state.delivery.match(/R\$ (\d+[,.]\d{2})/) : null;
             const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
             totalGeral += deliveryFee;
 
             adminText += `------------------------------\n`;
             adminText += `*Pagamento:* ${state.payment}\n`;
-            adminText += `*Entrega/Retirada:* ${String(state.delivery).split(' - R$')[0]}\n`;
+            adminText += `*Entrega/Retirada:* ${state.delivery.split(' - R$')[0]}\n`;
             if (deliveryFee > 0) adminText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
             adminText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n`;
 
