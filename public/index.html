@@ -90,20 +90,21 @@
     </div>
 
     <script>
-        // --- ESTADO GLOBAL E VARIÁVEIS ---
+        // ESTADO GLOBAL
         let state = {};
         let orders = [];
         let allItemsData = {};
 
-        // --- FUNÇÕES DE ATALHO (HELPERS) ---
+        // SELETORES DE ATALHO
         const qs = (selector) => document.querySelector(selector);
         const qsa = (selector) => document.querySelectorAll(selector);
 
-        // --- LÓGICA DE MANIPULAÇÃO DO FORMULÁRIO (UI) ---
+        // FUNÇÕES UTILITÁRIAS DE UI
         const enable = el => { if (el) el.disabled = false; };
         const disable = el => { if (el) el.disabled = true; };
         const updateCounter = (element, count, max) => { if (element) element.textContent = `( ${count} / ${max ?? '?'} )`; };
-        
+
+        // ATUALIZA O ESTADO DOS BOTÕES PRINCIPAIS
         function updateButtonStates() {
             const itemValid = validateCurrentItem();
             const finalFieldsValid = !!state.payment && !!state.delivery;
@@ -111,7 +112,29 @@
             qs('#btnFinish').disabled = orders.length === 0 || !finalFieldsValid;
         }
 
-        // --- RENDERIZAÇÃO ---
+        // VALIDA O ITEM ATUAL SENDO MONTADO
+        function validateCurrentItem() {
+            if (!state.produtoPrincipal) return false;
+            const { type, id } = state.produtoPrincipal;
+            if (type === 'acai') {
+                const checkSection = (key) => {
+                    const fieldset = qs(`#fs${key.charAt(0).toUpperCase() + key.slice(1)}`);
+                    if (fieldset.disabled) return true;
+                    const items = state[key] || [];
+                    const noneValue = key === 'add' ? 'Nenhum Adicional' : 'Nenhuma';
+                    return items.length > 0 && !(items.includes(noneValue) && items.length > 1);
+                };
+                if (!qs('#fsAskAdd').disabled && !state.wantAdd) return false;
+                return ['frutas', 'cremes', 'accomp', 'cover'].every(key => checkSection(key)) && (state.wantAdd === 'Não' || checkSection('add'));
+            }
+            if (type === 'produto_especial') {
+                const productData = allItemsData.produtos_especiais.find(p => p.id === id);
+                return !productData?.requires_flavor_selection || !!state.selectedFlavor;
+            }
+            return false;
+        }
+
+        // DESENHA A LISTA DE PEDIDOS NA TELA
         function renderOrders() {
             qs('#ordersSection').style.display = orders.length > 0 ? 'block' : 'none';
             qs('#ordersList').innerHTML = '';
@@ -154,55 +177,68 @@
             qs('#orderPageTotalValue').textContent = totalGeral.toFixed(2).replace('.', ',');
             updateButtonStates();
         }
+        
+        // GERA O TEXTO PARA O WHATSAPP E O PAYLOAD PARA O SERVIDOR
+        function generateSummaryText() {
+            let totalGeral = 0;
+            const itemsPayload = [];
+            let adminText = "Blue Açaí - Novo Pedido!\n\n";
 
-        function renderAllOptions() {
-            const renderOptionsHTML = (items, type, name) => 
-                items.map(item => `
-                    <label class="${!item.available ? 'disabled-item' : ''}">
-                        <input type="${type}" name="${name}" value="${item.name}" data-item-id="${item.id}" ${!item.available ? 'disabled' : ''} />
-                        ${item.name.split(' - R$')[0]} ${type === 'checkbox' && item.name.includes('R$') ? ` - R$ ${item.name.split(' - R$')[1]}`:''}
-                    </label>
-                `).join('');
-            
-            ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(cat => {
-                const container = qs(`#box${cat.charAt(0).toUpperCase() + cat.slice(1)}`);
-                if (container) container.innerHTML = renderOptionsHTML(allItemsData[cat], 'checkbox', `${cat}[]`);
+            orders.forEach((order, i) => {
+                let subTotal = order.produtoPrincipal.price;
+                const itemPayload = { produto: order.produtoPrincipal.name, tipo: order.produtoPrincipal.type };
+                adminText += `*Item ${i + 1}:* ${order.produtoPrincipal.name}\n`;
+
+                if(order.produtoPrincipal.type === 'acai') {
+                    const formatList = (list) => (list && !list.includes('Nenhuma') && !list.includes('Nenhum Adicional')) ? list.join(', ') : 'Nenhum';
+                    itemPayload.frutas = formatList(order.frutas);
+                    itemPayload.cremes = formatList(order.cremes);
+                    itemPayload.acompanhamentos = formatList(order.accomp);
+                    itemPayload.coberturas = formatList(order.cover);
+                    adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n`;
+
+                    if (order.wantAdd === 'Sim' && order.add && !order.add.includes('Nenhum Adicional')) {
+                        order.add.forEach(() => subTotal += 1.00);
+                        const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
+                        itemPayload.adicionais = formattedAdicionais;
+                        adminText += `*Adicionais:* *${itemPayload.adicionais}*\n`;
+                    } else {
+                        itemPayload.adicionais = 'Nenhum';
+                        adminText += `*Adicionais:* ${itemPayload.adicionais}\n`;
+                    }
+                } else if (order.produtoPrincipal.type === 'produto_especial') {
+                    itemPayload.sabor = order.selectedFlavor || 'N/A';
+                    adminText += `*Sabor:* ${itemPayload.sabor}\n`;
+                }
+                adminText += '\n'; 
+                itemPayload.totalPedido = subTotal.toFixed(2);
+                itemsPayload.push(itemPayload);
+                totalGeral += subTotal;
             });
-
-            qs('#boxAskAdd').innerHTML = renderOptionsHTML([{name: 'Sim'}, {name: 'Não'}], 'radio', 'wantAdd');
-            qs('#boxPayment').innerHTML = renderOptionsHTML([{name: 'Pix'}, {name: 'Dinheiro'}, {name: 'Cartão'}], 'radio', 'payment');
-            qs('#boxDelivery').innerHTML = renderOptionsHTML([{name: 'Retirada'}, {name: 'Outeiro - R$ 3.00'}, {name: 'Cedral - R$ 5.00'}], 'radio', 'delivery');
-            qs('#pixInfo').innerHTML = `<h3>Pagamento via PIX</h3><p><strong>Nome:</strong> Bruna Raquel Carvalho Campos</p><p><strong>Chave PIX (Celular):</strong> (98) 985016035</p><p><small>Por favor, envie o comprovante após finalizar o pedido no WhatsApp.</small></p>`;
             
-            const mainProductsContainer = qs('#boxProdutosPrincipais');
-            const acaiProducts = [
-                { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', description: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
-                { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', description: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
-                { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', description: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true }
-            ];
-            const renderCard = (prod, type) => {
-                const imgMap = { 'copo_felicidade': '/images/copo-felicidade.jpg', 'fatia_bolo_doce_amor': '/images/fatia-bolo.jpg' };
-                const img = imgMap[prod.id] || prod.img || '/images/logo.png';
-                return `<label class="produto-card ${!prod.available ? 'disabled-item' : ''}" for="prod-${prod.id}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}">
-                            <img src="${img}" alt="${prod.name}" />
-                            <input type="radio" name="produtoPrincipal" value="${prod.name}" id="prod-${prod.id}" ${!prod.available ? 'disabled' : ''}/>
-                            <div>
-                                <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
-                                <span>${prod.description}</span>
-                            </div>
-                        </label>`;
-            };
-            mainProductsContainer.innerHTML = acaiProducts.map(p => renderCard(p, 'acai')).join('') + 
-                                              (allItemsData.produtos_especiais || []).map(p => renderCard(p, 'produto_especial')).join('');
+            const deliveryFeeMatch = state.delivery?.match(/R\$ (\d+[.,]\d{2})/);
+            const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
+            totalGeral += deliveryFee;
+
+            adminText = adminText.trimEnd();
+            adminText += `\n\n------------------------------\n`;
+            adminText += `*Pagamento:* ${state.payment}\n`;
+            adminText += `*Entrega/Retirada:* ${state.delivery.split(' - R$')[0]}\n`;
+            if (deliveryFee > 0) adminText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
+            adminText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n`;
+            
+            const payloadForServer = { pedidoCompleto: itemsPayload, valorTotal: totalGeral, metodoPagamento: state.payment, tipoEntrega: state.delivery, resumoParaAdmin: adminText };
+            return { admin: adminText, payload: payloadForServer };
         }
 
-        // --- LÓGICA PRINCIPAL E EVENT LISTENERS ---
+        // CONFIGURA TODOS OS EVENT LISTENERS DA PÁGINA
         function setupListeners() {
             const form = qs('#formPedido');
 
             const setupCheckListeners = (fieldset, max, key) => {
-                const newBox = fieldset.querySelector('.grid-2').cloneNode(true);
-                fieldset.querySelector('.grid-2').parentNode.replaceChild(newBox, fieldset.querySelector('.grid-2'));
+                const originalBox = fieldset.querySelector('.grid-2');
+                const newBox = originalBox.cloneNode(true);
+                originalBox.parentNode.replaceChild(newBox, originalBox);
                 
                 const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
@@ -301,7 +337,7 @@
                 resetFullForm(false);
                 state.payment = payment;
                 state.delivery = delivery;
-                if(state.payment) qs(`input[name="payment"][value="${state.payment}"]`).closest('label').classList.add('selected-radio');
+                if(state.payment) qs(`input[name="payment"][value="${state.payment}"]`)?.closest('label').classList.add('selected-radio');
                 if(state.delivery) qs(`input[name="delivery"][value="${state.delivery}"]`)?.closest('label').classList.add('selected-radio');
                 renderOrders();
             });
@@ -341,17 +377,20 @@
             });
         }
         
+        // FUNÇÃO DE INICIALIZAÇÃO E RESET GERAL
         async function resetFullForm(fetchData = true) {
             Object.keys(state).forEach(key => delete state[key]);
-            orders.length = 0;
+            if (fetchData) { // Apenas limpa a lista de pedidos se for um reset completo com busca de dados
+                orders.length = 0;
+            }
             qs('#formPedido').reset();
             qsa('.selected, .selected-radio').forEach(el => el.classList.remove('selected', 'selected-radio'));
             qsa('fieldset:not(#fsProdutoPrincipal)').forEach(disable);
             if(fetchData) await fetchAndApplyItemAvailability();
             renderOrders();
-            updateButtonStates();
         }
 
+        // FUNÇÃO PRINCIPAL DE BUSCA E RENDERIZAÇÃO
         async function fetchAndApplyItemAvailability() {
             try {
                 const response = await fetch('/api/items');
@@ -369,7 +408,46 @@
                     return;
                 }
                 
-                renderAllOptions();
+                // RESTAURADO: Lógica para desenhar todas as opções na tela
+                const renderOptionsHTML = (items, type, name) => 
+                    items.map(item => `
+                        <label class="${!item.available ? 'disabled-item' : ''}">
+                            <input type="${type}" name="${name}" value="${item.name}" data-item-id="${item.id}" ${!item.available ? 'disabled' : ''} />
+                            ${item.name.split(' - R$')[0]} ${type === 'checkbox' && item.name.includes('R$') ? ` - R$ ${item.name.split(' - R$')[1]}`:''}
+                        </label>
+                    `).join('');
+
+                ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(cat => {
+                    const container = qs(`#box${cat.charAt(0).toUpperCase() + cat.slice(1)}`);
+                    if (container) container.innerHTML = renderOptionsHTML(allItemsData[cat], 'checkbox', `${cat}[]`);
+                });
+
+                qs('#boxAskAdd').innerHTML = renderOptionsHTML([{name: 'Sim'}, {name: 'Não'}], 'radio', 'wantAdd');
+                qs('#boxPayment').innerHTML = renderOptionsHTML([{name: 'Pix'}, {name: 'Dinheiro'}, {name: 'Cartão'}], 'radio', 'payment');
+                qs('#boxDelivery').innerHTML = renderOptionsHTML([{name: 'Retirada'}, {name: 'Outeiro - R$ 3.00'}, {name: 'Cedral - R$ 5.00'}], 'radio', 'delivery');
+                qs('#pixInfo').innerHTML = `<h3>Pagamento via PIX</h3><p><strong>Nome:</strong> Bruna Raquel Carvalho Campos</p><p><strong>Chave PIX (Celular):</strong> (98) 985016035</p><p><small>Por favor, envie o comprovante após finalizar o pedido no WhatsApp.</small></p>`;
+
+                const mainProductsContainer = qs('#boxProdutosPrincipais');
+                const acaiProducts = [
+                    { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', description: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
+                    { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', description: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
+                    { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', description: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true }
+                ];
+                const renderCard = (prod, type) => {
+                    const imgMap = { 'copo_felicidade': '/images/copo-felicidade.jpg', 'fatia_bolo_doce_amor': '/images/fatia-bolo.jpg' };
+                    const img = imgMap[prod.id] || prod.img || '/images/logo.png';
+                    return `<label class="produto-card ${!prod.available ? 'disabled-item' : ''}" for="prod-${prod.id}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}">
+                                <img src="${img}" alt="${prod.name}" />
+                                <input type="radio" name="produtoPrincipal" value="${prod.name}" id="prod-${prod.id}" ${!prod.available ? 'disabled' : ''}/>
+                                <div>
+                                    <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
+                                    <span>${prod.description}</span>
+                                </div>
+                            </label>`;
+                };
+                mainProductsContainer.innerHTML = acaiProducts.map(p => renderCard(p, 'acai')).join('') + 
+                                                  (allItemsData.produtos_especiais || []).map(p => renderCard(p, 'produto_especial')).join('');
+
                 setupListeners();
                 enable(qs('#fsPayment'));
                 enable(qs('#fsDelivery'));
