@@ -95,12 +95,7 @@
         let allItemsData = {};
 
         const qs = (selector) => document.querySelector(selector);
-        const qsa = (selector) => document.querySelectorAll(selector);
         
-        const enable = el => { if (el) el.disabled = false; };
-        const disable = el => { if (el) el.disabled = true; };
-        const updateCounter = (element, count, max) => { if (element) element.textContent = `( ${count} / ${max ?? '?'} )`; };
-
         function updateButtonStates() {
             const itemValid = validateCurrentItem();
             const finalFieldsValid = !!state.payment && !!state.delivery;
@@ -279,10 +274,8 @@
 
                 if (name === 'produtoPrincipal') {
                     Object.keys(state).forEach(key => { if(key !== 'payment' && key !== 'delivery') delete state[key]; });
-                    
                     const acaiFieldsets = [qs('#fsFrutas'), qs('#fsCremes'), qs('#fsAccomp'), qs('#fsCoverage'), qs('#fsAskAdd'), qs('#fsAdd')];
                     const specialFieldsets = qsa('.special-flavors-fs');
-
                     const selectedCard = target.closest('.produto-card');
                     const { productType, productId, price } = selectedCard.dataset;
                     state.produtoPrincipal = { type: productType, id: productId, name: target.value, price: parseFloat(price) };
@@ -290,7 +283,6 @@
                     if (productType === 'acai') {
                         specialFieldsets.forEach(disable);
                         acaiFieldsets.forEach(enable);
-                        
                         let limits = {};
                         if (productId === 'size-300') limits = { f: 1, c: 1, a: 3, co: 1 };
                         else if (productId === 'size-500') limits = { f: 2, c: 2, a: 3, co: 1 };
@@ -382,6 +374,9 @@
         
         async function resetFullForm(fetchData = true) {
             Object.keys(state).forEach(key => delete state[key]);
+            if (fetchData) {
+                orders.length = 0;
+            }
             qs('#formPedido').reset();
             qsa('.selected, .selected-radio').forEach(el => el.classList.remove('selected', 'selected-radio'));
             qsa('fieldset:not(#fsProdutoPrincipal)').forEach(disable);
@@ -461,4 +456,3 @@
 </body>
 </html>
 }
-Quais foram as principais causas dos erros?
