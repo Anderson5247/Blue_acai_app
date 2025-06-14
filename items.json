@@ -222,27 +222,27 @@
       "id": "copo_felicidade",
       "name": "Copo da Felicidade",
       "description": "Uma experiência única em camadas de sabor.",
-      "price": 10.00,
+      "price": 8.00,
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
         {
-          "id": "ninho",
-          "name": "Ninho",
-          "internal_description": "creme especial + creme de ninho",
+          "id": "Delícia",
+          "name": "Delícia",
+          "internal_description": "doce de leite + ganache + escureto",
           "available": true
         },
         {
           "id": "floresta_negra",
           "name": "Floresta Negra",
           "internal_description": "creme especial + floresta negra",
-          "available": true
+          "available": false
         },
         {
           "id": "flocos",
           "name": "Flocos Delícia",
           "internal_description": "creme especial + flocos",
-          "available": true
+          "available": false
         }
       ]
     }
