@@ -64,7 +64,7 @@
         }
 
         fieldset[disabled] label {
-             pointer-events: none;
+             pointer-events: none; /* Impede clique nos labels quando o fieldset está desabilitado */
         }
 
 
@@ -105,7 +105,7 @@
             text-decoration: line-through;
             color: #aaa !important;
             cursor: not-allowed;
-            pointer-events: none;
+            pointer-events: none; /* Desabilita clique em itens individuais indisponíveis */
         }
 
         label input[type="checkbox"],
@@ -228,7 +228,7 @@
             border-bottom-right-radius: 8px;
         }
 
-        .special-flavors-fs .grid-2 label {
+        #fsCopoFelicidadeFlavors .grid-2 label {
              border: 1px solid #ccc;
              padding: 10px;
              border-radius: 5px;
@@ -236,17 +236,17 @@
              display: flex;
              align-items: center;
         }
-         .special-flavors-fs .grid-2 label.selected-radio {
+         #fsCopoFelicidadeFlavors .grid-2 label.selected-radio {
              border-color: var(--purple);
              background-color: #e9d8f3;
              font-weight: bold;
          }
-         .special-flavors-fs .grid-2 label input[type="radio"] {
+         #fsCopoFelicidadeFlavors .grid-2 label input[type="radio"] {
              margin-right: 0.5rem;
              cursor: pointer;
              accent-color: var(--purple);
          }
-          .special-flavors-fs .grid-2 label small {
+          #fsCopoFelicidadeFlavors .grid-2 label small {
              display: block;
              font-size: 0.8em;
              color: #555;
@@ -254,10 +254,11 @@
              margin-top: 0.2em;
              font-weight: normal;
           }
-           .special-flavors-fs .grid-2 label span {
+           #fsCopoFelicidadeFlavors .grid-2 label span {
              display: inline;
              font-weight: bold;
            }
+
     </style>
 </head>
 <body>
@@ -271,18 +272,15 @@
             <form id="formPedido">
                 <fieldset id="fsProdutoPrincipal">
                      <legend>1. Escolha o Produto <span class="section-status">(Obrigatório)</span></legend>
-                     <div class="produtos-opcoes" id="boxProdutosPrincipais"></div>
+                     <div class="produtos-opcoes" id="boxProdutosPrincipais">
+                         </div>
                 </fieldset>
 
-                <fieldset id="fs-copo_felicidade" class="special-flavors-fs" disabled>
-                     <legend>2. Escolha o Sabor do Copo <span class="section-status">(Obrigatório)</span></legend>
-                     <div class="grid-2" id="box-copo_felicidade"></div>
-                </fieldset>
-                
-                <fieldset id="fs-fatia_bolo_doce_amor" class="special-flavors-fs" disabled>
-                     <legend>2. Escolha o Sabor do Bolo <span class="section-status">(Obrigatório)</span></legend>
-                     <div class="grid-2" id="box-fatia_bolo_doce_amor"></div>
-                </fieldset>
+                <fieldset id="fsCopoFelicidadeFlavors" disabled>
+                     <legend>2. Escolha o Sabor <span class="section-status">(Obrigatório para Copo da Felicidade)</span></legend>
+                     <div class="grid-2" id="boxCopoFelicidadeFlavors">
+                         </div>
+                 </fieldset>
 
                 <fieldset id="fsFrutas" disabled><legend>2. Frutas <span id="cntFrutas" class="counter">(0/?)</span></legend><div class="grid-2" id="boxFrutas"><label for="chk-morango"><input type="checkbox" value="Morango" id="chk-morango" data-item-id="morango" />Morango</label><label for="chk-banana"><input type="checkbox" value="Banana" id="chk-banana" data-item-id="banana" />Banana</label><label for="chk-kiwi"><input type="checkbox" value="Kiwi" id="chk-kiwi" data-item-id="kiwi" />Kiwi</label><label for="chk-maca"><input type="checkbox" value="Maçã" id="chk-maca" data-item-id="maca" />Maçã</label><label for="chk-uva"><input type="checkbox" value="Uva" id="chk-uva" data-item-id="uva" />Uva</label><label for="chk-frutas-nenhuma"><input type="checkbox" value="Nenhuma" id="chk-frutas-nenhuma" />Nenhuma das opções</label></div></fieldset>
                 <fieldset id="fsCremes" disabled><legend>3. Cremes <span id="cntCremes" class="counter">(0/?)</span></legend><div class="grid-2" id="boxCremes"><label for="chk-ninho"><input type="checkbox" value="Ninho" id="chk-ninho" data-item-id="ninho" />Ninho</label><label for="chk-maracuja"><input type="checkbox" value="Maracujá" id="chk-maracuja" data-item-id="maracuja" />Maracujá</label><label for="chk-morango-creme"><input type="checkbox" value="Morango (Creme)" id="chk-morango-creme" data-item-id="morango_creme" />Morango (Creme)</label><label for="chk-tutti-frutti-creme"><input type="checkbox" value="Tutti Frutti (Creme)" id="chk-tutti-frutti-creme" data-item-id="tutti_frutti_creme" />Tutti Frutti (Creme)</label><label for="chk-chocolate-avela"><input type="checkbox" value="Chocolate com Avelã" id="chk-chocolate-avela" data-item-id="chocolate_avela" />Chocolate c/Avelã</label><label for="chk-cremes-nenhum"><input type="checkbox" value="Nenhuma" id="chk-cremes-nenhum"/>Nenhuma das opções</label></div></fieldset>
@@ -340,13 +338,11 @@
         <h2>Estamos Fechados no Momento</h2>
         <p id="closedMessageText" style="margin-top: 1rem; font-size: 1.1em; line-height: 1.6;"></p>
     </div>
-
-
     <script>
         // --- SELETORES ---
         const fs = {
             produtoPrincipal: document.getElementById('fsProdutoPrincipal'),
-            specialFlavorFieldsets: document.querySelectorAll('.special-flavors-fs'),
+            copoFelicidadeFlavors: document.getElementById('fsCopoFelicidadeFlavors'),
             frutas: document.getElementById('fsFrutas'),
             cremes: document.getElementById('fsCremes'),
             accomp: document.getElementById('fsAccomp'),
@@ -357,13 +353,12 @@
             delivery: document.getElementById('fsDelivery')
         };
         const cnt = {
-            frutas: document.getElementById('cntFrutas'),
-            cremes: document.getElementById('cntCremes'),
-            accomp: document.getElementById('cntAccomp'),
-            cover: document.getElementById('cntCover'),
+            frutas: document.getElementById('cntFrutas'), cremes: document.getElementById('cntCremes'),
+            accomp: document.getElementById('cntAccomp'), cover: document.getElementById('cntCover'),
             add: document.getElementById('cntAdd')
         };
         const boxProdutosPrincipais = document.getElementById('boxProdutosPrincipais');
+        const boxCopoFelicidadeFlavors = document.getElementById('boxCopoFelicidadeFlavors');
         
         const btnAdd = document.getElementById('btnAdd');
         const btnFinish = document.getElementById('btnFinish');
@@ -375,21 +370,25 @@
         const pixInfoDiv = document.getElementById('pixInfo');
         const orderPageTotalValueEl = document.getElementById('orderPageTotalValue');
 
+        // --- NOVOS SELETORES ---
         const formCard = document.querySelector('#formPedido').closest('.card');
         const shopClosedContainer = document.getElementById('shopClosedContainer');
         const closedMessageEl = document.querySelector('#shopClosedContainer #closedMessageText');
 
+
         let state = {};
         let orders = [];
         let allItemsData = {};
+        let copoFelicidadeData = null;
 
-        // --- FUNÇÕES UTILITÁRIAS ---
         const enable = el => {
             if (el) {
                 el.removeAttribute('disabled');
                 el.querySelectorAll('label').forEach(lbl => {
                      const input = lbl.querySelector('input');
-                     if (!input || !input.disabled) {
+                     if (input && input.disabled) { 
+                         lbl.style.pointerEvents = 'none';
+                     } else {
                          lbl.style.pointerEvents = 'auto';
                      }
                 });
@@ -401,21 +400,25 @@
                 el.querySelectorAll('label').forEach(lbl => lbl.style.pointerEvents = 'none');
             }
         };
-        const clearCheckboxes = fieldset => {
-             if (fieldset) fieldset.querySelectorAll('input[type="checkbox"]').forEach(chk => chk.checked = false);
-        };
-        const clearRadios = name => {
-            document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-                r.checked = false;
-                r.closest('label')?.classList.remove('selected-radio');
-            });
-        };
-        const updateCounter = (element, count, max) => {
-             if (element) element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
-        };
 
-        // --- LÓGICA DE ESTADO E FORMULÁRIO ---
+        function clearCheckboxes(fieldset) {
+             if (fieldset) {
+                 fieldset.querySelectorAll('input[type="checkbox"]:checked:not([disabled])').forEach(chk => chk.checked = false);
+                 const noneValues = ['Nenhuma', 'Nenhum Adicional'];
+                 noneValues.forEach(noneVal => {
+                     const noneChk = fieldset.querySelector(`input[value="${noneVal}"]:not([disabled])`);
+                      if (noneChk && noneChk.checked) noneChk.checked = false;
+                 });
+             }
+         }
+
+        function clearRadios(name) {
+            document.querySelectorAll(`input[name="${name}"]:checked`).forEach(r => r.checked = false);
+            document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label')?.classList.remove('selected-radio'));
+        }
+
         function disableAllAcaiAndAddonFieldsets() {
+             console.log("Desabilitando fieldsets de açaí e adicionais.");
              [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add].forEach(f => {
                 disable(f);
                 clearCheckboxes(f);
@@ -429,418 +432,750 @@
         }
 
         function resetPartialForItemSelection() {
-             state = {
-                payment: state.payment,
-                delivery: state.delivery
-             };
-            
-            disableAllAcaiAndAddonFieldsets();
-            fs.specialFlavorFieldsets.forEach(f => disable(f));
+             console.log("resetPartialForItemSelection: Resetando para novo item.");
+             state.produtoPrincipal = undefined;
+             state.size = undefined;
+             state.fMax = state.cMax = state.aMax = state.coMax = state.addMax = undefined;
+             state.frutas = []; state.cremes = []; state.accomp = []; state.cover = []; state.add = [];
+             state.wantAdd = undefined;
+             state.selectedCopoFelicidadeFlavor = undefined;
 
-            enable(fs.produtoPrincipal);
-            btnAdd.disabled = true;
-            btnFinish.disabled = orders.length === 0;
-        }
-
-        async function resetForm() {
-             state = {};
-             orders = [];
-             renderOrders();
-             if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
-             form.reset();
-             document.querySelectorAll('.selected-radio, .produto-card.selected').forEach(el => el.classList.remove('selected', 'selected-radio'));
+             [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add, fs.copoFelicidadeFlavors].forEach(f => {
+                disable(f);
+                if (f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
+                if (f.querySelectorAll('input[type="radio"]').length > 0) {
+                    const radioName = f.querySelector('input[type="radio"]')?.name;
+                    if (radioName) clearRadios(radioName);
+                }
+             });
+             updateCounter(cnt.frutas, 0, '?'); updateCounter(cnt.cremes, 0, '?');
+             updateCounter(cnt.accomp, 0, '?'); updateCounter(cnt.cover, 0, '?');
+             updateCounter(cnt.add, 0, 14);
              
-             await fetchAndApplyItemAvailability();
-             
-             btnAdd.disabled = true; 
-             btnFinish.disabled = true;
-        }
+             enable(fs.produtoPrincipal);
+             btnAdd.disabled = true;
+             btnFinish.disabled = orders.length === 0;
+             console.log("resetPartialForItemSelection: Concluído.");
+         }
 
-        // --- LÓGICA DE VALIDAÇÃO ---
         function validateCurrentOrderItem() {
-            if (!state.produtoPrincipal || !state.produtoPrincipal.type) return false;
+            console.log("validateCurrentOrderItem: Verificando item atual. State:", JSON.parse(JSON.stringify(state)));
+            if (!state.produtoPrincipal || !state.produtoPrincipal.type) {
+                console.log("  -> Produto principal não selecionado.");
+                return false;
+            }
+
+            const noneAddValue = 'Nenhum Adicional';
+            const noneValue = 'Nenhuma'; 
 
             if (state.produtoPrincipal.type === 'acai') {
-                const checkSection = (fieldset, stateKey, noneValue) => {
-                    if (fieldset.hasAttribute('disabled')) return true;
-                    const items = state[stateKey];
-                    if (!items || items.length === 0) return false;
-                    if (items.includes(noneValue) && items.length > 1) return false;
+                console.log("  -> Validando Açaí.");
+                state.frutas = state.frutas || []; state.cremes = state.cremes || [];
+                state.accomp = state.accomp || []; state.cover = state.cover || [];
+                state.add = state.add || [];
+
+                const checkSectionValidity = (fieldset, stateKey, sectionName) => {
+                    if (!fieldset || fieldset.hasAttribute('disabled')) {
+                        console.log(`    -> Fieldset "${sectionName}" desabilitado ou não existe. Válido por padrão.`);
+                        return true;
+                    }
+                    const itemsSelected = state[stateKey];
+                    if (!itemsSelected || itemsSelected.length === 0) {
+                        console.log(`    -> Fieldset "${sectionName}" habilitado, mas nenhum item selecionado no estado.`);
+                        return false; 
+                    }
+                    const noneOptionValue = stateKey === 'add' ? noneAddValue : noneValue;
+                    if (itemsSelected.includes(noneOptionValue) && itemsSelected.length > 1) {
+                        console.log(`    -> Fieldset "${sectionName}" habilitado, "${noneOptionValue}" selecionado com outros itens.`);
+                        return false;
+                    }
+                    console.log(`    -> Fieldset "${sectionName}" OK. Selecionados: ${itemsSelected.join(', ')}`);
                     return true;
                 };
 
-                const frutasOk = checkSection(fs.frutas, 'frutas', 'Nenhuma');
-                const cremesOk = checkSection(fs.cremes, 'cremes', 'Nenhuma');
-                const accompOk = checkSection(fs.accomp, 'accomp', 'Nenhuma');
-                const coverOk = checkSection(fs.cover, 'cover', 'Nenhuma');
+                const frutasOk = checkSectionValidity(fs.frutas, 'frutas', 'Frutas');
+                const cremesOk = checkSectionValidity(fs.cremes, 'cremes', 'Cremes');
+                const accompOk = checkSectionValidity(fs.accomp, 'accomp', 'Acompanhamentos');
+                const coverOk = checkSectionValidity(fs.cover, 'cover', 'Coberturas');
 
                 let addOk = true;
-                if (!fs.askAdd.hasAttribute('disabled')) {
-                    if (state.wantAdd === undefined) return false;
-                    if (state.wantAdd === 'Sim') addOk = checkSection(fs.add, 'add', 'Nenhum Adicional');
+                if (fs.askAdd && !fs.askAdd.hasAttribute('disabled')) { 
+                    if (state.wantAdd === undefined) {
+                        console.log("    -> Escolha Sim/Não para adicionais pendente.");
+                        return false; 
+                    }
+                    if (state.wantAdd === 'Sim') {
+                        addOk = checkSectionValidity(fs.add, 'add', 'Adicionais');
+                    }
                 }
-                return frutasOk && cremesOk && accompOk && coverOk && addOk;
-            } 
-            
-            if (state.produtoPrincipal.type === 'produto_especial') {
-                const productData = allItemsData.produtos_especiais.find(p => p.id === state.produtoPrincipal.id);
-                if (productData && productData.requires_flavor_selection) return !!state.selectedFlavor;
-                return true;
+                const isValid = frutasOk && cremesOk && accompOk && coverOk && addOk;
+                console.log("  -> Validade do Açaí:", isValid, `{frutas: ${frutasOk}, cremes: ${cremesOk}, accomp: ${accompOk}, cover: ${coverOk}, add: ${addOk}}`);
+                return isValid;
+
+            } else if (state.produtoPrincipal.type === 'produto_especial' && state.produtoPrincipal.id === 'copo_felicidade') {
+                console.log("  -> Validando Copo da Felicidade.");
+                const isFlavorSelected = state.selectedCopoFelicidadeFlavor !== undefined &&
+                                         state.selectedCopoFelicidadeFlavor !== null &&
+                                         state.selectedCopoFelicidadeFlavor !== '';
+                console.log("  -> Sabor selecionado?", isFlavorSelected, "Sabor:", state.selectedCopoFelicidadeFlavor);
+                return isFlavorSelected;
+            } else {
+                console.warn("  -> Tipo de produto desconhecido:", state.produtoPrincipal);
+                return false;
             }
-            return false;
         }
-
-        function checkIfCanFinish() {
-            const itemValid = validateCurrentOrderItem();
-            const paymentSelected = !!state.payment;
-            const deliverySelected = !!state.delivery;
-            
-            btnAdd.disabled = !(itemValid && paymentSelected && deliverySelected);
-            btnFinish.disabled = (orders.length === 0 && btnAdd.disabled) || (!paymentSelected || !deliverySelected);
-        }
-
-        // --- RENDERIZAÇÃO E SETUP DE LISTENERS ---
+        
         async function fetchAndApplyItemAvailability() {
+            console.log("fetchAndApplyItemAvailability: Buscando dados de itens...");
             try {
                 const response = await fetch('/api/items');
-                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                if (!response.ok) {
+                    const errorText = await response.text();
+                    throw new Error(`HTTP error! status: ${response.status} - ${errorText}`);
+                }
                 allItemsData = await response.json();
+                console.log("fetchAndApplyItemAvailability: Dados recebidos:", allItemsData);
 
+                // --- INÍCIO DA MODIFICAÇÃO PARA VERIFICAR STATUS DA LOJA ---
                 if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
-                    formCard.style.display = 'none';
-                    ordersSec.style.display = 'none';
-                    if (shopClosedContainer) {
-                        closedMessageEl.innerText = allItemsData.shopInfo.closedMessage.replace(/\\n/g, '\n');
+                    console.log("Loja está fechada. Exibindo mensagem.");
+                    if (formCard) formCard.style.display = 'none';
+                    if (ordersSec) ordersSec.style.display = 'none';
+                    
+                    if (shopClosedContainer && closedMessageEl) {
+                        closedMessageEl.innerText = allItemsData.shopInfo.closedMessage;
                         shopClosedContainer.style.display = 'block';
                     }
-                    return;
+                    return; // Interrompe a execução para não carregar o cardápio
                 }
-                formCard.style.display = 'block';
+
+                // Se a loja estiver aberta, garante que o cardápio está visível e a mensagem escondida
+                if (formCard) formCard.style.display = 'block';
                 if (shopClosedContainer) shopClosedContainer.style.display = 'none';
+                // --- FIM DA MODIFICAÇÃO ---
+
+                const produtosEspeciais = allItemsData.produtos_especiais || [];
+                copoFelicidadeData = produtosEspeciais.find(item => item.id === 'copo_felicidade');
 
                 renderProdutosPrincipais();
-                
+
                 const updateCheckboxDisplay = (categoryKey, fieldsetElement) => {
                     if (!allItemsData[categoryKey] || !fieldsetElement) return;
                     const checkboxes = fieldsetElement.querySelectorAll('input[type="checkbox"]');
                     checkboxes.forEach(checkbox => {
                         const itemId = checkbox.dataset.itemId;
-                        if (!itemId) return; // Pula a opção "Nenhuma"
-                        const itemData = allItemsData[categoryKey].find(item => item.id === itemId);
-                        if (itemData) {
-                            checkbox.disabled = !itemData.available;
-                            checkbox.closest('label').classList.toggle('disabled-item', !itemData.available);
+                        if (!itemId && !checkbox.value.toLowerCase().includes("nenhum")) return;
+
+                        let itemData = null;
+                        if (itemId) {
+                            itemData = allItemsData[categoryKey].find(item => item.id === itemId);
+                        }
+                        
+                        const label = checkbox.closest('label');
+                        if (itemData) { 
+                            if (!itemData.available) {
+                                checkbox.disabled = true;
+                                checkbox.checked = false;
+                                if (label) { label.classList.add('disabled-item'); label.title = 'Item indisponível'; }
+                            } else {
+                                checkbox.disabled = false;
+                                if (label) {
+                                    label.classList.remove('disabled-item');
+                                    label.title = '';
+                                }
+                            }
+                        } else if (checkbox.value.toLowerCase().includes("nenhum")) {
+                            checkbox.disabled = false;
+                             if (label) { label.classList.remove('disabled-item'); label.title = '';}
                         }
                     });
                 };
-                ['frutas', 'cremes', 'acompanhamentos', 'coberturas', 'adicionais'].forEach(key => updateCheckboxDisplay(key, fs[key] || document.getElementById('fs' + key.charAt(0).toUpperCase() + key.slice(1))));
 
-                setupAllListeners();
+                updateCheckboxDisplay('frutas', fs.frutas);
+                updateCheckboxDisplay('cremes', fs.cremes);
+                updateCheckboxDisplay('acompanhamentos', fs.accomp);
+                updateCheckboxDisplay('coberturas', fs.cover);
+                updateCheckboxDisplay('adicionais', fs.add);
+
+                setupProdutoPrincipalListeners();
+                setupRadioListener('payment');
+                setupRadioListener('delivery');
+
                 enable(fs.payment);
                 enable(fs.delivery);
+
             } catch (error) {
-                console.error("Erro fatal ao carregar cardápio:", error);
+                console.error("fetchAndApplyItemAvailability: Erro ao carregar:", error);
                 alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+                disableAllFieldsetsInForm();
             }
         }
 
-        function renderProdutosPrincipais() {
+         function renderProdutosPrincipais() {
+             console.log("renderProdutosPrincipais: Renderizando...");
              if (!boxProdutosPrincipais) return;
              boxProdutosPrincipais.innerHTML = '';
+
              const acaiProducts = [
-                { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', description: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
-                { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', description: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
-                { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', description: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true }
+                { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
+                { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', desc: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
+                { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', desc: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true }
              ];
 
-             const renderCard = (prod, type) => {
-                 const imgMap = { 'copo_felicidade': '/images/copo-felicidade.jpg', 'fatia_bolo_doce_amor': '/images/fatia-bolo.jpg' };
-                 const img = imgMap[prod.id] || prod.img || '/images/logo.png';
-                 return `
-                     <label class="produto-card ${!prod.available ? 'disabled-item' : ''}" for="prod-${prod.id}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}">
-                         <img src="${img}" alt="${prod.name}" />
-                         <input type="radio" name="produtoPrincipal" value="${prod.name}" id="prod-${prod.id}" ${!prod.available ? 'disabled' : ''}/>
+             acaiProducts.forEach(prod => {
+                 const disabledClass = !prod.available ? 'disabled-item' : '';
+                 const inputDisabled = !prod.available ? 'disabled' : '';
+                 const title = !prod.available ? 'Produto indisponível' : '';
+
+                 boxProdutosPrincipais.innerHTML += `
+                     <label class="produto-card ${disabledClass}" for="${prod.id}" data-product-type="acai" data-price="${prod.price}" title="${title}">
+                         <img src="${prod.img}" alt="${prod.name}" />
+                         <input type="radio" name="produtoPrincipal" value="${prod.name}" id="${prod.id}" required ${inputDisabled}/>
                          <div>
                              <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
-                             <span>${prod.description}</span>
+                             <span>${prod.desc}</span>
                          </div>
                      </label>
                  `;
-             };
-             acaiProducts.forEach(prod => boxProdutosPrincipais.innerHTML += renderCard(prod, 'acai'));
-             (allItemsData.produtos_especiais || []).forEach(prod => boxProdutosPrincipais.innerHTML += renderCard(prod, 'produto_especial'));
-        }
+             });
 
-        function renderSpecialProductFlavors(productData) {
-            const fieldset = document.getElementById(`fs-${productData.id}`);
-            const targetBox = document.getElementById(`box-${productData.id}`);
-            if (!fieldset || !targetBox) return;
+             if (copoFelicidadeData) {
+                 const disabledClass = !copoFelicidadeData.available ? 'disabled-item' : '';
+                 const inputDisabled = !copoFelicidadeData.available ? 'disabled' : '';
+                 const title = !copoFelicidadeData.available ? 'Produto indisponível' : '';
 
-            targetBox.innerHTML = '';
-            productData.flavors.forEach(flavor => {
-                targetBox.innerHTML += `
-                    <label class="${!flavor.available ? 'disabled-item' : ''}">
-                        <input type="radio" name="flavor-${productData.id}" value="${flavor.name}" ${!flavor.available ? 'disabled' : ''} />
-                        <span>${flavor.name}</span>
-                        ${flavor.internal_description ? `<small>(${flavor.internal_description})</small>` : ''}
-                    </label>`;
-            });
-            enable(fieldset);
-        }
+                 boxProdutosPrincipais.innerHTML += `
+                     <label class="produto-card ${disabledClass}" for="prod-${copoFelicidadeData.id}" data-product-type="produto_especial" data-product-id="${copoFelicidadeData.id}" data-price="${copoFelicidadeData.price}" title="${title}">
+                         <img src="/images/copo-felicidade.jpg" alt="${copoFelicidadeData.name}" />
+                         <input type="radio" name="produtoPrincipal" value="${copoFelicidadeData.name}" id="prod-${copoFelicidadeData.id}" ${inputDisabled}/>
+                         <div>
+                             <strong>${copoFelicidadeData.name}</strong> - R$ ${copoFelicidadeData.price.toFixed(2).replace('.', ',')}
+                             <span>${copoFelicidadeData.description}</span>
+                         </div>
+                     </label>
+                 `;
+                 if (copoFelicidadeData.available) renderCopoFelicidadeFlavors();
+             }
+             console.log("renderProdutosPrincipais: Concluído.");
+         }
 
-        function setupAllListeners() {
-            // Listener para Produtos Principais
-            document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
-                 radio.addEventListener('change', (e) => {
-                    document.querySelectorAll('.produto-card.selected').forEach(l => l.classList.remove('selected'));
-                    e.target.closest('label').classList.add('selected');
-                    
-                    resetPartialForItemSelection();
+         function renderCopoFelicidadeFlavors() {
+             console.log("renderCopoFelicidadeFlavors: Renderizando sabores...");
+             if (!boxCopoFelicidadeFlavors || !copoFelicidadeData || !copoFelicidadeData.flavors || copoFelicidadeData.flavors.length === 0) {
+                 boxCopoFelicidadeFlavors.innerHTML = copoFelicidadeData && copoFelicidadeData.available ? '<p>Nenhuma opção de sabor configurada.</p>' : '';
+                 return;
+             }
+             boxCopoFelicidadeFlavors.innerHTML = '';
+             copoFelicidadeData.flavors.forEach(flavor => {
+                 const flavorDisabled = !flavor.available ? 'disabled' : '';
+                 const labelClass = !flavor.available ? 'disabled-item' : '';
+                 const title = !flavor.available ? 'Sabor indisponível' : '';
+
+                 boxCopoFelicidadeFlavors.innerHTML += `
+                     <label for="flavor-${flavor.id}" class="${labelClass}" title="${title}">
+                         <input type="radio" name="copoFelicidadeFlavor" value="${flavor.name}" id="flavor-${flavor.id}" data-flavor-id="${flavor.id}" required ${flavorDisabled} />
+                         <span>${flavor.name}</span>
+                         ${flavor.internal_description ? `<small>(${flavor.internal_description})</small>` : ''}
+                     </label>
+                 `;
+             });
+             setupRadioListener('copoFelicidadeFlavor');
+             console.log("renderCopoFelicidadeFlavors: Concluído.");
+         }
+
+         function setupProdutoPrincipalListeners() {
+              console.log("setupProdutoPrincipalListeners: Configurando...");
+             document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
+                 if (radio.disabled) return;
+                 if (radio._productListener) radio.removeEventListener('change', radio._productListener);
+                 
+                 const newProductListener = (e) => {
+                    console.log("Listener Produto Principal: 'change' em", e.target.value);
+                    document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected'));
+                    e.target.closest('.produto-card:not(.disabled-item)')?.classList.add('selected');
+
+                    const savedPayment = state.payment;
+                    const savedDelivery = state.delivery;
+
+                    resetPartialForItemSelection(); 
+
+                    state.payment = savedPayment;
+                    state.delivery = savedDelivery;
+                    if (state.payment) document.querySelector(`input[name="payment"][value="${state.payment}"]`)?.closest('label')?.classList.add('selected-radio');
+                    if (state.delivery) document.querySelector(`input[name="delivery"][value="${state.delivery}"]`)?.closest('label')?.classList.add('selected-radio');
+                    if (state.payment === 'Pix' && pixInfoDiv) pixInfoDiv.classList.remove('hidden'); else if (pixInfoDiv) pixInfoDiv.classList.add('hidden');
+
 
                     const selectedCard = e.target.closest('.produto-card');
-                    const productType = selectedCard.dataset.productType;
-                    const productId = selectedCard.dataset.productId;
-                    const productPrice = parseFloat(selectedCard.dataset.price);
+                    const productType = selectedCard?.dataset.productType;
+                    const productName = e.target.value;
+                    const productPrice = parseFloat(selectedCard?.dataset.price || 0);
+                    const productId = selectedCard?.dataset.productId; 
 
-                    state.produtoPrincipal = { type: productType, name: e.target.value, price: productPrice, id: productId };
-                    
+                    state.produtoPrincipal = { type: productType, name: productName, price: productPrice, id: productId };
+                    state.size = (productType === 'acai') ? `${productName} - R$ ${productPrice.toFixed(2).replace('.', ',')}` : undefined;
+
                     if (productType === 'acai') {
-                        let limits = {};
-                        if (productId === 'size-300') limits = { f: 1, c: 1, a: 3, co: 1 };
-                        else if (productId === 'size-500') limits = { f: 2, c: 2, a: 3, co: 1 };
-                        else if (productId === 'size-1L') limits = { f: 3, c: 3, a: 4, co: 2 };
-                        state.fMax = limits.f; state.cMax = limits.c; state.aMax = limits.a; state.coMax = limits.co;
-                        
+                        console.log(" -> Tipo: Açaí. Configurando opções de açaí.");
+                        let fMax = 0, cMax = 0, aMax = 0, coMax = 0;
+                        if (productName.startsWith('Copo Pequeno')) { fMax = 1; cMax = 1; aMax = 3; coMax = 1; }
+                        else if (productName.startsWith('Copo Grande')) { fMax = 2; cMax = 2; aMax = 3; coMax = 1; }
+                        else if (productName.startsWith('Pote da Felicidade')) { fMax = 3; cMax = 3; aMax = 4; coMax = 2; }
+                        state.fMax = fMax; state.cMax = cMax; state.aMax = aMax; state.coMax = coMax; state.addMax = 14;
+
                         [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd].forEach(enable);
-                        setupChecks(fs.frutas, limits.f, 'frutas');
-                        setupChecks(fs.cremes, limits.c, 'cremes');
-                        setupChecks(fs.accomp, limits.a, 'accomp');
-                        setupChecks(fs.cover, limits.co, 'cover');
-                    } else if (productType === 'produto_especial') {
-                        const productData = allItemsData.produtos_especiais.find(p => p.id === productId);
-                        if (productData && productData.requires_flavor_selection) {
-                            renderSpecialProductFlavors(productData);
-                        }
+                        disable(fs.copoFelicidadeFlavors);
+                        clearRadios('copoFelicidadeFlavor'); state.selectedCopoFelicidadeFlavor = undefined;
+
+                        setupChecks(fs.frutas, fMax, 'frutas');
+                        setupChecks(fs.cremes, cMax, 'cremes');
+                        setupChecks(fs.accomp, aMax, 'accomp');
+                        setupChecks(fs.cover, coMax, 'cover');
+                        setupRadioListener('wantAdd', 'askAdd');
+
+                    } else if (productType === 'produto_especial' && productId === 'copo_felicidade') {
+                        console.log(" -> Tipo: Copo da Felicidade. Configurando sabores.");
+                        disableAllAcaiAndAddonFieldsets(); 
+                        enable(fs.copoFelicidadeFlavors); 
+                    } else {
+                        disableAllAcaiAndAddonFieldsets();
+                        disable(fs.copoFelicidadeFlavors);
+                        clearRadios('copoFelicidadeFlavor'); state.selectedCopoFelicidadeFlavor = undefined;
                     }
                     checkIfCanFinish();
-                 });
-            });
+                 };
+                 radio.addEventListener('change', newProductListener);
+                 radio._productListener = newProductListener;
+             });
+             console.log("setupProdutoPrincipalListeners: Concluído.");
+         }
 
-            // Listeners para checkboxes de Açaí
-            const setupChecks = (fieldset, max, key) => {
-                const originalBox = fieldset.querySelector('.grid-2');
-                const newBox = originalBox.cloneNode(true);
-                originalBox.parentNode.replaceChild(newBox, originalBox);
-                
-                const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
-                const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
-                
-                state[key] = [];
-                if (noneCheckbox) {
-                    noneCheckbox.checked = true;
-                    state[key].push(noneCheckbox.value);
-                }
-                updateCounter(cnt[key], 0, max);
-                
-                checkboxes.forEach(chk => {
-                    chk.addEventListener('change', () => {
+        function setupRadioListener(name, stageToAdvanceOnClick) {
+            console.log(`setupRadioListener: Configurando para "${name}"`);
+            document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                 if (r.disabled) return;
+                 if (r._currentListener) r.removeEventListener('change', r._currentListener);
+                 
+                 const new_listener = ev => {
+                     console.log(` -> Listener Rádio "${name}": 'change'. Valor: ${ev.target.value}`);
+                     state[name] = ev.target.value;
+
+                     document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => {
+                         radioEl.closest('label')?.classList.remove('selected-radio');
+                     });
+                     ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
+
+                     if (name === 'copoFelicidadeFlavor') {
+                         state.selectedCopoFelicidadeFlavor = ev.target.value;
+                     } else if (name === 'wantAdd' && stageToAdvanceOnClick) {
+                         advanceStage(stageToAdvanceOnClick);
+                     }
+
+                     if (name === 'payment' && pixInfoDiv) {
+                         pixInfoDiv.classList.toggle('hidden', ev.target.value !== 'Pix');
+                     }
+                     checkIfCanFinish();
+                 };
+                 r.addEventListener('change', new_listener);
+                 r._currentListener = new_listener;
+             });
+              console.log(`setupRadioListener: Concluído para "${name}".`);
+         }
+
+        function setupChecks(fieldsetElement, max, key) { 
+             const box = fieldsetElement.querySelector('.grid-2'); 
+             if (!box) { console.error(`Div .grid-2 não encontrado em fieldset para "${key}"`); return; }
+             console.log(`setupChecks: Configurando para "${key}" (max: ${max}) em fieldset ${fieldsetElement.id}`);
+             
+             const counterEl = cnt[key];
+             const allCheckboxesInBox = box.querySelectorAll('input[type=checkbox]');
+             const noneValue = key === 'add' ? 'Nenhum Adicional' : 'Nenhuma';
+             const noneCheckbox = box.querySelector(`input[value="${noneValue}"]`);
+
+             state[key] = state[key] || [];
+             state[key] = state[key].filter(itemName => {
+                 const chk = Array.from(allCheckboxesInBox).find(c => c.value === itemName);
+                 return chk && !chk.disabled;
+             });
+             
+             if (fieldsetElement && !fieldsetElement.hasAttribute('disabled')) {
+                 if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                     noneCheckbox.checked = true;
+                     state[key] = [noneValue]; 
+                     console.log(`    -> Opção "${noneValue}" para "${key}" marcada como padrão.`);
+                 }
+             }
+
+             let initialCount = state[key].includes(noneValue) ? 0 : state[key].filter(item => item !== noneValue).length;
+             updateCounter(counterEl, initialCount, max);
+
+             allCheckboxesInBox.forEach(chk => {
+                 if (chk._currentListener) chk.removeEventListener('change', chk._currentListener);
+                 
+                 const new_listener = () => {
+                    console.log(` -> Listener Checkbox "${chk.value}" (${key}): 'change'. Checado: ${chk.checked}`);
+                    if (chk.disabled && !chk.value.toLowerCase().includes("nenhum")) return;
+
+                    const currentSelectedInBox = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')];
+                    const isNoneChecked = noneCheckbox && noneCheckbox.checked;
+
+                    if (noneCheckbox) {
                         if (chk === noneCheckbox && chk.checked) {
-                            checkboxes.forEach(other => { if(other !== chk) other.checked = false; });
-                        } else if(chk.checked && noneCheckbox) {
-                            noneCheckbox.checked = false;
+                            allCheckboxesInBox.forEach(otherChk => {
+                                if (otherChk !== noneCheckbox && !otherChk.disabled) otherChk.checked = false;
+                            });
+                            state[key] = [noneValue];
+                        } else if (chk !== noneCheckbox && chk.checked && isNoneChecked) {
+                            if (!noneCheckbox.disabled) noneCheckbox.checked = false;
+                            state[key] = currentSelectedInBox.filter(c => c !== noneCheckbox).map(i => i.value);
+                        } else {
+                            state[key] = currentSelectedInBox.map(i => i.value);
+                            if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                                noneCheckbox.checked = true;
+                                state[key] = [noneValue];
+                            } else if (state[key].length > 0 && state[key].some(val => val !== noneValue) && noneCheckbox && noneCheckbox.checked && !noneCheckbox.disabled) {
+                                 noneCheckbox.checked = false;
+                                 state[key] = state[key].filter(item => item !== noneValue);
+                            }
                         }
-
-                        state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
-                        let count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
-
-                        if (count > max) {
-                            chk.checked = false;
-                            alert(`Máximo de ${max} opções para esta categoria.`);
-                            state[key] = Array.from(checkboxes).filter(c => c.checked).map(c => c.value);
-                            count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
-                        }
-                        
-                        if (count === 0 && noneCheckbox && !noneCheckbox.disabled) {
-                            noneCheckbox.checked = true;
-                            state[key] = [noneCheckbox.value];
-                        }
-
-                        updateCounter(cnt[key], count, max);
-                        checkIfCanFinish();
-                    });
-                });
-            };
-
-            // Listener para todos os radios (sabores, pagamento, etc.)
-            form.addEventListener('change', e => {
-                if (e.target.type !== 'radio') return;
-
-                const name = e.target.name;
-                document.querySelectorAll(`input[name="${name}"]`).forEach(r => r.closest('label').classList.remove('selected-radio'));
-                e.target.closest('label').classList.add('selected-radio');
-                
-                if(name.startsWith('flavor-')) {
-                    state.selectedFlavor = e.target.value;
-                } else if (name === 'wantAdd') {
-                    state.wantAdd = e.target.value;
-                    if(state.wantAdd === 'Sim') {
-                        enable(fs.add);
-                        setupChecks(fs.add, 14, 'add');
                     } else {
-                        disable(fs.add);
+                        state[key] = currentSelectedInBox.map(i => i.value);
                     }
-                } else if (name === 'payment' || name === 'delivery') {
-                    state[name] = e.target.value;
-                    if (name === 'payment') pixInfoDiv.classList.toggle('hidden', e.target.value !== 'Pix');
-                }
-                checkIfCanFinish();
-            });
 
-            // Listeners para botões
-            btnCancel.addEventListener('click', () => {
-                if (confirm("Tem certeza que deseja limpar o formulário e o pedido atual?")) resetForm();
-            });
+                    let actualSelectedCount = state[key].includes(noneValue) ? 0 : state[key].filter(item => item !== noneValue).length;
 
-            btnAdd.addEventListener('click', () => {
-                orders.push(JSON.parse(JSON.stringify(state)));
-                renderOrders();
-                resetPartialForItemSelection();
-                document.querySelectorAll('input[name="produtoPrincipal"]').forEach(r => r.checked = false);
-                document.querySelectorAll('.produto-card.selected').forEach(l => l.classList.remove('selected'));
-                checkIfCanFinish();
-            });
+                    if (max !== undefined && actualSelectedCount > max) {
+                        chk.checked = false;
+                        state[key] = state[key].filter(item => item !== chk.value);
+                        if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                             noneCheckbox.checked = true; state[key] = [noneValue];
+                        }
+                        actualSelectedCount = state[key].includes(noneValue) ? 0 : state[key].filter(item => item !== noneValue).length;
+                        alert(`Máximo ${max} ${key === 'add' ? 'adicionais' : key}.`);
+                    }
 
-            btnFinish.addEventListener('click', async () => {
-                 if (btnAdd.disabled === false) { 
-                    orders.push(JSON.parse(JSON.stringify(state)));
-                    renderOrders();
-                }
-                if (orders.length === 0) {
-                    alert("Seu pedido está vazio.");
-                    return;
-                }
-                
-                const summary = generateSummaryText();
-                const phoneNumber = '5598985016035';
-                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(summary.admin)}`;
+                    updateCounter(counterEl, actualSelectedCount, max);
+                    checkIfCanFinish();
+                 };
+                 chk.addEventListener('change', new_listener);
+                 chk._currentListener = new_listener;
+             });
+             console.log(`setupChecks: Concluído para "${key}".`);
+         }
 
-                const payload = {
-                    pedidoCompleto: summary.items,
-                    valorTotal: summary.total,
-                    metodoPagamento: state.payment,
-                    tipoEntrega: state.delivery,
-                    resumoParaAdmin: summary.admin
-                };
+        function updateCounter(element, count, max) {
+             if (element) {
+                 element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
+             }
+         }
 
-                try {
-                    btnFinish.disabled = true;
-                    const response = await fetch('/api/orders', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    if (!response.ok) throw new Error('Falha ao registrar pedido no servidor.');
-                    
-                    alert("Pedido enviado com sucesso! Você será redirecionado para o WhatsApp.");
-                    window.location.href = whatsappURL;
-                    await resetForm();
-                } catch (error) {
-                    alert(`Erro de conexão. Envie o pedido manualmente no WhatsApp:\n\n${summary.admin}`);
-                    btnFinish.disabled = false;
-                }
-            });
+        function advanceStage(stage) {
+             console.log("advanceStage: Avançando para", stage, "State:", JSON.parse(JSON.stringify(state)));
+             switch (stage) {
+                 case 'askAdd':
+                     if (state.wantAdd === 'Sim') {
+                         enable(fs.add);
+                         setupChecks(fs.add, state.addMax !== undefined ? state.addMax : 14, 'add');
+                         const currentAddCount = state.add ? state.add.filter(item => item !== 'Nenhum Adicional').length : 0;
+                         updateCounter(cnt.add, currentAddCount, state.addMax !== undefined ? state.addMax : 14);
+                     } else if (state.wantAdd === 'Não') {
+                         state.add = ['Nenhum Adicional'];
+                         disable(fs.add);
+                         clearCheckboxes(fs.add);
+                         updateCounter(cnt.add, 0, state.addMax !== undefined ? state.addMax : 14);
+                     }
+                     break;
+             }
+             checkIfCanFinish();
+         }
+
+        function checkIfCanFinish() {
+            console.log("checkIfCanFinish: Verificando...");
+            const itemValid = validateCurrentOrderItem();
+            const paymentSelected = state.payment && !fs.payment.hasAttribute('disabled');
+            const deliverySelected = state.delivery && !fs.delivery.hasAttribute('disabled');
+
+            console.log(`  -> Item válido: ${itemValid}, Pagamento: ${paymentSelected} (${state.payment}), Entrega: ${deliverySelected} (${state.delivery})`);
+
+            const canProceedCurrentItem = itemValid && paymentSelected && deliverySelected;
+
+            btnAdd.disabled = !canProceedCurrentItem;
+            btnFinish.disabled = !(canProceedCurrentItem || (orders.length > 0 && paymentSelected && deliverySelected));
+
+            console.log(`  -> btnAdd.disabled: ${btnAdd.disabled}, btnFinish.disabled: ${btnFinish.disabled}`);
         }
-        
-        // --- LÓGICA DE GERAÇÃO DE RESUMO E RENDERIZAÇÃO DE PEDIDOS ---
+
         function renderOrders() {
+            console.log("renderOrders: Renderizando. Pedidos:", orders);
             ordersSec.style.display = orders.length > 0 ? 'block' : 'none';
             ordersList.innerHTML = '';
-            let totalGeral = 0;
-            const deliveryFeeMatch = state.delivery ? state.delivery.match(/R\$ (\d+[,.]\d{2})/) : null;
-            const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
+            let totalGeralItensPagina = 0;
+            let taxaEntregaPagina = 0;
+            let localEntregaPagina = "Retirada";
 
-            orders.forEach((order, i) => {
-                let subTotal = order.produtoPrincipal.price;
-                let details = '';
-                if(order.produtoPrincipal.type === 'acai') {
-                    const formatList = (list) => list && !list.some(v => v.toLowerCase().includes('nenhum')) ? list.join(', ') : 'Nenhum';
-                    details += `Frutas: ${formatList(order.frutas)}<br>`;
-                    details += `Cremes: ${formatList(order.cremes)}<br>`;
-                    details += `Acompanhamentos: ${formatList(order.accomp)}<br>`;
-                    details += `Coberturas: ${formatList(order.cover)}<br>`;
-                    if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
-                        order.add.forEach(addon => subTotal += 1.00);
-                        details += `Adicionais: ${formatList(order.add)}`;
-                    } else {
-                        details += `Adicionais: Nenhum`;
-                    }
-                } else if(order.produtoPrincipal.type === 'produto_especial') {
-                    details += `Sabor: ${order.selectedFlavor || 'N/A'}`;
-                }
-                
+            orders.forEach((orderItem, i) => {
                 const li = document.createElement('li');
-                li.innerHTML = `<strong>Item ${i+1}: ${order.produtoPrincipal.name}</strong><br>${details}<br><strong>Subtotal: R$ ${subTotal.toFixed(2).replace('.', ',')}</strong>`;
+                let itemDetailsHtml = '';
+                let subTotalItem = 0;
+
+                const itemNameForDisplay = orderItem.produtoPrincipal?.name || 'Produto Desconhecido';
+                subTotalItem = orderItem.produtoPrincipal?.price || 0;
+
+                if (orderItem.produtoPrincipal?.type === 'produto_especial' && orderItem.produtoPrincipal?.id === 'copo_felicidade') {
+                    itemDetailsHtml += `Sabor: ${orderItem.selectedCopoFelicidadeFlavor || 'Não especificado'}`;
+                } else { 
+                    const displayFrutas = orderItem.frutas?.length > 0 && !orderItem.frutas.includes('Nenhuma') ? orderItem.frutas.join(', ') : 'Nenhuma';
+                    const displayCremes = orderItem.cremes?.length > 0 && !orderItem.cremes.includes('Nenhuma') ? orderItem.cremes.join(', ') : 'Nenhum';
+                    const displayAccomp = orderItem.accomp?.length > 0 && !orderItem.accomp.includes('Nenhuma') ? orderItem.accomp.join(', ') : 'Nenhum';
+                    const displayCover = orderItem.cover?.length > 0 && !orderItem.cover.includes('Nenhuma') ? orderItem.cover.join(', ') : 'Nenhuma';
+                    itemDetailsHtml += `Frutas: ${displayFrutas}<br>Cremes: ${displayCremes}<br>Acompanhamentos: ${displayAccomp}<br>Coberturas: ${displayCover}<br>`;
+
+                    let displayAdd = 'Nenhum Adicional';
+                    if (orderItem.add && orderItem.add.length > 0 && !orderItem.add.includes('Nenhum Adicional')) {
+                        displayAdd = orderItem.add.map(item => item.split(' - R$ ')[0]).join(', ');
+                         orderItem.add.forEach(addon => {
+                            if (addon.includes('R$')) {
+                                const addonPriceMatch = addon.match(/R\$ (\d+[,.]\d{2})/);
+                                if (addonPriceMatch) subTotalItem += parseFloat(addonPriceMatch[1].replace(',', '.'));
+                            }
+                        });
+                    }
+                    itemDetailsHtml += `Adicionais: ${displayAdd}`;
+                }
+                li.innerHTML = `<strong>Item ${i + 1}:</strong> ${itemNameForDisplay}<br>${itemDetailsHtml}<br><strong>Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}</strong>`;
+                totalGeralItensPagina += subTotalItem;
+
+                if (i === 0 && orderItem.delivery) {
+                    localEntregaPagina = orderItem.delivery.split(' - R$ ')[0];
+                    if (orderItem.delivery.includes('R$')) {
+                        const deliveryPriceMatch = orderItem.delivery.match(/R\$ (\d+[,.]\d{2})/);
+                        if (deliveryPriceMatch) taxaEntregaPagina = parseFloat(deliveryPriceMatch[1].replace(',', '.'));
+                    }
+                }
                 ordersList.appendChild(li);
-                totalGeral += subTotal;
             });
-            totalGeral += deliveryFee;
-            orderPageTotalValueEl.textContent = totalGeral.toFixed(2).replace('.', ',');
+
+            let totalFinalPagina = totalGeralItensPagina;
+            if (localEntregaPagina !== "Retirada" && taxaEntregaPagina > 0) {
+                totalFinalPagina += taxaEntregaPagina;
+            }
+
+            if (orderPageTotalValueEl) orderPageTotalValueEl.textContent = totalFinalPagina.toFixed(2).replace('.', ',');
         }
 
         function generateSummaryText() {
-            let totalGeral = 0;
-            const itemsPayload = [];
-            let adminText = "Blue Açaí - Novo Pedido!\n\n";
+            if (orders.length === 0) return "Nenhum item no pedido.";
+            let summaryText = "Blue Açaí - Novo Pedido!\n\n";
+            let totalGeralPedido = 0;
+            let deliveryFee = 0;
+            let deliveryLocation = "Retirada";
+            let paymentMethod = orders[0].payment || "Não especificado";
 
-            orders.forEach((order, i) => {
-                let subTotal = order.produtoPrincipal.price;
-                const itemPayload = { produto: order.produtoPrincipal.name, tipo: order.produtoPrincipal.type };
-                
-                adminText += `*Item ${i+1}:* ${order.produtoPrincipal.name}\n`;
+            orders.forEach((orderItem, i) => {
+                let subTotalItem = 0;
+                const itemName = orderItem.produtoPrincipal?.name || 'Produto Desconhecido';
+                subTotalItem = orderItem.produtoPrincipal?.price || 0;
 
-                if(order.produtoPrincipal.type === 'acai') {
-                    const formatList = (list) => list && !list.some(v => v.toLowerCase().includes('nenhum')) ? list.join(', ') : 'Nenhum';
-                    itemPayload.frutas = formatList(order.frutas);
-                    itemPayload.cremes = formatList(order.cremes);
-                    itemPayload.acompanhamentos = formatList(order.accomp);
-                    itemPayload.coberturas = formatList(order.cover);
+                summaryText += `*Item ${i + 1}:*\n`;
+                summaryText += `Produto: ${itemName}\n`;
 
-                    // Lógica para Adicionais
-                    if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
-                        order.add.forEach(addon => subTotal += 1.00);
-                        const formattedAdicionais = order.add.map(a => a.split(' - R$')[0].toUpperCase()).join(', ');
-                        itemPayload.adicionais = formattedAdicionais;
-                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* *${itemPayload.adicionais}*\n`;
+                if (orderItem.produtoPrincipal?.type === 'produto_especial' && orderItem.produtoPrincipal?.id === 'copo_felicidade') {
+                    summaryText += `Sabor: ${orderItem.selectedCopoFelicidadeFlavor || 'N/A'}\n`;
+                } else {
+                    summaryText += `Frutas: ${orderItem.frutas?.includes('Nenhuma') ? 'Nenhuma' : (orderItem.frutas?.join(', ') || 'Nenhuma')}\n`;
+                    summaryText += `Cremes: ${orderItem.cremes?.includes('Nenhuma') ? 'Nenhuma' : (orderItem.cremes?.join(', ') || 'Nenhum')}\n`;
+                    summaryText += `Acompanhamentos: ${orderItem.accomp?.includes('Nenhuma') ? 'Nenhuma' : (orderItem.accomp?.join(', ') || 'Nenhum')}\n`;
+                    summaryText += `Coberturas: ${orderItem.cover?.includes('Nenhuma') ? 'Nenhuma' : (orderItem.cover?.join(', ') || 'Nenhuma')}\n`;
+                    if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
+                        const adicionaisNomes = orderItem.add.map(a => a.split(' - R$ ')[0]).join(', ');
+                        summaryText += `Adicionais: ${adicionaisNomes}\n`;
+                        orderItem.add.forEach(addon => {
+                            const pricePart = addon.split(' - R$ ')[1];
+                            if(pricePart) subTotalItem += parseFloat(pricePart.replace(',', '.'));
+                        });
                     } else {
-                        itemPayload.adicionais = 'Nenhum';
-                        adminText += `*Frutas:* ${itemPayload.frutas}\n*Cremes:* ${itemPayload.cremes}\n*Acompanhamentos:* ${itemPayload.acompanhamentos}\n*Coberturas:* ${itemPayload.coberturas}\n*Adicionais:* ${itemPayload.adicionais}\n`;
+                        summaryText += `Adicionais: Nenhum Adicional\n`;
                     }
-                } else if (order.produtoPrincipal.type === 'produto_especial') {
-                    itemPayload.sabor = order.selectedFlavor || 'N/A';
-                    adminText += `*Sabor:* ${itemPayload.sabor}\n`;
                 }
+                summaryText += `Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}\n\n`;
+                totalGeralPedido += subTotalItem;
 
-                adminText += '\n'; // Linha em branco entre os itens
-
-                itemPayload.totalPedido = subTotal.toFixed(2);
-                itemsPayload.push(itemPayload);
-                totalGeral += subTotal;
+                if (i === 0) {
+                    deliveryLocation = orderItem.delivery ? orderItem.delivery.split(' - R$ ')[0] : "Retirada";
+                    if (orderItem.delivery && orderItem.delivery.includes('R$')) {
+                        const deliveryPriceMatch = orderItem.delivery.match(/R\$ (\d+[,.]\d{2})/);
+                        if (deliveryPriceMatch) deliveryFee = parseFloat(deliveryPriceMatch[1].replace(',', '.'));
+                    }
+                }
             });
-            
-            const deliveryFeeMatch = state.delivery ? state.delivery.match(/R\$ (\d+[,.]\d{2})/) : null;
-            const deliveryFee = deliveryFeeMatch ? parseFloat(deliveryFeeMatch[1].replace(',', '.')) : 0;
-            totalGeral += deliveryFee;
 
-            adminText += `------------------------------\n`;
-            adminText += `*Pagamento:* ${state.payment}\n`;
-            adminText += `*Entrega/Retirada:* ${state.delivery.split(' - R$')[0]}\n`;
-            if (deliveryFee > 0) adminText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
-            adminText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeral.toFixed(2).replace('.', ',')}*\n`;
-
-            return { admin: adminText, items: itemsPayload, total: totalGeral };
+            summaryText += `------------------------------\n`;
+            summaryText += `*Forma de Pagamento:* ${paymentMethod}\n`;
+            summaryText += `*Entrega/Retirada:* ${deliveryLocation}\n`;
+            if (deliveryLocation !== "Retirada" && deliveryFee > 0) {
+                summaryText += `*Taxa de Entrega:* R$ ${deliveryFee.toFixed(2).replace('.', ',')}\n`;
+                totalGeralPedido += deliveryFee;
+            }
+            summaryText += `*TOTAL GERAL DO PEDIDO: R$ ${totalGeralPedido.toFixed(2).replace('.', ',')}*\n`;
+            summaryEl.textContent = summaryText;
+            return summaryText;
         }
 
-        // --- INICIALIZAÇÃO ---
+        btnAdd.onclick = () => {
+            if (validateCurrentOrderItem() && state.payment && state.delivery) {
+                orders.push(JSON.parse(JSON.stringify(state)));
+                renderOrders();
+                const savedPayment = state.payment;
+                const savedDelivery = state.delivery;
+                resetPartialForItemSelection();
+                state.payment = savedPayment;
+                state.delivery = savedDelivery;
+                if (savedPayment) document.querySelector(`input[name="payment"][value="${savedPayment}"]`)?.closest('label')?.classList.add('selected-radio');
+                if (savedDelivery) document.querySelector(`input[name="delivery"][value="${savedDelivery}"]`)?.closest('label')?.classList.add('selected-radio');
+                if (pixInfoDiv && state.payment === 'Pix') pixInfoDiv.classList.remove('hidden'); else if (pixInfoDiv) pixInfoDiv.classList.add('hidden');
+                
+                document.querySelectorAll('.produto-card.selected').forEach(card => card.classList.remove('selected'));
+                clearRadios('produtoPrincipal');
+
+                checkIfCanFinish();
+            } else {
+                alert("Por favor, complete todas as seleções obrigatórias do item atual, incluindo forma de pagamento e entrega/retirada.");
+            }
+        };
+
+        btnFinish.onclick = async () => {
+            const currentItemValidAndComplete = validateCurrentOrderItem() && state.payment && state.delivery;
+
+            if (currentItemValidAndComplete) {
+                const lastOrderClean = orders.length > 0 ? JSON.stringify(cleanOrderForComparison(orders[orders.length - 1])) : null;
+                const currentStateClean = JSON.stringify(cleanOrderForComparison(state));
+                if (!lastOrderClean || currentStateClean !== lastOrderClean || orders.length === 0) {
+                    orders.push(JSON.parse(JSON.stringify(state)));
+                }
+            } else if (orders.length === 0) {
+                 alert("Seu pedido está vazio ou o item atual não foi completamente preenchido.");
+                 return;
+            }
+
+            if (orders.length > 0) {
+                renderOrders();
+                const summaryTextContent = generateSummaryText();
+                const phoneNumber = '5598985016035';
+                const encodedText = encodeURIComponent(summaryTextContent);
+                const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+
+                let payloadTotalGeral = 0;
+                const payloadItems = orders.map(order => {
+                    let itemSubTotal = 0;
+                    const itemDetails = {
+                        produto: order.produtoPrincipal.name,
+                        tipo: order.produtoPrincipal.type,
+                    };
+                    itemSubTotal = order.produtoPrincipal.price;
+                    if (order.produtoPrincipal.type === 'acai') {
+                        itemDetails.frutas = order.frutas?.join(', ') || 'Nenhuma';
+                        itemDetails.cremes = order.cremes?.join(', ') || 'Nenhum';
+                        itemDetails.acompanhamentos = order.accomp?.join(', ') || 'Nenhum';
+                        itemDetails.coberturas = order.cover?.join(', ') || 'Nenhuma';
+                        itemDetails.adicionais = (order.add && !order.add.includes('Nenhum Adicional')) ? order.add.map(a => a.split(' - R$')[0]).join(', ') : 'Nenhum Adicional';
+                         if (order.add && !order.add.includes('Nenhum Adicional')) {
+                            order.add.forEach(addon => {
+                                const pricePart = addon.split(' - R$ ')[1];
+                                if (pricePart) itemSubTotal += parseFloat(pricePart.replace(',', '.'));
+                            });
+                        }
+                    } else if (order.produtoPrincipal.type === 'produto_especial' && order.produtoPrincipal.id === 'copo_felicidade') {
+                        itemDetails.sabor = order.selectedCopoFelicidadeFlavor;
+                    }
+                    itemDetails.totalPedido = itemSubTotal.toFixed(2);
+                    payloadTotalGeral += itemSubTotal;
+                    return itemDetails;
+                });
+
+                let taxaEntregaServidor = 0;
+                if (orders[0].delivery && orders[0].delivery.includes('R$')) {
+                    const matchTaxa = orders[0].delivery.match(/R\$ (\d+[,.]\d{2})/);
+                    if (matchTaxa) taxaEntregaServidor = parseFloat(matchTaxa[1].replace(',', '.'));
+                }
+                if (orders[0].delivery.split(' - R$ ')[0] !== "Retirada") {
+                     payloadTotalGeral += taxaEntregaServidor;
+                }
+
+                const payloadParaServidor = {
+                    pedidoCompleto: payloadItems.map(item => ({ ...item, totalPedido: item.subTotalItem ? item.subTotalItem.toFixed(2) : item.totalPedido })),
+                    valorTotal: parseFloat(payloadTotalGeral.toFixed(2)),
+                    metodoPagamento: orders[0].payment,
+                    tipoEntrega: orders[0].delivery,
+                    resumoParaAdmin: summaryTextContent
+                };
+                
+                try {
+                    btnFinish.disabled = true; btnAdd.disabled = true;
+                    const response = await fetch('/api/orders', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payloadParaServidor),
+                    });
+                    if (response.ok) {
+                        alert("Pedido enviado com sucesso! Você será redirecionado para o WhatsApp.");
+                        orders = []; await resetForm(); window.location.href = whatsappURL;
+                    } else {
+                        const errorText = await response.text();
+                        alert(`Erro ao registrar pedido (Status: ${response.status}). Tente novamente ou envie manualmente.\nResumo:\n${summaryTextContent}`);
+                        checkIfCanFinish();
+                    }
+                } catch (error) {
+                    alert(`Erro de conexão. Verifique sua internet ou envie manualmente.\nResumo:\n${summaryTextContent}`);
+                    checkIfCanFinish();
+                }
+            } else {
+                alert("Adicione pelo menos um item ao pedido.");
+            }
+        };
+
+        function cleanOrderForComparison(orderState) {
+            if (!orderState) return null;
+            const clean = { ...orderState };
+            delete clean.fMax; delete clean.cMax; delete clean.aMax; delete clean.coMax; delete clean.addMax;
+            delete clean.payment; delete clean.delivery;
+            return clean;
+        }
+
+        btnCancel.onclick = async () => {
+            if (confirm("Tem certeza que deseja cancelar o pedido e limpar seleções?")) {
+                orders = []; await resetForm();
+            }
+        };
+
+         async function resetForm() {
+             state = {}; orders = [];
+             renderOrders();
+             if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
+             form.querySelectorAll('input:not([disabled])').forEach(input => {
+                 if(input.type === 'checkbox' || input.type === 'radio') input.checked = false;
+             });
+             document.querySelectorAll('.selected-radio, .produto-card.selected').forEach(el => el.classList.remove('selected', 'selected-radio'));
+             
+             const allFieldsets = form.querySelectorAll('fieldset');
+             allFieldsets.forEach(fset => {
+                 if (fset.id !== 'fsProdutoPrincipal') disable(fset); else enable(fset);
+             });
+             disable(fs.copoFelicidadeFlavors);
+             
+             await fetchAndApplyItemAvailability();
+             
+             updateCounter(cnt.frutas, 0, '?'); updateCounter(cnt.cremes, 0, '?');
+             updateCounter(cnt.accomp, 0, '?'); updateCounter(cnt.cover, 0, '?');
+             updateCounter(cnt.add, 0, 14);
+
+             btnAdd.disabled = true; btnFinish.disabled = true;
+             console.log("resetForm: Concluído.");
+         }
+
+         function disableAllFieldsetsInForm() {
+             form.querySelectorAll('fieldset').forEach(disable);
+         }
+
         document.addEventListener('DOMContentLoaded', () => {
             resetForm();
         });
