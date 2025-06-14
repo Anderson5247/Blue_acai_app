@@ -55,6 +55,40 @@ app.post('/api/items', (req, res) => {
     });
 });
 
+// NOVA ROTA: Atualizar o status da loja (aberto/fechado) e a mensagem
+app.post('/api/shop-info', (req, res) => {
+    const { isOpen, closedMessage } = req.body;
+
+    fs.readFile(itemsFilePath, 'utf8', (err, data) => {
+        if (err) {
+            console.error("Erro ao ler items.json para atualizar o status:", err);
+            return res.status(500).send('Erro ao ler dados dos itens.');
+        }
+        try {
+            const itemsData = JSON.parse(data);
+            
+            // Inicializa shopInfo se não existir
+            if (!itemsData.shopInfo) {
+                itemsData.shopInfo = {};
+            }
+
+            itemsData.shopInfo.isOpen = isOpen;
+            itemsData.shopInfo.closedMessage = closedMessage;
+
+            fs.writeFile(itemsFilePath, JSON.stringify(itemsData, null, 2), 'utf8', (writeErr) => {
+                if (writeErr) {
+                    console.error("Erro ao salvar status da loja em items.json:", writeErr);
+                    return res.status(500).send('Erro ao salvar o status da loja.');
+                }
+                res.json({ message: 'Status da loja atualizado com sucesso!' });
+            });
+        } catch (parseError) {
+            console.error("Erro ao fazer parse do items.json para atualizar status:", parseError);
+            res.status(500).send('Erro interno ao processar dados dos itens.');
+        }
+    });
+});
+
 // --- ROTAS PARA PEDIDOS ---
 
 // API: Registrar um novo pedido
