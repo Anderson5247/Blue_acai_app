@@ -628,8 +628,14 @@
 
             // Listeners para checkboxes de Açaí
             const setupChecks = (fieldset, max, key) => {
-                const checkboxes = fieldset.querySelectorAll('input[type="checkbox"]');
+                // CLONE-AND-REPLACE: Limpa listeners antigos para garantir que os limites sejam atualizados
+                const originalBox = fieldset.querySelector('.grid-2');
+                const newBox = originalBox.cloneNode(true);
+                originalBox.parentNode.replaceChild(newBox, originalBox);
+                
+                const checkboxes = newBox.querySelectorAll('input[type="checkbox"]');
                 const noneCheckbox = Array.from(checkboxes).find(c => c.value.toLowerCase().includes('nenhum'));
+                
                 state[key] = []; // Reset no estado ao configurar
                 if (noneCheckbox) {
                     noneCheckbox.checked = true;
@@ -655,7 +661,7 @@
                             count = state[key].filter(v => !v.toLowerCase().includes('nenhum')).length;
                         }
                         
-                        if (count === 0 && noneCheckbox) {
+                        if (count === 0 && noneCheckbox && !noneCheckbox.disabled) {
                             noneCheckbox.checked = true;
                             state[key] = [noneCheckbox.value];
                         }
@@ -763,7 +769,7 @@
                     details += `Cremes: ${formatList(order.cremes)}<br>`;
                     details += `Acompanhamentos: ${formatList(order.accomp)}<br>`;
                     details += `Coberturas: ${formatList(order.cover)}<br>`;
-                    if (order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
+                    if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
                         order.add.forEach(addon => subTotal += 1.00);
                         details += `Adicionais: ${formatList(order.add)}`;
                     } else {
@@ -798,16 +804,18 @@
                     itemPayload.cremes = formatList(order.cremes);
                     itemPayload.acompanhamentos = formatList(order.accomp);
                     itemPayload.coberturas = formatList(order.cover);
-                    if (order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
+                    if (order.wantAdd === 'Sim' && order.add && !order.add.some(v => v.toLowerCase().includes('nenhum'))) {
                         order.add.forEach(addon => subTotal += 1.00);
                         itemPayload.adicionais = formatList(order.add);
                     } else {
                         itemPayload.adicionais = 'Nenhum';
                     }
+                    adminText += `Frutas: ${itemPayload.frutas}\nCremes: ${itemPayload.cremes}\nAcompanhamentos: ${itemPayload.acompanhamentos}\nCoberturas: ${itemPayload.coberturas}\nAdicionais: ${itemPayload.adicionais}\n`;
+
                 } else if (order.produtoPrincipal.type === 'produto_especial') {
                     itemPayload.sabor = order.selectedFlavor || 'N/A';
+                    adminText += `Sabor: ${itemPayload.sabor}\n`;
                 }
-                adminText += `Sabor: ${itemPayload.sabor || 'N/A para Açaí'}\n`; // Ajuste para o texto admin
                 itemPayload.totalPedido = subTotal.toFixed(2);
                 itemsPayload.push(itemPayload);
                 totalGeral += subTotal;
@@ -833,3 +841,4 @@
     </script>
 </body>
 </html>
+}
