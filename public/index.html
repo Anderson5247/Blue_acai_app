@@ -65,7 +65,7 @@
             opacity: .6;
         }
 
-        fieldset[disabled] label {
+        fieldset[disabled] label, fieldset[disabled] input, fieldset[disabled] textarea {
             pointer-events: none;
         }
 
@@ -321,28 +321,28 @@
                     </div>
                 </fieldset>
 
+                <fieldset id="fsDelivery" disabled>
+                    <legend>9. Entrega ou Retirada <span class="section-status">(Obrigatório)</span></legend>
+                    <div class="grid-2">
+                        <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
+                        <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
+                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral (R$ 5.00)</label>
+                    </div>
+                </fieldset>
+                
                 <fieldset id="fsAddress" style="display: none;">
-                    <legend>9. Endereço para Entrega <span class="section-status">(Obrigatório)</span></legend>
+                    <legend>10. Endereço para Entrega <span class="section-status">(Obrigatório)</span></legend>
                     <div>
                         <textarea id="addressInput" rows="3" placeholder="Ex: Rua, Número, Bairro, Ponto de Referência..."></textarea>
                     </div>
                 </fieldset>
 
                 <fieldset id="fsPayment" disabled>
-                    <legend>10. Forma de Pagamento <span class="section-status">(Obrigatório)</span></legend>
+                    <legend>11. Forma de Pagamento <span class="section-status">(Obrigatório)</span></legend>
                     <div class="grid-2">
                         <label><input type="radio" name="payment" value="Pix" required />Pix</label>
                         <label><input type="radio" name="payment" value="Dinheiro" />Dinheiro</label>
                         <label><input type="radio" name="payment" value="Cartão" />Cartão</label>
-                    </div>
-                </fieldset>
-
-                <fieldset id="fsDelivery" disabled>
-                    <legend>11. Entrega ou Retirada <span class="section-status">(Obrigatório)</span></legend>
-                    <div class="grid-2">
-                        <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
-                        <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
-                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral (R$ 5.00)</label>
                     </div>
                 </fieldset>
 
@@ -389,7 +389,7 @@
         askAdd: document.getElementById('fsAskAdd'),
         add: document.getElementById('fsAdd'),
         clientName: document.getElementById('fsClientName'),
-        address: document.getElementById('fsAddress'), // NOVO
+        address: document.getElementById('fsAddress'),
         payment: document.getElementById('fsPayment'),
         delivery: document.getElementById('fsDelivery')
     };
@@ -411,7 +411,7 @@
     const pixInfoDiv = document.getElementById('pixInfo');
     const orderPageTotalValueEl = document.getElementById('orderPageTotalValue');
     const clientNameInput = document.getElementById('clientName');
-    const addressInput = document.getElementById('addressInput'); // NOVO
+    const addressInput = document.getElementById('addressInput');
 
     const formCard = document.querySelector('#formPedido').closest('.card');
     const shopClosedContainer = document.getElementById('shopClosedContainer');
@@ -421,7 +421,6 @@
     let orders = [];
     let allItemsData = {};
 
-    // --- FUNÇÕES DE UTILIDADE (enable, disable, clearCheckboxes, clearRadios) ---
     const enable = el => { if (el) el.removeAttribute('disabled'); };
     const disable = el => { if (el) el.setAttribute('disabled', ''); };
     function clearCheckboxes(fieldset) { if (fieldset) fieldset.querySelectorAll('input[type="checkbox"]:checked:not([disabled])').forEach(chk => chk.checked = false); }
@@ -542,7 +541,7 @@
             setupRadioListener('payment');
             setupRadioListener('delivery');
             clientNameInput.addEventListener('input', checkIfCanFinish);
-            addressInput.addEventListener('input', checkIfCanFinish); // NOVO
+            addressInput.addEventListener('input', checkIfCanFinish);
 
             [fs.clientName, fs.payment, fs.delivery].forEach(enable);
 
@@ -628,7 +627,6 @@
                     const deliveryRadio = document.querySelector(`input[name="delivery"][value="${state.delivery}"]`);
                     if(deliveryRadio) {
                         deliveryRadio.closest('label')?.classList.add('selected-radio');
-                        // MODIFICADO: Mantém o campo de endereço visível se a entrega já estava selecionada
                         if(state.delivery !== 'Retirada') fs.address.style.display = 'block';
                     }
                 }
@@ -694,12 +692,12 @@
                 ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
 
                 if (name === 'delivery') {
-                    // ##### LÓGICA PARA MOSTRAR/ESCONDER ENDEREÇO #####
                     if (value === 'Retirada') {
                         fs.address.style.display = 'none';
-                        addressInput.value = ''; // Limpa o campo para não ser validado
+                        addressInput.value = '';
                     } else {
                         fs.address.style.display = 'block';
+                        enable(fs.address); // Garante que o campo esteja habilitado
                     }
                 }
 
@@ -806,18 +804,22 @@
         checkIfCanFinish();
     }
 
+    // ##### FUNÇÃO DE VALIDAÇÃO CORRIGIDA #####
     function checkIfCanFinish() {
         const itemValid = validateCurrentOrderItem();
+        const clientNameFilled = clientNameInput.value.trim() !== '';
         const paymentSelected = !!state.payment;
         const deliverySelected = !!state.delivery;
-        const clientNameFilled = clientNameInput.value.trim() !== '';
-        // ##### VALIDAÇÃO DO ENDEREÇO #####
-        const addressOk = state.delivery === 'Retirada' || (state.delivery && addressInput.value.trim() !== '');
+        const addressOk = (state.delivery === 'Retirada') || (deliverySelected && addressInput.value.trim() !== '');
 
-        const canProceed = itemValid && paymentSelected && deliverySelected && clientNameFilled && addressOk;
+        const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
 
         btnAdd.disabled = !canProceed;
-        btnFinish.disabled = !(canProceed || (orders.length > 0 && paymentSelected && deliverySelected && clientNameFilled && addressOk));
+
+        const hasItemsInCart = orders.length > 0;
+        const globalFieldsOkForFinish = clientNameFilled && paymentSelected && deliverySelected && addressOk;
+
+        btnFinish.disabled = !((hasItemsInCart && globalFieldsOkForFinish) || canProceed);
     }
 
     function renderOrders() {
@@ -885,7 +887,6 @@
         const address = addressInput.value.trim();
         let summaryText = `Blue Açaí - *Novo Pedido!*\n\n*Cliente:* ${clientName}\n`;
 
-        // ##### ADICIONA O ENDEREÇO AO RESUMO #####
         if (orders[0].delivery !== 'Retirada' && address) {
             summaryText += `*Endereço:* ${address}\n`;
         }
@@ -936,12 +937,11 @@
         return summaryText;
     }
 
+    // ##### BOTÃO 'ADICIONAR' CORRIGIDO #####
     btnAdd.onclick = () => {
-        if (!checkIfCanFinish() && !btnAdd.disabled) { // Verificação redundante para segurança
-             alert("Por favor, complete todas as seleções obrigatórias, incluindo seu nome, endereço (se for entrega), forma de pagamento e tipo de entrega.");
-             return;
-        }
-        state.address = addressInput.value; // Salva o endereço no estado do item
+        if (btnAdd.disabled) return; // Não faz nada se o botão estiver desabilitado
+
+        state.address = addressInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
         renderOrders();
         
@@ -956,7 +956,10 @@
             const deliveryRadio = document.querySelector(`input[name="delivery"][value="${savedDelivery}"]`);
             if (deliveryRadio) {
                 deliveryRadio.closest('label')?.classList.add('selected-radio');
-                if (savedDelivery !== 'Retirada') fs.address.style.display = 'block';
+                if (savedDelivery !== 'Retirada') {
+                    fs.address.style.display = 'block';
+                    enable(fs.address);
+                }
             }
         }
         if (pixInfoDiv && state.payment === 'Pix') pixInfoDiv.classList.remove('hidden'); else if (pixInfoDiv) pixInfoDiv.classList.add('hidden');
@@ -968,19 +971,14 @@
     };
 
     btnFinish.onclick = async () => {
-        if (orders.length === 0 && !validateCurrentOrderItem()) {
-             alert("Seu pedido está vazio. Adicione ao menos um item.");
-             return;
+        if (btnFinish.disabled) {
+            alert("Por favor, complete todos os campos obrigatórios para finalizar o pedido.");
+            return;
         }
         
-        // Validação final de campos globais
-        if (!clientNameInput.value.trim()) { alert("Por favor, informe seu nome."); clientNameInput.focus(); return; }
-        if (state.delivery !== 'Retirada' && !addressInput.value.trim()) { alert("Por favor, informe o endereço para entrega."); addressInput.focus(); return; }
-
-
         const currentItemIsPending = !!state.produtoPrincipal;
-        if (currentItemIsPending && checkIfCanFinish()) {
-             state.address = addressInput.value;
+        if (currentItemIsPending) {
+             state.address = addressInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
         
@@ -1011,7 +1009,7 @@
         form.reset();
         clientNameInput.value = '';
         addressInput.value = '';
-        fs.address.style.display = 'none'; // Esconde o campo de endereço
+        fs.address.style.display = 'none';
         renderOrders();
         if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
         
