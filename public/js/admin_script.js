@@ -1,3 +1,5 @@
+// public/js/admin_script.js
+
 document.addEventListener('DOMContentLoaded', () => {
     // --- SELETORES PARA O STATUS DA LOJA ---
     const shopStatusToggle = document.getElementById('shopStatusToggle');
@@ -27,7 +29,16 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!shopStatusToggle || !closedMessageText) return;
 
             const isOpen = shopStatusToggle.checked;
-            const closedMessage = closedMessageText.value;
+            let messageToSave = closedMessageText.value.trim();
+
+            // ############# INÍCIO DA CORREÇÃO #############
+            // Se o campo de texto foi esvaziado, em vez de salvar uma mensagem vazia,
+            // nós usamos a última mensagem que estava salva no sistema.
+            // Isso previne a exclusão acidental da mensagem de horários.
+            if (messageToSave === '' && currentItemsData.shopInfo && currentItemsData.shopInfo.closedMessage) {
+                messageToSave = currentItemsData.shopInfo.closedMessage;
+            }
+            // ############# FIM DA CORREÇÃO #############
 
             if (shopStatusMessage) {
                 shopStatusMessage.textContent = 'Salvando status...';
@@ -38,7 +49,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/shop-info', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ isOpen, closedMessage })
+                    // Enviamos a `messageToSave` (que pode ser a nova ou a antiga), nunca uma vazia por acidente.
+                    body: JSON.stringify({ isOpen, closedMessage: messageToSave })
                 });
 
                 if (!response.ok) {
@@ -50,6 +62,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     shopStatusMessage.textContent = result.message;
                     shopStatusMessage.style.color = 'green';
                 }
+                // Recarrega os dados para garantir que a interface reflita o que foi salvo
+                await fetchItemsAvailability();
+
             } catch (error) {
                 console.error("Erro ao salvar status da loja:", error);
                 if (shopStatusMessage) {
@@ -92,8 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         for (const categoryKey in currentItemsData) {
             if (Object.hasOwnProperty.call(currentItemsData, categoryKey)) {
-                // Pula a chave 'shopInfo' para não renderizá-la como uma categoria de item
-                if (categoryKey === 'shopInfo') continue;
+                if (categoryKey === 'shopInfo' || categoryKey === 'acai_sizes') continue;
 
                 const categoryItemsArray = currentItemsData[categoryKey];
                 if (!Array.isArray(categoryItemsArray) || categoryItemsArray.length === 0) continue;
@@ -189,8 +203,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 availabilityStatusMessage.style.color = 'orange';
             }
             
-            // Remove shopInfo do objeto a ser salvo para não sobrescrever o status
             const itemsToSave = { ...currentItemsData };
+            
+            // Não queremos salvar a informação da loja junto com a dos itens aqui
+            const shopInfoToPreserve = itemsToSave.shopInfo;
             delete itemsToSave.shopInfo;
 
             const checkboxes = itemsContainer.querySelectorAll('input[type="checkbox"]');
@@ -215,6 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     itemInCollection.available = chk.checked;
                 }
             });
+            
+            // Adiciona a informação da loja de volta para salvar o arquivo completo
+            itemsToSave.shopInfo = shopInfoToPreserve;
 
             try {
                 const response = await fetch('/api/items', {
@@ -239,7 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- SELETORES PARA GERENCIAMENTO DE PEDIDOS (ATUALIZADOS) ---
+    // --- SELETORES PARA GERENCIAMENTO DE PEDIDOS ---
     const ordersReportContainer = document.getElementById('ordersReportContainer');
     const grandTotalAllTimeEl = document.getElementById('grandTotalAllTime');
     const refreshOrdersButton = document.getElementById('refreshOrdersButton');
@@ -249,7 +268,6 @@ document.addEventListener('DOMContentLoaded', () => {
     let allOrdersCache = [];
     let currentViewMode = 'day';
 
-    // --- FUNÇÕES AUXILIARES DE DATA ---
     function getLocalDateKey(isoTimestamp) {
         const date = new Date(isoTimestamp);
         return date.toISOString().split('T')[0];
@@ -273,8 +291,6 @@ document.addEventListener('DOMContentLoaded', () => {
         return date.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
     }
 
-
-    // --- LÓGICA PRINCIPAL DE PEDIDOS ---
     async function fetchAndProcessOrders(forceFetch = false) {
         if (!ordersReportContainer || !grandTotalAllTimeEl) return;
 
@@ -287,7 +303,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 allOrdersCache = await response.json();
                 if (!Array.isArray(allOrdersCache)) {
-                    console.warn("/api/orders não retornou um array. Usando array vazio.");
                     allOrdersCache = [];
                 }
                 allOrdersCache.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
@@ -303,8 +318,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function displayOrdersByGroup(ordersToDisplay, mode) {
-        if (!ordersReportContainer || !grandTotalAllTimeEl) return;
-
         if (!Array.isArray(ordersToDisplay) || ordersToDisplay.length === 0) {
             ordersReportContainer.innerHTML = '<p>Nenhum pedido registrado ainda.</p>';
             grandTotalAllTimeEl.textContent = '0,00';
@@ -312,11 +325,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         const groupedOrders = {};
-        let getKeyFunction;
-
-        if (mode === 'day')    getKeyFunction = getLocalDateKey;
-        else if (mode === 'month') getKeyFunction = getMonthKey;
-        else getKeyFunction = getLocalDateKey;
+        let getKeyFunction = mode === 'month' ? getMonthKey : getLocalDateKey;
 
         ordersToDisplay.forEach(order => {
             if (order.timestamp) {
@@ -325,34 +334,14 @@ document.addEventListener('DOMContentLoaded', () => {
                     groupedOrders[groupKey] = [];
                 }
                 groupedOrders[groupKey].push(order);
-            } else {
-                console.warn("Pedido sem timestamp encontrado:", order);
-                if (!groupedOrders["unknown_date"]) groupedOrders["unknown_date"] = [];
-                groupedOrders["unknown_date"].push(order);
             }
         });
 
         ordersReportContainer.innerHTML = '';
-        let overallGrandTotal = 0;
-        allOrdersCache.forEach(order => {
-            const orderTotal = parseFloat(order.valorTotal);
-            if (!isNaN(orderTotal)) {
-                overallGrandTotal += orderTotal;
-            }
-        });
+        let overallGrandTotal = allOrdersCache.reduce((total, order) => total + (parseFloat(order.valorTotal) || 0), 0);
         grandTotalAllTimeEl.textContent = overallGrandTotal.toFixed(2).replace('.', ',');
 
-        const sortedGroupKeys = Object.keys(groupedOrders).sort((a, b) => {
-            if (a === "unknown_date") return 1;
-            if (b === "unknown_date") return -1;
-            if (mode === 'month') {
-                 const [yearA, monthA] = a.split('-');
-                 const [yearB, monthB] = b.split('-');
-                 return new Date(Date.UTC(parseInt(yearB), parseInt(monthB) - 1)) - new Date(Date.UTC(parseInt(yearA), parseInt(monthA) - 1));
-            }
-            return new Date(b) - new Date(a);
-        });
-
+        const sortedGroupKeys = Object.keys(groupedOrders).sort((a, b) => new Date(b) - new Date(a));
 
         if (sortedGroupKeys.length === 0) {
              ordersReportContainer.innerHTML = '<p>Nenhum pedido para exibir com os filtros atuais.</p>';
@@ -360,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         sortedGroupKeys.forEach(groupKey => {
             const ordersInGroup = groupedOrders[groupKey];
-            let groupTotalValue = 0;
+            let groupTotalValue = ordersInGroup.reduce((total, order) => total + (parseFloat(order.valorTotal) || 0), 0);
 
             const groupContainerDiv = document.createElement('div');
             groupContainerDiv.className = 'group-container';
@@ -369,83 +358,54 @@ document.addEventListener('DOMContentLoaded', () => {
             groupHeaderDiv.className = 'group-header';
 
             const groupTitle = document.createElement('h3');
-            if (groupKey === "unknown_date") {
-                groupTitle.textContent = "Data Desconhecida";
-            } else if (mode === 'day') {
-                groupTitle.textContent = formatDisplayDate(groupKey);
-            } else if (mode === 'month') {
-                groupTitle.textContent = formatDisplayMonth(groupKey);
-            }
+            groupTitle.textContent = mode === 'day' ? formatDisplayDate(groupKey) : formatDisplayMonth(groupKey);
 
             const groupTotalSpan = document.createElement('span');
             groupTotalSpan.className = 'group-total';
+            groupTotalSpan.textContent = `Total: R$ ${groupTotalValue.toFixed(2).replace('.', ',')}`;
 
             groupHeaderDiv.appendChild(groupTitle);
             groupHeaderDiv.appendChild(groupTotalSpan);
             groupContainerDiv.appendChild(groupHeaderDiv);
 
             ordersInGroup.forEach(order => {
-                const orderTotalValue = parseFloat(order.valorTotal || 0);
-                if (!isNaN(orderTotalValue)) {
-                    groupTotalValue += orderTotalValue;
-                }
-
                 const orderDiv = document.createElement('div');
                 orderDiv.className = 'order-item-admin';
-
+                const orderTime = new Date(order.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+                
                 let itemsHtml = '<ul>';
-                if (order.pedidoCompleto && Array.isArray(order.pedidoCompleto)) {
+                 if (order.pedidoCompleto && Array.isArray(order.pedidoCompleto)) {
                     order.pedidoCompleto.forEach(subPedido => {
-                        itemsHtml += `<li>`;
-                        const subPedidoTotal = parseFloat(subPedido.totalPedido || 0);
-
-                        if (subPedido.itemType === 'produto_especial') {
-                            itemsHtml += `<strong>Item:</strong> ${subPedido.name || 'Produto Especial'}<br>`;
-                            if (subPedido.selectedFlavor) {
-                                itemsHtml += `&nbsp;&nbsp;Sabor: ${subPedido.selectedFlavor}<br>`;
-                            }
-                        } else {
-                            itemsHtml += `<strong>Item:</strong> ${subPedido.tamanho || subPedido.produto || 'Açaí'}<br>`;
-                            if (subPedido.frutas && subPedido.frutas.toLowerCase() !== "nenhuma") itemsHtml += `&nbsp;&nbsp;Frutas: ${subPedido.frutas}<br>`;
-                            if (subPedido.cremes && subPedido.cremes.toLowerCase() !== "nenhum") itemsHtml += `&nbsp;&nbsp;Cremes: ${subPedido.cremes}<br>`;
-                            if (subPedido.acompanhamentos && subPedido.acompanhamentos.toLowerCase() !== "nenhum") itemsHtml += `&nbsp;&nbsp;Acompanhamentos: ${subPedido.acompanhamentos}<br>`;
-                            if (subPedido.coberturas && subPedido.coberturas.toLowerCase() !== "nenhuma") itemsHtml += `&nbsp;&nbsp;Coberturas: ${subPedido.coberturas}<br>`;
-                        }
-                        if (subPedido.adicionais && subPedido.adicionais.toLowerCase() !== "nenhum adicional" && subPedido.adicionais.toLowerCase() !== "nenhum") {
-                             itemsHtml += `&nbsp;&nbsp;Adicionais: ${subPedido.adicionais}<br>`;
-                        }
-
-                        itemsHtml += `&nbsp;&nbsp;<strong>Subtotal do Item: R$ ${subPedidoTotal.toFixed(2).replace('.', ',')}</strong>`;
-                        itemsHtml += `</li>`;
+                        const subPedidoTotal = parseFloat(subPedido.totalPedido || subPedido.subTotalItem || 0);
+                        itemsHtml += `<li><strong>Item:</strong> ${subPedido.produto || 'Item'}<br>`;
+                        if (subPedido.sabor) itemsHtml += `&nbsp;&nbsp;Sabor: ${subPedido.sabor}<br>`;
+                        if (subPedido.frutas && !subPedido.frutas.includes("Nenhuma")) itemsHtml += `&nbsp;&nbsp;Frutas: ${subPedido.frutas}<br>`;
+                        if (subPedido.cremes && !subPedido.cremes.includes("Nenhuma")) itemsHtml += `&nbsp;&nbsp;Cremes: ${subPedido.cremes}<br>`;
+                        if (subPedido.acompanhamentos && !subPedido.acompanhamentos.includes("Nenhum")) itemsHtml += `&nbsp;&nbsp;Acompanhamentos: ${subPedido.acompanhamentos}<br>`;
+                        if (subPedido.coberturas && !subPedido.coberturas.includes("Nenhuma")) itemsHtml += `&nbsp;&nbsp;Coberturas: ${subPedido.coberturas}<br>`;
+                        if (subPedido.adicionais && !subPedido.adicionais.includes("Nenhum")) itemsHtml += `&nbsp;&nbsp;Adicionais: ${subPedido.adicionais}<br>`;
+                        itemsHtml += `&nbsp;&nbsp;<strong>Subtotal: R$ ${subPedidoTotal.toFixed(2).replace('.', ',')}</strong></li>`;
                     });
-                } else {
-                    itemsHtml += '<li>Detalhes do item não disponíveis no formato esperado.</li>';
                 }
                 itemsHtml += '</ul>';
 
-                const orderTime = order.timestamp ? new Date(order.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) : "Hora desconhecida";
-
                 orderDiv.innerHTML = `
-                    <h4>Pedido às ${orderTime}</h4>
-                    <p><strong>Valor Total do Pedido: R$ ${orderTotalValue.toFixed(2).replace('.', ',')}</strong></p>
+                    <h4>Pedido de ${order.cliente || 'Cliente não informado'} às ${orderTime}</h4>
+                    <p><strong>Valor Total do Pedido: R$ ${(parseFloat(order.valorTotal) || 0).toFixed(2).replace('.', ',')}</strong></p>
                     <p><strong>Pagamento:</strong> ${order.metodoPagamento || 'N/A'}</p>
                     <p><strong>Entrega/Retirada:</strong> ${order.tipoEntrega || 'N/A'}</p>
-                    <div><strong>Detalhes dos Itens:</strong> ${itemsHtml}</div>
-                    `;
+                    <div><strong>Detalhes:</strong>${itemsHtml}</div>
+                `;
                 groupContainerDiv.appendChild(orderDiv);
             });
-
-            groupTotalSpan.textContent = `Total: R$ ${groupTotalValue.toFixed(2).replace('.', ',')}`;
             ordersReportContainer.appendChild(groupContainerDiv);
         });
     }
 
 
     function updateActiveButton(activeButton) {
-        [viewByDayButton, viewByMonthButton].forEach(button => {
-            if (button) button.classList.remove('active');
-        });
-        if (activeButton) activeButton.classList.add('active');
+        [viewByDayButton, viewByMonthButton].forEach(button => button?.classList.remove('active'));
+        activeButton?.classList.add('active');
     }
 
     if (viewByDayButton) {
@@ -468,11 +428,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- CHAMADAS INICIAIS ---
-    if (document.getElementById('availabilityControl') || document.getElementById('shopStatusControl')) {
-        fetchItemsAvailability();
-    }
-    if (document.getElementById('orderManagement')) {
-        fetchAndProcessOrders(true);
-        if(viewByDayButton) updateActiveButton(viewByDayButton);
-    }
+    fetchItemsAvailability();
+    fetchAndProcessOrders(true);
+    updateActiveButton(viewByDayButton);
 });
