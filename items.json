@@ -223,6 +223,7 @@
       "name": "Copo da Felicidade",
       "description": "Uma experiência única em camadas de sabor.",
       "price": 8.00,
+      "img": "/images/copo-felicidade.jpg",
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
@@ -251,6 +252,7 @@
       "name": "Fatia de Bolo 'Doce Amor'",
       "description": "Deliciosas fatias de bolo para adoçar o seu dia.",
       "price": 7.00,
+      "img": "/images/fatia-bolo.jpg",
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
