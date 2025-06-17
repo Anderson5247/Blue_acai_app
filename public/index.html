@@ -573,7 +573,7 @@
         
         return `
             <label class="produto-card ${disabledClass}" for="${inputId}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}" title="${title}">
-                <img src="${prod.img || '/images/copo-felicidade.jpg'}" alt="${prod.name}" />
+                <img src="${prod.img || '/images/images/default-product.png'}" alt="${prod.name}" />
                 <input type="radio" name="produtoPrincipal" value="${prod.name}" id="${inputId}" required ${inputDisabled}/>
                 <div>
                     <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
