@@ -17,7 +17,7 @@
     {
       "id": "kiwi",
       "name": "Kiwi",
-      "available": false
+      "available": true
     },
     {
       "id": "maca",
@@ -96,7 +96,7 @@
     {
       "id": "uva_passa_acomp",
       "name": "Uva Passa",
-      "available": false
+      "available": true
     }
   ],
   "coberturas": [
@@ -196,7 +196,7 @@
       "id": "uva_passa_add",
       "name": "Uva Passa (Adicional) - R$ 1.00",
       "originalValue": "Uva Passa - R$ 1.00",
-      "available": false
+      "available": true
     },
     {
       "id": "mms_add",
