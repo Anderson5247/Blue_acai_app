@@ -3,6 +3,8 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- SELETORES PARA O STATUS DA LOJA ---
     const shopStatusToggle = document.getElementById('shopStatusToggle');
+    // 1. NOVO SELETOR ADICIONADO
+    const deliveryStatusToggle = document.getElementById('deliveryStatusToggle');
     const closedMessageText = document.getElementById('closedMessageText');
     const saveShopStatusButton = document.getElementById('saveShopStatusButton');
     const shopStatusMessage = document.getElementById('shopStatusMessage');
@@ -19,6 +21,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shopStatusToggle) {
             shopStatusToggle.checked = shopInfo.isOpen;
         }
+        // 2. NOVO BLOCO PARA ATUALIZAR O BOTÃO DE ENTREGA
+        if (deliveryStatusToggle) {
+            deliveryStatusToggle.checked = shopInfo.isDeliveryAvailable;
+        }
         if (closedMessageText) {
             closedMessageText.value = shopInfo.closedMessage;
         }
@@ -26,19 +32,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (saveShopStatusButton) {
         saveShopStatusButton.addEventListener('click', async () => {
-            if (!shopStatusToggle || !closedMessageText) return;
+            if (!shopStatusToggle || !closedMessageText || !deliveryStatusToggle) return;
 
             const isOpen = shopStatusToggle.checked;
+            // 3. ADICIONADA A LEITURA DO NOVO BOTÃO E ENVIO PARA O SERVIDOR
+            const isDeliveryAvailable = deliveryStatusToggle.checked;
             let messageToSave = closedMessageText.value.trim();
 
-            // ############# INÍCIO DA CORREÇÃO #############
-            // Se o campo de texto foi esvaziado, em vez de salvar uma mensagem vazia,
-            // nós usamos a última mensagem que estava salva no sistema.
-            // Isso previne a exclusão acidental da mensagem de horários.
             if (messageToSave === '' && currentItemsData.shopInfo && currentItemsData.shopInfo.closedMessage) {
                 messageToSave = currentItemsData.shopInfo.closedMessage;
             }
-            // ############# FIM DA CORREÇÃO #############
 
             if (shopStatusMessage) {
                 shopStatusMessage.textContent = 'Salvando status...';
@@ -49,8 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const response = await fetch('/api/shop-info', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // Enviamos a `messageToSave` (que pode ser a nova ou a antiga), nunca uma vazia por acidente.
-                    body: JSON.stringify({ isOpen, closedMessage: messageToSave })
+                    // O novo status da entrega é incluído aqui
+                    body: JSON.stringify({ isOpen, closedMessage: messageToSave, isDeliveryAvailable })
                 });
 
                 if (!response.ok) {
@@ -62,7 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     shopStatusMessage.textContent = result.message;
                     shopStatusMessage.style.color = 'green';
                 }
-                // Recarrega os dados para garantir que a interface reflita o que foi salvo
                 await fetchItemsAvailability();
 
             } catch (error) {
@@ -85,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
             currentItemsData = await response.json();
 
-            // Popula os controles de status da loja com os dados recebidos
             if (currentItemsData.shopInfo) {
                 populateShopStatus(currentItemsData.shopInfo);
             }
@@ -158,6 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
                                 flavorCheckbox.dataset.flavorId = flavor.id;
 
                                 const flavorLabel = document.createElement('label');
+
                                 flavorLabel.textContent = flavor.name;
                                 flavorLabel.htmlFor = `flavor-avail-${specialProduct.id}-${flavor.id}`;
 
@@ -205,7 +207,6 @@ document.addEventListener('DOMContentLoaded', () => {
             
             const itemsToSave = { ...currentItemsData };
             
-            // Não queremos salvar a informação da loja junto com a dos itens aqui
             const shopInfoToPreserve = itemsToSave.shopInfo;
             delete itemsToSave.shopInfo;
 
@@ -232,7 +233,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
-            // Adiciona a informação da loja de volta para salvar o arquivo completo
             itemsToSave.shopInfo = shopInfoToPreserve;
 
             try {
