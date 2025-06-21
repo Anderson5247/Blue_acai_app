@@ -57,7 +57,8 @@ app.post('/api/items', (req, res) => {
 
 // NOVA ROTA: Atualizar o status da loja (aberto/fechado) e a mensagem
 app.post('/api/shop-info', (req, res) => {
-    const { isOpen, closedMessage } = req.body;
+    // LINHA MODIFICADA
+    const { isOpen, closedMessage, isDeliveryAvailable } = req.body;
 
     fs.readFile(itemsFilePath, 'utf8', (err, data) => {
         if (err) {
@@ -74,6 +75,8 @@ app.post('/api/shop-info', (req, res) => {
 
             itemsData.shopInfo.isOpen = isOpen;
             itemsData.shopInfo.closedMessage = closedMessage;
+            // NOVA LINHA
+            itemsData.shopInfo.isDeliveryAvailable = isDeliveryAvailable;
 
             fs.writeFile(itemsFilePath, JSON.stringify(itemsData, null, 2), 'utf8', (writeErr) => {
                 if (writeErr) {
