@@ -1,7 +1,8 @@
 {
   "shopInfo": {
     "isOpen": true,
-    "closedMessage": "Horário de Funcionamento da Blue Açaí\n\nSegunda-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nTerça-feira: Fechados.\n\nQuarta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nQuinta-feira:\nNoite: das 18h30 às 21h30.\n\nSexta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nSábado e Domingo:\nNoite: das 18h30 às 21h30.\n\nEstamos localizados na Rua do Porto, Outeiro-Cedral, com opções de retirada na loja ou delivery. Esperamos por você!"
+    "isDeliveryAvailable": true,
+    "closedMessage": "Horário de Funcionamento da Blue Açaí\n\nSegunda-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h00 às 21h30.\n\nTerça-feira: Fechados.\n\nQuarta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nQuinta-feira:\nNoite: das 18h30 às 21h30.\n\nSexta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h00 às 21h30.\n\nSábado e Domingo:\nNoite: das 18h30 às 21h30.\n\nEstamos localizados na Rua do Porto, Outeiro-Cedral, com opções de retirada na loja ou delivery. Esperamos por você!"
   },
   "frutas": [
     {
@@ -33,7 +34,7 @@
   "cremes": [
     {
       "id": "ninho",
-      "name": "Ninho (Zero lactose)",
+      "name": "Ninho",
       "available": true
     },
     {
@@ -134,8 +135,8 @@
   "adicionais": [
     {
       "id": "ovomaltine_add",
-      "name": "Ovomaltine - R$ 1.00",
-      "originalValue": "Ovomaltine - R$ 1.00",
+      "name": "Ovomaltine - R$ 2.00",
+      "originalValue": "Ovomaltine - R$ 2.00",
       "available": true
     },
     {
@@ -176,8 +177,8 @@
     },
     {
       "id": "leite_po_add",
-      "name": "Leite em pó (Adicional) - R$ 1.00",
-      "originalValue": "Leite em pó - R$ 1.00",
+      "name": "Leite em pó (Adicional) - R$ 2.00",
+      "originalValue": "Leite em pó - R$ 2.00",
       "available": true
     },
     {
@@ -200,8 +201,8 @@
     },
     {
       "id": "mms_add",
-      "name": "M&MS - R$ 1.00",
-      "originalValue": "M&MS - R$ 1.00",
+      "name": "M&MS - R$ 2.00",
+      "originalValue": "M&MS - R$ 2.00",
       "available": true
     },
     {
@@ -215,6 +216,36 @@
       "name": "Doce de leite - R$ 1.00",
       "originalValue": "Doce de leite - R$ 1.00",
       "available": true
+    },
+    {
+      "id": "ninho_zero_lactose_add",
+      "name": "Ninho (Zero lactose) - R$ 2.00",
+      "originalValue": "Ninho (Zero lactose) - R$ 2.00",
+      "available": true
+    },
+    {
+      "id": "maracuja_creme_add",
+      "name": "Maracujá (Creme) - R$ 2.00",
+      "originalValue": "Maracujá (Creme) - R$ 2.00",
+      "available": true
+    },
+    {
+      "id": "morango_creme_add_extra",
+      "name": "Morango (Creme) - R$ 2.00",
+      "originalValue": "Morango (Creme) - R$ 2.00",
+      "available": true
+    },
+    {
+      "id": "tutti_frutti_creme_add",
+      "name": "Tutti Frutti (Creme) - R$ 2.00",
+      "originalValue": "Tutti Frutti (Creme) - R$ 2.00",
+      "available": true
+    },
+    {
+      "id": "chocolate_avela_add",
+      "name": "Chocolate c/Avelã (Creme) - R$ 2.00",
+      "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00",
+      "available": true
     }
   ],
   "produtos_especiais": [
@@ -223,7 +254,6 @@
       "name": "Copo da Felicidade",
       "description": "Uma experiência única em camadas de sabor.",
       "price": 8.00,
-      "img": "/images/copo-felicidade.jpg",
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
@@ -252,7 +282,6 @@
       "name": "Fatia de Bolo 'Doce Amor'",
       "description": "Deliciosas fatias de bolo para adoçar o seu dia.",
       "price": 7.00,
-      "img": "/images/fatia-bolo.jpg",
       "available": true,
       "requires_flavor_selection": true,
       "flavors": [
