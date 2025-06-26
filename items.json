@@ -50,7 +50,7 @@
     {
       "id": "tutti_frutti_creme",
       "name": "Tutti Frutti (Creme)",
-      "available": true
+      "available": false
     },
     {
       "id": "chocolate_avela",
@@ -239,7 +239,7 @@
       "id": "tutti_frutti_creme_add",
       "name": "Tutti Frutti (Creme) - R$ 2.00",
       "originalValue": "Tutti Frutti (Creme) - R$ 2.00",
-      "available": true
+      "available": false
     },
     {
       "id": "chocolate_avela_add",
@@ -254,7 +254,7 @@
       "name": "Copo da Felicidade",
       "description": "Uma experiência única em camadas de sabor.",
       "price": 8.00,
-      "available": true,
+      "available": false,
       "requires_flavor_selection": true,
       "flavors": [
         {
@@ -282,7 +282,7 @@
       "name": "Fatia de Bolo 'Doce Amor'",
       "description": "Deliciosas fatias de bolo para adoçar o seu dia.",
       "price": 7.00,
-      "available": true,
+      "available": false,
       "requires_flavor_selection": true,
       "flavors": [
         {
