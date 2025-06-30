@@ -8,7 +8,7 @@
     {
       "id": "morango",
       "name": "Morango",
-      "available": false
+      "available": true
     },
     {
       "id": "banana",
@@ -87,7 +87,7 @@
     {
       "id": "confetes_acomp",
       "name": "Confetes",
-      "available": false
+      "available": true
     },
     {
       "id": "tapioca_acomp",
@@ -149,7 +149,7 @@
       "id": "chocoball_add",
       "name": "Chocoball - R$ 1.00",
       "originalValue": "Chocoball - R$ 1.00",
-      "available": false
+      "available": true
     },
     {
       "id": "amendoim_add",
