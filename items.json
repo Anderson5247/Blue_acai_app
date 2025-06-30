@@ -8,7 +8,7 @@
     {
       "id": "morango",
       "name": "Morango",
-      "available": true
+      "available": false
     },
     {
       "id": "banana",
@@ -40,7 +40,7 @@
     {
       "id": "maracuja",
       "name": "Maracujá",
-      "available": true
+      "available": false
     },
     {
       "id": "morango_creme",
@@ -87,7 +87,7 @@
     {
       "id": "confetes_acomp",
       "name": "Confetes",
-      "available": true
+      "available": false
     },
     {
       "id": "tapioca_acomp",
@@ -149,7 +149,7 @@
       "id": "chocoball_add",
       "name": "Chocoball - R$ 1.00",
       "originalValue": "Chocoball - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "amendoim_add",
@@ -219,15 +219,15 @@
     },
     {
       "id": "ninho_zero_lactose_add",
-      "name": "Ninho (Zero lactose) - R$ 2.00",
-      "originalValue": "Ninho (Zero lactose) - R$ 2.00",
+      "name": "Ninho - R$ 2.00",
+      "originalValue": "Ninho - R$ 2.00",
       "available": true
     },
     {
       "id": "maracuja_creme_add",
       "name": "Maracujá (Creme) - R$ 2.00",
       "originalValue": "Maracujá (Creme) - R$ 2.00",
-      "available": true
+      "available": false
     },
     {
       "id": "morango_creme_add_extra",
