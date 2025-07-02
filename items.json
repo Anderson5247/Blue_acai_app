@@ -255,7 +255,7 @@
       "id": "Abacaxi_creme_add",
       "name": "Abacaxi (Creme) - R$ 2.00",
       "originalValue": "Tutti Frutti (Creme) - R$ 2.00",
-      "available": false
+      "available": true
     },
     {
       "id": "tutti_frutti_creme_add",
