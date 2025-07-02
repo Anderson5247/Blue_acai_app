@@ -38,6 +38,11 @@
       "available": true
     },
     {
+      "id": "ninho_zero_lactose",
+      "name": "Ninho Zero Lactose",
+      "available": true
+    },
+    {
       "id": "maracuja",
       "name": "Maracujá",
       "available": false
@@ -45,6 +50,11 @@
     {
       "id": "morango_creme",
       "name": "Morango (Creme)",
+      "available": true
+    },
+    {
+      "id": "abacaxi",
+      "name": "Abacaxi",
       "available": true
     },
     {
@@ -224,6 +234,12 @@
       "available": true
     },
     {
+      "id": "ninho_creme_zero_lactose_add",
+      "name": "Ninho Zero Lactose (Creme) - R$ 2.00",
+      "originalValue": "Ninho - R$ 2.00",
+      "available": true
+    },
+    {
       "id": "maracuja_creme_add",
       "name": "Maracujá (Creme) - R$ 2.00",
       "originalValue": "Maracujá (Creme) - R$ 2.00",
@@ -234,6 +250,12 @@
       "name": "Morango (Creme) - R$ 2.00",
       "originalValue": "Morango (Creme) - R$ 2.00",
       "available": true
+    },
+    {
+      "id": "Abacaxi_creme_add",
+      "name": "Abacaxi (Creme) - R$ 2.00",
+      "originalValue": "Tutti Frutti (Creme) - R$ 2.00",
+      "available": false
     },
     {
       "id": "tutti_frutti_creme_add",
