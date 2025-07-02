@@ -828,8 +828,7 @@
 
                 let actualSelectedCount = state[key].includes(noneValue) ? 0 : state[key].filter(item => item !== noneValue).length;
 
-                if (max !== undefined && actualSelectedCount > max) {
-                    chk.checked = false;
+if (key !== 'add' && max !== undefined && actualSelectedCount > max) {                    chk.checked = false;
                     state[key] = state[key].filter(item => item !== chk.value);
                     if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
                         noneCheckbox.checked = true; state[key] = [noneValue];
@@ -838,7 +837,7 @@
                     alert(`Máximo ${max} ${key === 'add' ? 'adicionais' : key}.`);
                 }
 
-                updateCounter(counterEl, actualSelectedCount, max);
+            updateCounter(counterEl, actualSelectedCount, max, key);
                 checkIfCanFinish();
             };
             chk.addEventListener('change', new_listener);
@@ -846,7 +845,17 @@
         });
     }
 
-    function updateCounter(element, count, max) { if (element) element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`; }
+    function updateCounter(element, count, max, key) {
+    if (element) {
+        if (key === 'add') {
+            // Para os adicionais, mostra apenas a contagem atual
+            element.textContent = `( ${count} )`;
+        } else {
+            // Para todos os outros, mantém o formato original com o máximo
+            element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
+        }
+    }
+}
 
     function advanceStage(stage) {
         if (stage === 'askAdd') {
