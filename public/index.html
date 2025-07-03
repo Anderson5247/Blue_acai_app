@@ -570,7 +570,7 @@ async function fetchAndApplyItemAvailability() {
         }
         allItemsData = await response.json();
 
-        // Lógica de loja fechada (mantida)
+        // Lógica de loja fechada... (código mantido)
         if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
             if (formCard) formCard.style.display = 'none';
             if (shopClosedContainer) shopClosedContainer.style.display = 'block';
@@ -583,7 +583,7 @@ async function fetchAndApplyItemAvailability() {
         if (formCard) formCard.style.display = 'block';
         if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-        // Renderiza os itens... (mantido)
+        // Renderiza os itens... (código mantido)
         if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
         if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
         if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
@@ -591,42 +591,25 @@ async function fetchAndApplyItemAvailability() {
         if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
         
         renderProdutosPrincipais(); 
-        
-        // Configura os listeners principais
+
         setupProdutoPrincipalListeners();
         setupRadioListener('payment');
+        setupRadioListener('delivery');
         clientNameInput.addEventListener('input', checkIfCanFinish);
         addressInput.addEventListener('input', checkIfCanFinish);
 
-        // Habilita os campos que não dependem da entrega
-        enable(fs.clientName);
-        enable(fs.payment);
-        
-        // --- LÓGICA DE HABILITAÇÃO REFINADA PARA ENTREGA ---
+        [fs.clientName, fs.payment, fs.delivery].forEach(enable);
 
-        // Por padrão, a entrega está disponível, a menos que explicitamente definida como false
-        const deliveryIsAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
-        const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+        // ===== INÍCIO DA DEPURACÃO =====
+        console.log("Verificando status da entrega. Dados recebidos:", allItemsData.shopInfo); // LINHA DE TESTE 1
 
-        if (deliveryIsAvailable) {
-            // 1. Se a entrega está disponível, habilita o campo de seleção de entrega
-            enable(fs.delivery);
+        if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) {
+            
+            console.log("CONDIÇÃO ATIVADA! Bloqueando e riscando as opções de entrega."); // LINHA DE TESTE 2
 
-            // 2. Garante que os botões não tenham o estilo de desabilitado
-            deliveryRadios.forEach(radio => {
-                radio.disabled = false;
-                const label = radio.closest('label');
-                if (label) {
-                    label.classList.remove('disabled-item');
-                    label.title = '';
-                }
-            });
-        } else {
-            // 1. Se a entrega está INDISPONÍVEL, o fieldset 'fsDelivery' permanece desabilitado.
-            //    Apenas aplicamos o estilo visual de 'riscado' para maior clareza.
+            const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
             deliveryRadios.forEach(radio => {
                 if (radio.value.startsWith('Entrega')) {
-                    // O radio já está desabilitado pelo fieldset, mas reforçamos aqui
                     radio.disabled = true; 
                     const label = radio.closest('label');
                     if (label) {
@@ -636,18 +619,13 @@ async function fetchAndApplyItemAvailability() {
                 }
             });
         }
-        
-        // 3. Configura o listener para os cliques DEPOIS de definir o estado dos botões
-        setupRadioListener('delivery');
+        // ===== FIM DA DEPURACÃO =====
 
     } catch (error) {
         console.error("Erro ao carregar o cardápio:", error);
         alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
     }
 }
-
-// ... (cole todo o seu código JS que vem DEPOIS da função) ...
-</script>
     // ... (o restante do seu código javascript depois desta função) ...
 
     function renderProdutosPrincipais() {
