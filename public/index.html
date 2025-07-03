@@ -557,76 +557,90 @@ label.disabled-item {
         }
         return false;
     }
-    
-    // ... (o restante do seu código javascript antes desta função) ...
 
-   // Substitua esta função inteira no seu index.html
-
-async function fetchAndApplyItemAvailability() {
-    try {
-        const response = await fetch('/api/items');
-        if (!response.ok) {
-            throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
-        }
-        allItemsData = await response.json();
-
-        // Lógica de loja fechada... (código mantido)
-        if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
-            if (formCard) formCard.style.display = 'none';
-            if (shopClosedContainer) shopClosedContainer.style.display = 'block';
-            if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
-                closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
+    async function fetchAndApplyItemAvailability() {
+        try {
+            const response = await fetch('/api/items');
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
             }
-            return;
-        }
+            allItemsData = await response.json();
 
-        if (formCard) formCard.style.display = 'block';
-        if (shopClosedContainer) shopClosedContainer.style.display = 'none';
+            // Lógica de loja fechada (mantida)
+            if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
+                if (formCard) formCard.style.display = 'none';
+                if (shopClosedContainer) shopClosedContainer.style.display = 'block';
+                if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
+                    closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
+                }
+                return;
+            }
 
-        // Renderiza os itens... (código mantido)
-        if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
-        if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
-        if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
-        if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
-        if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
-        
-        renderProdutosPrincipais(); 
+            if (formCard) formCard.style.display = 'block';
+            if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-        setupProdutoPrincipalListeners();
-        setupRadioListener('payment');
-        setupRadioListener('delivery');
-        clientNameInput.addEventListener('input', checkIfCanFinish);
-        addressInput.addEventListener('input', checkIfCanFinish);
-
-        [fs.clientName, fs.payment, fs.delivery].forEach(enable);
-
-        // ===== INÍCIO DA DEPURACÃO =====
-        console.log("Verificando status da entrega. Dados recebidos:", allItemsData.shopInfo); // LINHA DE TESTE 1
-
-        if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) {
+            // Renderiza os itens... (mantido)
+            if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
+            if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
+            if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
+            if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
+            if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
             
-            console.log("CONDIÇÃO ATIVADA! Bloqueando e riscando as opções de entrega."); // LINHA DE TESTE 2
+            renderProdutosPrincipais(); 
+            
+            // Configura os listeners principais
+            setupProdutoPrincipalListeners();
+            setupRadioListener('payment');
+            clientNameInput.addEventListener('input', checkIfCanFinish);
+            addressInput.addEventListener('input', checkIfCanFinish);
 
+            // Habilita os campos que não dependem da entrega
+            enable(fs.clientName);
+            enable(fs.payment);
+            
+            // --- LÓGICA DE HABILITAÇÃO REFINADA PARA ENTREGA ---
+
+            // Por padrão, a entrega está disponível, a menos que explicitamente definida como false
+            const deliveryIsAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
             const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-            deliveryRadios.forEach(radio => {
-                if (radio.value.startsWith('Entrega')) {
-                    radio.disabled = true; 
+
+            if (deliveryIsAvailable) {
+                // 1. Se a entrega está disponível, habilita o campo de seleção de entrega
+                enable(fs.delivery);
+
+                // 2. Garante que os botões não tenham o estilo de desabilitado
+                deliveryRadios.forEach(radio => {
+                    radio.disabled = false;
                     const label = radio.closest('label');
                     if (label) {
-                        label.classList.add('disabled-item'); 
-                        label.title = 'Entrega indisponível no momento.';
+                        label.classList.remove('disabled-item');
+                        label.title = '';
                     }
-                }
-            });
-        }
-        // ===== FIM DA DEPURACÃO =====
+                });
+            } else {
+                // 1. Se a entrega está INDISPONÍVEL, o fieldset 'fsDelivery' permanece desabilitado.
+                //    Apenas aplicamos o estilo visual de 'riscado' para maior clareza.
+                deliveryRadios.forEach(radio => {
+                    if (radio.value.startsWith('Entrega')) {
+                        // O radio já está desabilitado pelo fieldset, mas reforçamos aqui
+                        radio.disabled = true; 
+                        const label = radio.closest('label');
+                        if (label) {
+                            label.classList.add('disabled-item'); 
+                            label.title = 'Entrega indisponível no momento.';
+                        }
+                    }
+                });
+            }
+            
+            // 3. Configura o listener para os cliques DEPOIS de definir o estado dos botões
+            setupRadioListener('delivery');
 
-    } catch (error) {
-        console.error("Erro ao carregar o cardápio:", error);
-        alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+        } catch (error) {
+            console.error("Erro ao carregar o cardápio:", error);
+            alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+        }
     }
-}
-    // ... (o restante do seu código javascript depois desta função) ...
 
     function renderProdutosPrincipais() {
         if (!boxProdutosPrincipais) return;
@@ -755,48 +769,41 @@ async function fetchAndApplyItemAvailability() {
         });
     }
 
-   // Substitua esta função inteira no seu index.html
-
-function setupRadioListener(name, stageToAdvanceOnClick) {
-    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-        if (r.disabled) return;
-        if (r._currentListener) r.removeEventListener('change', r._currentListener);
-        
-        const new_listener = ev => {
-            const value = ev.target.value;
-            if (name === 'specialFlavor') state.selectedSpecialFlavor = value;
-            else state[name] = value;
+    function setupRadioListener(name, stageToAdvanceOnClick) {
+        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+            if (r.disabled) return;
+            if (r._currentListener) r.removeEventListener('change', r._currentListener);
             
-            document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => radioEl.closest('label')?.classList.remove('selected-radio'));
-            ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
+            const new_listener = ev => {
+                const value = ev.target.value;
+                if (name === 'specialFlavor') state.selectedSpecialFlavor = value;
+                else state[name] = value;
+                
+                document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => radioEl.closest('label')?.classList.remove('selected-radio'));
+                ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
 
-            // ===== INÍCIO DA LÓGICA CORRIGIDA =====
-            if (name === 'delivery') {
-                // Verifica se a opção é de entrega E se a entrega está disponível no sistema
-                const isDeliveryOption = value !== 'Retirada';
-                const isDeliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
+                if (name === 'delivery') {
+                    const isDeliveryOption = value !== 'Retirada';
+                    const isDeliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
 
-                if (isDeliveryOption && isDeliveryGloballyAvailable) {
-                    // Só mostra o campo de endereço se as duas condições forem verdadeiras
-                    fs.address.style.display = 'block';
-                    enable(fs.address);
-                } else {
-                    // Esconde o campo em todos os outros casos (Retirada ou Entrega Indisponível)
-                    fs.address.style.display = 'none';
-                    addressInput.value = '';
+                    if (isDeliveryOption && isDeliveryGloballyAvailable) {
+                        fs.address.style.display = 'block';
+                        enable(fs.address);
+                    } else {
+                        fs.address.style.display = 'none';
+                        addressInput.value = '';
+                    }
                 }
-            }
-            // ===== FIM DA LÓGICA CORRIGIDA =====
 
-            if (name === 'wantAdd' && stageToAdvanceOnClick) advanceStage(stageToAdvanceOnClick);
-            if (name === 'payment' && pixInfoDiv) pixInfoDiv.classList.toggle('hidden', value !== 'Pix');
-            
-            checkIfCanFinish();
-        };
-        r.addEventListener('change', new_listener);
-        r._currentListener = new_listener;
-    });
-}
+                if (name === 'wantAdd' && stageToAdvanceOnClick) advanceStage(stageToAdvanceOnClick);
+                if (name === 'payment' && pixInfoDiv) pixInfoDiv.classList.toggle('hidden', value !== 'Pix');
+                
+                checkIfCanFinish();
+            };
+            r.addEventListener('change', new_listener);
+            r._currentListener = new_listener;
+        });
+    }
 
     function setupChecks(fieldsetElement, max, key) { 
         const box = fieldsetElement.querySelector('.grid-2'); 
@@ -854,7 +861,7 @@ function setupRadioListener(name, stageToAdvanceOnClick) {
 
                 let actualSelectedCount = state[key].includes(noneValue) ? 0 : state[key].filter(item => item !== noneValue).length;
 
-if (key !== 'add' && max !== undefined && actualSelectedCount > max) {                    chk.checked = false;
+                if (key !== 'add' && max !== undefined && actualSelectedCount > max) {                    chk.checked = false;
                     state[key] = state[key].filter(item => item !== chk.value);
                     if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
                         noneCheckbox.checked = true; state[key] = [noneValue];
@@ -863,7 +870,7 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
                     alert(`Máximo ${max} ${key === 'add' ? 'adicionais' : key}.`);
                 }
 
-            updateCounter(counterEl, actualSelectedCount, max, key);
+                updateCounter(counterEl, actualSelectedCount, max, key);
                 checkIfCanFinish();
             };
             chk.addEventListener('change', new_listener);
@@ -872,16 +879,14 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
     }
 
     function updateCounter(element, count, max, key) {
-    if (element) {
-        if (key === 'add') {
-            // Para os adicionais, mostra apenas a contagem atual
-            element.textContent = `( ${count} )`;
-        } else {
-            // Para todos os outros, mantém o formato original com o máximo
-            element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
+        if (element) {
+            if (key === 'add') {
+                element.textContent = `( ${count} )`;
+            } else {
+                element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
+            }
         }
     }
-}
 
     function advanceStage(stage) {
         if (stage === 'askAdd') {
@@ -900,27 +905,24 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
         checkIfCanFinish();
     }
 
-   // Substitua esta função para corrigir o botão "Finalizar"
-function checkIfCanFinish() {
-    const itemValid = validateCurrentOrderItem();
-    const clientNameFilled = clientNameInput.value.trim() !== '';
-    const paymentSelected = !!state.payment;
-    const deliverySelected = !!state.delivery;
+    function checkIfCanFinish() {
+        const itemValid = validateCurrentOrderItem();
+        const clientNameFilled = clientNameInput.value.trim() !== '';
+        const paymentSelected = !!state.payment;
+        const deliverySelected = !!state.delivery;
 
-    // --- LÓGICA DE VALIDAÇÃO DO ENDEREÇO CORRIGIDA ---
-    const deliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
-    const addressOk = (state.delivery === 'Retirada') || 
-                      (deliverySelected && deliveryGloballyAvailable && addressInput.value.trim() !== '');
-    // --- FIM DA CORREÇÃO ---
+        const deliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
+        const addressOk = (state.delivery === 'Retirada') || 
+                          (deliverySelected && deliveryGloballyAvailable && addressInput.value.trim() !== '');
 
-    const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
-    btnAdd.disabled = !canProceed;
+        const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
+        btnAdd.disabled = !canProceed;
 
-    const hasItemsInCart = orders.length > 0;
-    const globalFieldsOkForFinish = clientNameFilled && paymentSelected && deliverySelected && addressOk;
+        const hasItemsInCart = orders.length > 0;
+        const globalFieldsOkForFinish = clientNameFilled && paymentSelected && deliverySelected && addressOk;
 
-    btnFinish.disabled = !((hasItemsInCart && globalFieldsOkForFinish) || canProceed);
-}
+        btnFinish.disabled = !((hasItemsInCart && globalFieldsOkForFinish) || canProceed);
+    }
 
     function renderOrders() {
         ordersSec.style.display = orders.length > 0 ? 'block' : 'none';
@@ -1037,10 +1039,8 @@ function checkIfCanFinish() {
         return summaryText;
     }
 
-    // ##### BOTÃO 'ADICIONAR' CORRIGIDO #####
     btnAdd.onclick = () => {
-        if (btnAdd.disabled) return; // Não faz nada se o botão estiver desabilitado
-
+        if (btnAdd.disabled) return; 
         state.address = addressInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
         renderOrders();
