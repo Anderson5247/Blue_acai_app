@@ -559,45 +559,40 @@
 
     async function fetchAndApplyItemAvailability() {
         try {
+            // CORREÇÃO 1: Adicionada a busca (fetch) de dados no início.
+            const response = await fetch('/api/items');
+            if (!response.ok) {
+                throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
+            }
+            allItemsData = await response.json();
+
+            // Lógica de loja fechada (agora funciona, pois 'allItemsData' tem dados)
             if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
-    // Esconde o formulário de pedidos
-    if (formCard) formCard.style.display = 'none'; 
-    // Mostra o aviso de "loja fechada"
-    if (shopClosedContainer) shopClosedContainer.style.display = 'block'; 
-    // Coloca a mensagem de horário (vinda da sua API) no campo de texto
-    if (closedMessageEl && allItemsData.shopInfo.closedMessage) { 
-        closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
-    }
-    return; // Para a execução para não carregar o resto do cardápio
-}
-
-// Estas duas linhas garantem que o estado normal (loja aberta) seja exibido
-if (formCard) formCard.style.display = 'block';
-if (shopClosedContainer) shopClosedContainer.style.display = 'none';
-// --- INÍCIO DO NOVO CÓDIGO DE ENTREGA ---
-
-        // Verifica se a entrega está disponível, com base na resposta da API.
-        if (allItemsData.shopInfo && allItemsData.shopInfo.deliveryAvailable === false) {
-            // Encontra todos os botões de rádio para entrega.
-            const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-            // Itera sobre cada um dos botões encontrados.
-            deliveryRadios.forEach(radio => {
-                // Desabilita apenas as opções que são de "Entrega" (ignorando a "Retirada").
-                if (radio.value.startsWith('Entrega')) {
-                    radio.disabled = true;
-                    // Adiciona a classe CSS para deixar o texto cinza e não-clicável.
-                    radio.closest('label').classList.add('disabled-item');
-                    // Adiciona uma mensagem de ajuda que aparece ao passar o mouse.
-                    radio.closest('label').title = 'Entrega indisponível no momento.';
+                if (formCard) formCard.style.display = 'none';
+                if (shopClosedContainer) shopClosedContainer.style.display = 'block';
+                if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
+                    closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
                 }
-            });
-        }
+                return;
+            }
 
-        // --- FIM DO NOVO CÓDIGO DE ENTREGA ---
+            // Garante que o formulário apareça se a loja estiver aberta
+            if (formCard) formCard.style.display = 'block';
+            if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-            // ##### INÍCIO DA MODIFICAÇÃO #####
-            // Substitua as chamadas 'updateCheckboxDisplay' por 'renderDynamicCheckboxes'
-            
+            // CORREÇÃO 2: Verificação da entrega com o nome correto da variável.
+            if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) { // <-- NOME CORRIGIDO
+                const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+                deliveryRadios.forEach(radio => {
+                    if (radio.value.startsWith('Entrega')) {
+                        radio.disabled = true;
+                        radio.closest('label').classList.add('disabled-item');
+                        radio.closest('label').title = 'Entrega indisponível no momento.';
+                    }
+                });
+            }
+
+            // Renderiza os itens de checkbox dinamicamente
             if (allItemsData.frutas) {
                 renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
             }
@@ -613,9 +608,11 @@ if (shopClosedContainer) shopClosedContainer.style.display = 'none';
             if (allItemsData.adicionais) {
                 renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
             }
-            // ##### FIM DA MODIFICAÇÃO #####
+            
+            // CORREÇÃO 3 (MELHORIA): Garante que produtos principais também sejam renderizados com dados da API.
+            renderProdutosPrincipais(); 
 
-
+            // Configura os listeners para os botões e campos (lógica original preservada)
             setupProdutoPrincipalListeners();
             setupRadioListener('payment');
             setupRadioListener('delivery');
