@@ -584,7 +584,7 @@ async function fetchAndApplyItemAvailability() {
         if (formCard) formCard.style.display = 'block';
         if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-        // Renderiza os itens de checkbox dinamicamente
+        // Renderiza todos os itens dinamicamente
         if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
         if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
         if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
@@ -600,26 +600,30 @@ async function fetchAndApplyItemAvailability() {
         clientNameInput.addEventListener('input', checkIfCanFinish);
         addressInput.addEventListener('input', checkIfCanFinish);
 
+        // Habilita os campos principais
         [fs.clientName, fs.payment, fs.delivery].forEach(enable);
 
-        // ===== INÍCIO DA LÓGICA CORRIGIDA =====
-        // Verifica se a entrega está disponível
+        // ===== A LÓGICA FINAL PARA BLOQUEAR E RISCAR A ENTREGA =====
+        // Verifica se a entrega está disponível no sistema
         if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) {
             const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+            
             deliveryRadios.forEach(radio => {
-                // Afeta apenas as opções de "Entrega", não a "Retirada"
+                // Afeta apenas as opções que são de "Entrega"
                 if (radio.value.startsWith('Entrega')) {
-                    radio.disabled = true;
+                    // 1. Bloqueia o clique no botão
+                    radio.disabled = true; 
+                    
                     const label = radio.closest('label');
                     if (label) {
-                        // Adiciona a classe que deixa o texto riscado e cinza
-                        label.classList.add('disabled-item');
+                        // 2. Adiciona a classe CSS que deixa o texto riscado e cinza
+                        label.classList.add('disabled-item'); 
                         label.title = 'Entrega indisponível no momento.';
                     }
                 }
             });
         }
-        // ===== FIM DA LÓGICA CORRIGIDA =====
+        // ===== FIM DA LÓGICA FINAL =====
 
     } catch (error) {
         console.error("Erro ao carregar o cardápio:", error);
