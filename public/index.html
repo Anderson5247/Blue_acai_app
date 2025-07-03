@@ -560,74 +560,72 @@
     
     // ... (o restante do seu código javascript antes desta função) ...
 
-    async function fetchAndApplyItemAvailability() {
-        try {
-            // CORREÇÃO 1: Adicionada a busca (fetch) de dados no início.
-            const response = await fetch('/api/items');
-            if (!response.ok) {
-                throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
-            }
-            allItemsData = await response.json();
+   // Substitua esta função inteira no seu index.html
 
-            // Lógica de loja fechada (agora funciona, pois 'allItemsData' tem dados)
-            if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
-                if (formCard) formCard.style.display = 'none';
-                if (shopClosedContainer) shopClosedContainer.style.display = 'block';
-                if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
-                    closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
-                }
-                return;
-            }
-
-            // Garante que o formulário apareça se a loja estiver aberta
-            if (formCard) formCard.style.display = 'block';
-            if (shopClosedContainer) shopClosedContainer.style.display = 'none';
-
-            // Renderiza os itens de checkbox dinamicamente
-            if (allItemsData.frutas) {
-                renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
-            }
-            if (allItemsData.cremes) {
-                renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
-            }
-            if (allItemsData.acompanhamentos) {
-                renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
-            }
-            if (allItemsData.coberturas) {
-                renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
-            }
-            if (allItemsData.adicionais) {
-                renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
-            }
-            
-            // CORREÇÃO 3 (MELHORIA): Garante que produtos principais também sejam renderizados com dados da API.
-            renderProdutosPrincipais(); 
-
-            // Configura os listeners para os botões e campos (lógica original preservada)
-            setupProdutoPrincipalListeners();
-            setupRadioListener('payment');
-            setupRadioListener('delivery');
-            clientNameInput.addEventListener('input', checkIfCanFinish);
-            addressInput.addEventListener('input', checkIfCanFinish);
-
-            [fs.clientName, fs.payment, fs.delivery].forEach(enable);
-   // CORREÇÃO 2: Verificação da entrega com o nome correto da variável.
-            if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) { // <-- NOME CORRIGIDO
-                const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-                deliveryRadios.forEach(radio => {
-                    if (radio.value.startsWith('Entrega')) {
-                        radio.disabled = true;
-                        radio.closest('label').classList.add('disabled-item');
-                        radio.closest('label').title = 'Entrega indisponível no momento.';
-                    }
-                });
-            }
-        } catch (error) {
-            console.error("Erro ao carregar o cardápio:", error);
-            alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+async function fetchAndApplyItemAvailability() {
+    try {
+        const response = await fetch('/api/items');
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
         }
-    }
+        allItemsData = await response.json();
 
+        // Lógica de loja fechada
+        if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
+            if (formCard) formCard.style.display = 'none';
+            if (shopClosedContainer) shopClosedContainer.style.display = 'block';
+            if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
+                closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
+            }
+            return;
+        }
+
+        // Garante que o formulário apareça se a loja estiver aberta
+        if (formCard) formCard.style.display = 'block';
+        if (shopClosedContainer) shopClosedContainer.style.display = 'none';
+
+        // Renderiza os itens de checkbox dinamicamente
+        if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
+        if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
+        if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
+        if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
+        if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
+        
+        renderProdutosPrincipais(); 
+
+        // Configura os listeners
+        setupProdutoPrincipalListeners();
+        setupRadioListener('payment');
+        setupRadioListener('delivery');
+        clientNameInput.addEventListener('input', checkIfCanFinish);
+        addressInput.addEventListener('input', checkIfCanFinish);
+
+        [fs.clientName, fs.payment, fs.delivery].forEach(enable);
+
+        // ===== INÍCIO DA LÓGICA CORRIGIDA =====
+        // Verifica se a entrega está disponível
+        if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) {
+            const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+            deliveryRadios.forEach(radio => {
+                // Afeta apenas as opções de "Entrega", não a "Retirada"
+                if (radio.value.startsWith('Entrega')) {
+                    radio.disabled = true;
+                    const label = radio.closest('label');
+                    if (label) {
+                        // Adiciona a classe que deixa o texto riscado e cinza
+                        label.classList.add('disabled-item');
+                        label.title = 'Entrega indisponível no momento.';
+                    }
+                }
+            });
+        }
+        // ===== FIM DA LÓGICA CORRIGIDA =====
+
+    } catch (error) {
+        console.error("Erro ao carregar o cardápio:", error);
+        alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+    }
+}
     // ... (o restante do seu código javascript depois desta função) ...
 
     function renderProdutosPrincipais() {
@@ -757,38 +755,48 @@
         });
     }
 
-    function setupRadioListener(name, stageToAdvanceOnClick) {
-        document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
-            if (r.disabled) return;
-            if (r._currentListener) r.removeEventListener('change', r._currentListener);
+   // Substitua esta função inteira no seu index.html
+
+function setupRadioListener(name, stageToAdvanceOnClick) {
+    document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+        if (r.disabled) return;
+        if (r._currentListener) r.removeEventListener('change', r._currentListener);
+        
+        const new_listener = ev => {
+            const value = ev.target.value;
+            if (name === 'specialFlavor') state.selectedSpecialFlavor = value;
+            else state[name] = value;
             
-            const new_listener = ev => {
-                const value = ev.target.value;
-                if (name === 'specialFlavor') state.selectedSpecialFlavor = value;
-                else state[name] = value;
-                
-                document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => radioEl.closest('label')?.classList.remove('selected-radio'));
-                ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
+            document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => radioEl.closest('label')?.classList.remove('selected-radio'));
+            ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
 
-                if (name === 'delivery') {
-                    if (value === 'Retirada') {
-                        fs.address.style.display = 'none';
-                        addressInput.value = '';
-                    } else {
-                        fs.address.style.display = 'block';
-                        enable(fs.address); // Garante que o campo esteja habilitado
-                    }
+            // ===== INÍCIO DA LÓGICA CORRIGIDA =====
+            if (name === 'delivery') {
+                // Verifica se a opção é de entrega E se a entrega está disponível no sistema
+                const isDeliveryOption = value !== 'Retirada';
+                const isDeliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
+
+                if (isDeliveryOption && isDeliveryGloballyAvailable) {
+                    // Só mostra o campo de endereço se as duas condições forem verdadeiras
+                    fs.address.style.display = 'block';
+                    enable(fs.address);
+                } else {
+                    // Esconde o campo em todos os outros casos (Retirada ou Entrega Indisponível)
+                    fs.address.style.display = 'none';
+                    addressInput.value = '';
                 }
+            }
+            // ===== FIM DA LÓGICA CORRIGIDA =====
 
-                if (name === 'wantAdd' && stageToAdvanceOnClick) advanceStage(stageToAdvanceOnClick);
-                if (name === 'payment' && pixInfoDiv) pixInfoDiv.classList.toggle('hidden', value !== 'Pix');
-                
-                checkIfCanFinish();
-            };
-            r.addEventListener('change', new_listener);
-            r._currentListener = new_listener;
-        });
-    }
+            if (name === 'wantAdd' && stageToAdvanceOnClick) advanceStage(stageToAdvanceOnClick);
+            if (name === 'payment' && pixInfoDiv) pixInfoDiv.classList.toggle('hidden', value !== 'Pix');
+            
+            checkIfCanFinish();
+        };
+        r.addEventListener('change', new_listener);
+        r._currentListener = new_listener;
+    });
+}
 
     function setupChecks(fieldsetElement, max, key) { 
         const box = fieldsetElement.querySelector('.grid-2'); 
