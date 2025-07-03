@@ -570,7 +570,7 @@ async function fetchAndApplyItemAvailability() {
         }
         allItemsData = await response.json();
 
-        // Lógica de loja fechada
+        // Lógica de loja fechada... (código mantido)
         if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
             if (formCard) formCard.style.display = 'none';
             if (shopClosedContainer) shopClosedContainer.style.display = 'block';
@@ -580,11 +580,10 @@ async function fetchAndApplyItemAvailability() {
             return;
         }
 
-        // Garante que o formulário apareça se a loja estiver aberta
         if (formCard) formCard.style.display = 'block';
         if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-        // Renderiza todos os itens dinamicamente
+        // Renderiza os itens... (código mantido)
         if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
         if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
         if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
@@ -593,37 +592,34 @@ async function fetchAndApplyItemAvailability() {
         
         renderProdutosPrincipais(); 
 
-        // Configura os listeners
         setupProdutoPrincipalListeners();
         setupRadioListener('payment');
         setupRadioListener('delivery');
         clientNameInput.addEventListener('input', checkIfCanFinish);
         addressInput.addEventListener('input', checkIfCanFinish);
 
-        // Habilita os campos principais
         [fs.clientName, fs.payment, fs.delivery].forEach(enable);
 
-        // ===== A LÓGICA FINAL PARA BLOQUEAR E RISCAR A ENTREGA =====
-        // Verifica se a entrega está disponível no sistema
+        // ===== INÍCIO DA DEPURACÃO =====
+        console.log("Verificando status da entrega. Dados recebidos:", allItemsData.shopInfo); // LINHA DE TESTE 1
+
         if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) {
-            const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
             
+            console.log("CONDIÇÃO ATIVADA! Bloqueando e riscando as opções de entrega."); // LINHA DE TESTE 2
+
+            const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
             deliveryRadios.forEach(radio => {
-                // Afeta apenas as opções que são de "Entrega"
                 if (radio.value.startsWith('Entrega')) {
-                    // 1. Bloqueia o clique no botão
                     radio.disabled = true; 
-                    
                     const label = radio.closest('label');
                     if (label) {
-                        // 2. Adiciona a classe CSS que deixa o texto riscado e cinza
                         label.classList.add('disabled-item'); 
                         label.title = 'Entrega indisponível no momento.';
                     }
                 }
             });
         }
-        // ===== FIM DA LÓGICA FINAL =====
+        // ===== FIM DA DEPURACÃO =====
 
     } catch (error) {
         console.error("Erro ao carregar o cardápio:", error);
@@ -904,23 +900,27 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
         checkIfCanFinish();
     }
 
-    // ##### FUNÇÃO DE VALIDAÇÃO CORRIGIDA #####
-    function checkIfCanFinish() {
-        const itemValid = validateCurrentOrderItem();
-        const clientNameFilled = clientNameInput.value.trim() !== '';
-        const paymentSelected = !!state.payment;
-        const deliverySelected = !!state.delivery;
-        const addressOk = (state.delivery === 'Retirada') || (deliverySelected && addressInput.value.trim() !== '');
+   // Substitua esta função para corrigir o botão "Finalizar"
+function checkIfCanFinish() {
+    const itemValid = validateCurrentOrderItem();
+    const clientNameFilled = clientNameInput.value.trim() !== '';
+    const paymentSelected = !!state.payment;
+    const deliverySelected = !!state.delivery;
 
-        const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
+    // --- LÓGICA DE VALIDAÇÃO DO ENDEREÇO CORRIGIDA ---
+    const deliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
+    const addressOk = (state.delivery === 'Retirada') || 
+                      (deliverySelected && deliveryGloballyAvailable && addressInput.value.trim() !== '');
+    // --- FIM DA CORREÇÃO ---
 
-        btnAdd.disabled = !canProceed;
+    const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
+    btnAdd.disabled = !canProceed;
 
-        const hasItemsInCart = orders.length > 0;
-        const globalFieldsOkForFinish = clientNameFilled && paymentSelected && deliverySelected && addressOk;
+    const hasItemsInCart = orders.length > 0;
+    const globalFieldsOkForFinish = clientNameFilled && paymentSelected && deliverySelected && addressOk;
 
-        btnFinish.disabled = !((hasItemsInCart && globalFieldsOkForFinish) || canProceed);
-    }
+    btnFinish.disabled = !((hasItemsInCart && globalFieldsOkForFinish) || canProceed);
+}
 
     function renderOrders() {
         ordersSec.style.display = orders.length > 0 ? 'block' : 'none';
