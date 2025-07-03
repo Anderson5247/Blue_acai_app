@@ -16,6 +16,9 @@
             --success-green: #28a745;
             --success-green-hover: #218838;
         }
+        #shopClosedContainer #closedMessageText {
+            white-space: pre-wrap;
+        }
 
         * {
             box-sizing: border-box;
@@ -500,7 +503,7 @@
           state.cremes = []; updateCounter(cnt.cremes, 0, '?');
           state.accomp = []; updateCounter(cnt.accomp, 0, '?');
           state.cover = []; updateCounter(cnt.cover, 0, '?');
-          state.add = []; updateCounter(cnt.add, 0, 14);
+          state.add = []; updateCounter(cnt.add, 0, 14, 'add');
           state.wantAdd = undefined; clearRadios('wantAdd');
     }
 
@@ -519,7 +522,7 @@
           });
           updateCounter(cnt.frutas, 0, '?'); updateCounter(cnt.cremes, 0, '?');
           updateCounter(cnt.accomp, 0, '?'); updateCounter(cnt.cover, 0, '?');
-          updateCounter(cnt.add, 0, 14);
+          updateCounter(cnt.add, 0, 14, 'add');
           
           enable(fs.produtoPrincipal);
           btnAdd.disabled = true;
@@ -580,18 +583,6 @@
             if (formCard) formCard.style.display = 'block';
             if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-            // CORREÇÃO 2: Verificação da entrega com o nome correto da variável.
-            if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) { // <-- NOME CORRIGIDO
-                const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-                deliveryRadios.forEach(radio => {
-                    if (radio.value.startsWith('Entrega')) {
-                        radio.disabled = true;
-                        radio.closest('label').classList.add('disabled-item');
-                        radio.closest('label').title = 'Entrega indisponível no momento.';
-                    }
-                });
-            }
-
             // Renderiza os itens de checkbox dinamicamente
             if (allItemsData.frutas) {
                 renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
@@ -620,7 +611,17 @@
             addressInput.addEventListener('input', checkIfCanFinish);
 
             [fs.clientName, fs.payment, fs.delivery].forEach(enable);
-
+   // CORREÇÃO 2: Verificação da entrega com o nome correto da variável.
+            if (allItemsData.shopInfo && allItemsData.shopInfo.isDeliveryAvailable === false) { // <-- NOME CORRIGIDO
+                const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+                deliveryRadios.forEach(radio => {
+                    if (radio.value.startsWith('Entrega')) {
+                        radio.disabled = true;
+                        radio.closest('label').classList.add('disabled-item');
+                        radio.closest('label').title = 'Entrega indisponível no momento.';
+                    }
+                });
+            }
         } catch (error) {
             console.error("Erro ao carregar o cardápio:", error);
             alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
@@ -812,7 +813,7 @@
         }
 
         let initialCount = state[key].includes(noneValue) ? 0 : state[key].filter(item => item !== noneValue).length;
-        updateCounter(counterEl, initialCount, max);
+        updateCounter(counterEl, initialCount, max, key);
 
         allCheckboxesInBox.forEach(chk => {
             if (chk._currentListener) chk.removeEventListener('change', chk._currentListener);
@@ -880,12 +881,12 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
                 enable(fs.add);
                 setupChecks(fs.add, state.addMax !== undefined ? state.addMax : 14, 'add');
                 const currentAddCount = state.add ? state.add.filter(item => item !== 'Nenhum Adicional').length : 0;
-                updateCounter(cnt.add, currentAddCount, state.addMax !== undefined ? state.addMax : 14);
+                updateCounter(cnt.add, currentAddCount, state.addMax !== undefined ? state.addMax : 14, 'add');
             } else if (state.wantAdd === 'Não') {
                 state.add = ['Nenhum Adicional'];
                 disable(fs.add);
                 clearCheckboxes(fs.add);
-                updateCounter(cnt.add, 0, state.addMax !== undefined ? state.addMax : 14);
+                updateCounter(cnt.add, 0, state.addMax !== undefined ? state.addMax : 14,'add');
             }
         }
         checkIfCanFinish();
@@ -1114,7 +1115,7 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
         
         updateCounter(cnt.frutas, 0, '?'); updateCounter(cnt.cremes, 0, '?');
         updateCounter(cnt.accomp, 0, '?'); updateCounter(cnt.cover, 0, '?');
-        updateCounter(cnt.add, 0, 14);
+        updateCounter(cnt.add, 0, 14, 'add');
 
         btnAdd.disabled = true; btnFinish.disabled = true;
     }
