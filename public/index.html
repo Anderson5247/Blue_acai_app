@@ -348,7 +348,7 @@ label.disabled-item {
                     </div>
                 </fieldset>
 
-                <fieldset id="fsDelivery" disabled>
+                <fieldset id="fsDelivery">
                     <legend>9. Entrega ou Retirada <span class="section-status">(Obrigatório)</span></legend>
                     <div class="grid-2">
                         <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
@@ -559,88 +559,89 @@ label.disabled-item {
     }
 
     async function fetchAndApplyItemAvailability() {
-        try {
-            const response = await fetch('/api/items');
-            if (!response.ok) {
-                throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
-            }
-            allItemsData = await response.json();
-
-            // Lógica de loja fechada (mantida)
-            if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
-                if (formCard) formCard.style.display = 'none';
-                if (shopClosedContainer) shopClosedContainer.style.display = 'block';
-                if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
-                    closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
-                }
-                return;
-            }
-
-            if (formCard) formCard.style.display = 'block';
-            if (shopClosedContainer) shopClosedContainer.style.display = 'none';
-
-            // Renderiza os itens... (mantido)
-            if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
-            if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
-            if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
-            if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
-            if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
-            
-            renderProdutosPrincipais(); 
-            
-            // Configura os listeners principais
-            setupProdutoPrincipalListeners();
-            setupRadioListener('payment');
-            clientNameInput.addEventListener('input', checkIfCanFinish);
-            addressInput.addEventListener('input', checkIfCanFinish);
-
-            // Habilita os campos que não dependem da entrega
-            enable(fs.clientName);
-            enable(fs.payment);
-            
-            // --- LÓGICA DE HABILITAÇÃO REFINADA PARA ENTREGA ---
-
-            // Por padrão, a entrega está disponível, a menos que explicitamente definida como false
-            const deliveryIsAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
-            const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-
-            if (deliveryIsAvailable) {
-                // 1. Se a entrega está disponível, habilita o campo de seleção de entrega
-                enable(fs.delivery);
-
-                // 2. Garante que os botões não tenham o estilo de desabilitado
-                deliveryRadios.forEach(radio => {
-                    radio.disabled = false;
-                    const label = radio.closest('label');
-                    if (label) {
-                        label.classList.remove('disabled-item');
-                        label.title = '';
-                    }
-                });
-            } else {
-                // 1. Se a entrega está INDISPONÍVEL, o fieldset 'fsDelivery' permanece desabilitado.
-                //    Apenas aplicamos o estilo visual de 'riscado' para maior clareza.
-                deliveryRadios.forEach(radio => {
-                    if (radio.value.startsWith('Entrega')) {
-                        // O radio já está desabilitado pelo fieldset, mas reforçamos aqui
-                        radio.disabled = true; 
-                        const label = radio.closest('label');
-                        if (label) {
-                            label.classList.add('disabled-item'); 
-                            label.title = 'Entrega indisponível no momento.';
-                        }
-                    }
-                });
-            }
-            
-            // 3. Configura o listener para os cliques DEPOIS de definir o estado dos botões
-            setupRadioListener('delivery');
-
-        } catch (error) {
-            console.error("Erro ao carregar o cardápio:", error);
-            alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
+    try {
+        const response = await fetch('/api/items');
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar dados da API: ${response.statusText}`);
         }
+        allItemsData = await response.json();
+
+        // Lógica de loja fechada (mantida)
+        if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
+            if (formCard) formCard.style.display = 'none';
+            if (shopClosedContainer) shopClosedContainer.style.display = 'block';
+            if (closedMessageEl && allItemsData.shopInfo.closedMessage) {
+                closedMessageEl.textContent = allItemsData.shopInfo.closedMessage;
+            }
+            return;
+        }
+
+        if (formCard) formCard.style.display = 'block';
+        if (shopClosedContainer) shopClosedContainer.style.display = 'none';
+
+        // Renderiza os itens (mantido)
+        if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
+        if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
+        if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
+        if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
+        if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
+        
+        renderProdutosPrincipais(); 
+        
+        // Configura os listeners principais
+        setupProdutoPrincipalListeners();
+        setupRadioListener('payment');
+        clientNameInput.addEventListener('input', checkIfCanFinish);
+        addressInput.addEventListener('input', checkIfCanFinish);
+
+        // Habilita os campos que não dependem da entrega
+        enable(fs.clientName);
+        enable(fs.payment);
+        
+        // --- LÓGICA FINAL E CORRETA PARA ENTREGA ---
+
+        // 1. HABILITA O GRUPO DE ENTREGA/RETIRADA.
+        //    (Lembre-se que você já removeu 'disabled' do HTML no Passo 1).
+        enable(fs.delivery);
+
+        const deliveryIsAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
+        const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+
+        // 2. Itera sobre cada opção para definir seu estado individualmente.
+        deliveryRadios.forEach(radio => {
+            const label = radio.closest('label');
+            if (!label) return;
+
+            // A opção "Retirada" estará SEMPRE disponível.
+            if (radio.value === 'Retirada') {
+                radio.disabled = false;
+                label.classList.remove('disabled-item');
+                label.title = '';
+            } 
+            // As opções de "Entrega" dependem da disponibilidade.
+            else if (radio.value.startsWith('Entrega')) {
+                if (deliveryIsAvailable) {
+                    // Se a entrega está disponível, habilita a opção.
+                    radio.disabled = false;
+                    label.classList.remove('disabled-item');
+                    label.title = '';
+                } else {
+                    // Se a entrega está indisponível, desabilita a opção E aplica o estilo.
+                    radio.disabled = true;
+                    label.classList.add('disabled-item');
+                    label.title = 'Entrega indisponível no momento.';
+                }
+            }
+        });
+        
+        // 3. Configura os listeners de clique para o grupo.
+        setupRadioListener('delivery');
+
+    } catch (error) {
+        console.error("Erro ao carregar o cardápio:", error);
+        alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
     }
+}
 
     function renderProdutosPrincipais() {
         if (!boxProdutosPrincipais) return;
