@@ -45,7 +45,7 @@
     {
       "id": "maracuja",
       "name": "Maracujá",
-      "available": false
+      "available": true
     },
     {
       "id": "morango_creme",
@@ -243,7 +243,7 @@
       "id": "maracuja_creme_add",
       "name": "Maracujá (Creme) - R$ 2.00",
       "originalValue": "Maracujá (Creme) - R$ 2.00",
-      "available": false
+      "available": true
     },
     {
       "id": "morango_creme_add_extra",
