@@ -562,6 +562,7 @@ label.disabled-item {
 
    // Substitua esta função inteira no seu index.html
 
+// Substitua esta função inteira no seu código
 async function fetchAndApplyItemAvailability() {
     try {
         const response = await fetch('/api/items');
@@ -588,8 +589,8 @@ async function fetchAndApplyItemAvailability() {
         if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
         if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
         if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
-        renderProdutosPrincipais(); 
-        
+        renderProdutosPrincipais();
+
         // --- Configuração dos listeners e habilitação de campos (sem alterações) ---
         setupProdutoPrincipalListeners();
         setupRadioListener('payment');
@@ -597,9 +598,8 @@ async function fetchAndApplyItemAvailability() {
         addressInput.addEventListener('input', checkIfCanFinish);
         enable(fs.clientName);
         enable(fs.payment);
-        
-        // --- INÍCIO DA NOVA LÓGICA FORÇADA PARA ENTREGA ---
 
+        // --- LÓGICA DE ENTREGA CORRIGIDA ---
         const deliveryIsAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
         const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
 
@@ -607,18 +607,16 @@ async function fetchAndApplyItemAvailability() {
             const label = radio.closest('label');
             if (!label) return;
 
-            // TRATAMENTO PARA A OPÇÃO "RETIRADA"
+            // Tratamento para a opção "Retirada"
             if (radio.value === 'Retirada') {
                 radio.disabled = false;
                 label.classList.remove('disabled-item');
-                // Força a remoção de qualquer estilo de texto
-                label.style.textDecoration = ''; 
+                label.style.textDecoration = '';
                 label.style.color = '';
                 label.style.cursor = 'pointer';
-
-            } 
-            // TRATAMENTO PARA AS OPÇÕES DE "ENTREGA"
-            else if (radio.value.startsWith('Entrega')) {
+            }
+            // Tratamento para qualquer outra opção (as de entrega)
+            else { // <<< AQUI ESTÁ A CORREÇÃO EFETIVA
                 if (deliveryIsAvailable) {
                     // Habilita a opção de entrega
                     radio.disabled = false;
@@ -629,14 +627,14 @@ async function fetchAndApplyItemAvailability() {
                 } else {
                     // Desabilita a opção de entrega e FORÇA o estilo visual
                     radio.disabled = true;
-                    label.classList.add('disabled-item'); // Adiciona a classe por garantia
-                    label.style.textDecoration = 'line-through'; // Força o riscado
-                    label.style.color = '#aaa'; // Força a cor cinza
-                    label.style.cursor = 'not-allowed'; // Força o cursor
+                    label.classList.add('disabled-item');
+                    label.style.textDecoration = 'line-through';
+                    label.style.color = '#aaa';
+                    label.style.cursor = 'not-allowed';
                 }
             }
         });
-        
+
         // Configura os listeners de clique após a manipulação
         setupRadioListener('delivery');
 
@@ -919,22 +917,22 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
         checkIfCanFinish();
     }
 
-// Substitua esta função inteira no seu código
+// Substitua esta função para o ajuste final de consistência
 function checkIfCanFinish() {
     const itemValid = validateCurrentOrderItem();
     const clientNameFilled = clientNameInput.value.trim() !== '';
     const paymentSelected = !!state.payment;
     const deliverySelected = !!state.delivery;
 
-    // --- INÍCIO DA LÓGICA DE VALIDAÇÃO CORRIGIDA ---
+    // --- INÍCIO DA LÓGICA DE VALIDAÇÃO 100% CORRIGIDA ---
     let addressOk = false;
     if (deliverySelected) {
         // Se a opção for Retirada, o endereço está sempre OK.
         if (state.delivery === 'Retirada') {
             addressOk = true;
         } 
-        // Se a opção for de Entrega, só está OK se o campo de endereço estiver preenchido.
-        else if (state.delivery.startsWith('Entrega')) {
+        // Se for qualquer outra opção (de entrega), só está OK se o endereço estiver preenchido.
+        else {
             addressOk = addressInput.value.trim() !== '';
         }
     }
