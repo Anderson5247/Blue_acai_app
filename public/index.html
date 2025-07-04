@@ -919,17 +919,25 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
         checkIfCanFinish();
     }
 
-   // Substitua esta função para corrigir o botão "Finalizar"
+// Substitua esta função inteira no seu código
 function checkIfCanFinish() {
     const itemValid = validateCurrentOrderItem();
     const clientNameFilled = clientNameInput.value.trim() !== '';
     const paymentSelected = !!state.payment;
     const deliverySelected = !!state.delivery;
 
-    // --- LÓGICA DE VALIDAÇÃO DO ENDEREÇO CORRIGIDA ---
-    const deliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
-    const addressOk = (state.delivery === 'Retirada') || 
-                      (deliverySelected && deliveryGloballyAvailable && addressInput.value.trim() !== '');
+    // --- INÍCIO DA LÓGICA DE VALIDAÇÃO CORRIGIDA ---
+    let addressOk = false;
+    if (deliverySelected) {
+        // Se a opção for Retirada, o endereço está sempre OK.
+        if (state.delivery === 'Retirada') {
+            addressOk = true;
+        } 
+        // Se a opção for de Entrega, só está OK se o campo de endereço estiver preenchido.
+        else if (state.delivery.startsWith('Entrega')) {
+            addressOk = addressInput.value.trim() !== '';
+        }
+    }
     // --- FIM DA CORREÇÃO ---
 
     const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
