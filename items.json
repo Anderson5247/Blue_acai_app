@@ -216,6 +216,12 @@
       "available": true
     },
     {
+      "id": "jujubas_add",
+      "name": "Jujubas - R$ 1.00",
+      "originalValue": "Jujubas - R$ 1.00",
+      "available": true
+    },
+    {
       "id": "marshmallow_add",
       "name": "Marshmallow - R$ 1.00",
       "originalValue": "Marshmallow - R$ 1.00",
