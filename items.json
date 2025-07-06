@@ -234,6 +234,36 @@
       "available": true
     },
     {
+     "id": "morango_add",
+      "name": "Morango - R$ 1.00",
+      "originalValue": "Morango - R$ 1.00",
+      "available": true
+    },
+    {
+      "id": "banana_add",
+      "name": "Banana - R$ 1.00",
+      "originalValue": "Banana - R$ 1.00",
+      "available": true
+    },
+    {
+       "id": "kiwi_add",
+      "name": "Kiwi - R$ 1.00",
+      "originalValue": "Kiwi - R$ 1.00",
+      "available": true
+    },
+    {
+       "id": "maçã_add",
+      "name": "Maçã - R$ 1.00",
+      "originalValue": "Maçã - R$ 1.00",
+      "available": true
+    },
+    {
+       "id": "uva_add",
+      "name": "Uva - R$ 1.00",
+      "originalValue": "Uva- R$ 1.00",
+      "available": true
+    },
+    {
       "id": "ninho_creme_add",
       "name": "Ninho (Creme) - R$ 2.00",
       "originalValue": "Ninho - R$ 2.00",
