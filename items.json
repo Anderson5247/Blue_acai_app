@@ -1,14 +1,14 @@
 {
   "shopInfo": {
     "isOpen": true,
-    "isDeliveryAvailable": true,
+    "isDeliveryAvailable": false,
     "closedMessage": "Horário de Funcionamento da Blue Açaí\n\nSegunda-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h00 às 21h30.\n\nTerça-feira: Fechados.\n\nQuarta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nQuinta-feira:\nNoite: das 18h30 às 21h30.\n\nSexta-feira: Fechados.\n\nSábado e Domingo:\nNoite: das 18h30 às 21h30.\n\nEstamos localizados na Rua do Porto, Outeiro-Cedral, com opções de retirada na loja ou delivery. Esperamos por você!"
   },
   "frutas": [
     {
       "id": "morango",
       "name": "Morango",
-      "available": true
+      "available": false
     },
     {
       "id": "banana",
@@ -35,7 +35,7 @@
     {
       "id": "ninho",
       "name": "Ninho",
-      "available": true
+      "available": false
     },
     {
       "id": "ninho_zero_lactose",
@@ -65,7 +65,7 @@
     {
       "id": "chocolate_avela",
       "name": "Chocolate c/Avelã",
-      "available": true
+      "available": false
     }
   ],
   "acompanhamentos": [
@@ -303,7 +303,7 @@
       "id": "chocolate_avela_add",
       "name": "Chocolate c/Avelã (Creme) - R$ 2.00",
       "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00",
-      "available": true
+      "available": false
     }
   ],
   "produtos_especiais": [
