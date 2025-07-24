@@ -35,7 +35,7 @@
     {
       "id": "ninho",
       "name": "Ninho",
-      "available": false
+      "available": true
     },
     {
       "id": "ninho_zero_lactose",
@@ -60,12 +60,17 @@
     {
       "id": "tutti_frutti_creme",
       "name": "Tutti Frutti (Creme)",
-      "available": false
+      "available": true
     },
     {
       "id": "chocolate_avela",
       "name": "Chocolate c/Avelã",
-      "available": false
+      "available": true
+      },
+    {
+      "id": "chocolate_branco",
+      "name": "Chocolate Branco",
+      "available": true
     }
   ],
   "acompanhamentos": [
@@ -190,6 +195,12 @@
       "name": "Leite em pó (Adicional) - R$ 2.00",
       "originalValue": "Leite em pó - R$ 2.00",
       "available": true
+      },
+    {
+      "id": "leite_condensado",
+      "name": "Leite Condensado (Adicional) - R$ 1.00",
+      "originalValue": "Leite Condensado - R$ 1.00",
+      "available": true
     },
     {
       "id": "confetes_add",
@@ -297,13 +308,19 @@
       "id": "tutti_frutti_creme_add",
       "name": "Tutti Frutti (Creme) - R$ 2.00",
       "originalValue": "Tutti Frutti (Creme) - R$ 2.00",
-      "available": false
+      "available": true
     },
     {
       "id": "chocolate_avela_add",
       "name": "Chocolate c/Avelã (Creme) - R$ 2.00",
       "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00",
-      "available": false
+      "available": true
+      },
+    {
+      "id": "chocolate_branco",
+      "name": "Chocolate Branco (Creme) - R$ 2.00",
+      "originalValue": "Chocolate Branco (Creme) - R$ 2.00",
+      "available": true
     }
   ],
   "produtos_especiais": [
@@ -313,7 +330,7 @@
       "description": "COPO DE 300ML, FRUTA= MAÇÃ, CREME= ABACAXI, ACOMPANHAMENTOS= TAPIOCA, PAÇOCA, CONFETES, COBERTURA= KIWI",
       "price": 9.00,
       "img": "/images/Promocao.png",
-      "available": true,
+      "available": false,
       "requires_flavor_selection": true,
       "flavors": [
         {
