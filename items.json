@@ -360,13 +360,13 @@
       ]
     },
     {
-      "id": "fatia_bolo_doce_amor",
-      "name": "Fatia de Bolo 'Doce Amor'",
-      "description": "Deliciosas fatias de bolo para adoçar o seu dia.",
+      "id": "torta de limão com chocolate ao leite",
+      "name": "Torta de Limão com Chocolate ao Leite'",
+      "description": "O encontro perfeito entre o chocolate cremoso e o limão refrescante.",
       "price": 7.00,
-      "img": "/images/fatia-bolo-doce-amor.jpg",
-      "available": false,
-      "requires_flavor_selection": true,
+      "img": "/images/tortadelimão.jpg",
+      "available": true,
+      "requires_flavor_selection": false,
       "flavors": [
         {
           "id": "Fatia",
