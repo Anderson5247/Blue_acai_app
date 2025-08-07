@@ -351,23 +351,6 @@
       "available": false,
       "requires_flavor_selection": true,
       "flavors": [
-        {
-          "id": "Fatia",
-          "name": "Fatia recheada",
-          "internal_description": "Massa branca com recheio de doce de leite e ganache e cobertura de creme de bobom garoto.",
-          "available": true
-        },
-        {
-          "id": "prestigio",
-          "name": "Prestígio",
-          "internal_description": "Massa de chocolate com recheio cremoso de coco.",
-          "available": false
-        },
-        {
-          "id": "ninho_nutella",
-          "name": "Ninho com Nutella",
-          "internal_description": "Massa branca com recheio de Ninho e Nutella.",
-          "available": false
         }
       ]
     }
