@@ -3,8 +3,10 @@
 document.addEventListener('DOMContentLoaded', () => {
     // --- SELETORES PARA O STATUS DA LOJA ---
     const shopStatusToggle = document.getElementById('shopStatusToggle');
-    // 1. NOVO SELETOR ADICIONADO
     const deliveryStatusToggle = document.getElementById('deliveryStatusToggle');
+    // CORRIGIDO: Seletores corretos para Cedral e Outeiro
+    const deliveryCedralToggle = document.getElementById('deliveryCedralToggle');
+    const deliveryOuteiroToggle = document.getElementById('deliveryOuteiroToggle');
     const closedMessageText = document.getElementById('closedMessageText');
     const saveShopStatusButton = document.getElementById('saveShopStatusButton');
     const shopStatusMessage = document.getElementById('shopStatusMessage');
@@ -21,9 +23,17 @@ document.addEventListener('DOMContentLoaded', () => {
         if (shopStatusToggle) {
             shopStatusToggle.checked = shopInfo.isOpen;
         }
-        // 2. NOVO BLOCO PARA ATUALIZAR O BOTÃO DE ENTREGA
         if (deliveryStatusToggle) {
             deliveryStatusToggle.checked = shopInfo.isDeliveryAvailable;
+        }
+        // CORRIGIDO: Lógica para popular os checkboxes de Cedral e Outeiro
+        if (shopInfo.deliveryLocations) {
+            if (deliveryCedralToggle) {
+                deliveryCedralToggle.checked = shopInfo.deliveryLocations.cedral;
+            }
+            if (deliveryOuteiroToggle) {
+                deliveryOuteiroToggle.checked = shopInfo.deliveryLocations.Outeiro;
+            }
         }
         if (closedMessageText) {
             closedMessageText.value = shopInfo.closedMessage;
@@ -31,12 +41,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (saveShopStatusButton) {
-        saveShopStatusButton.addEventListener('click', async () => {
-            if (!shopStatusToggle || !closedMessageText || !deliveryStatusToggle) return;
+      saveShopStatusButton.addEventListener('click', async () => {
+            // CORRIGIDO: Verificação usando os seletores corretos
+            if (!shopStatusToggle || !closedMessageText || !deliveryStatusToggle || !deliveryCedralToggle || !deliveryCentroToggle) return;
 
             const isOpen = shopStatusToggle.checked;
-            // 3. ADICIONADA A LEITURA DO NOVO BOTÃO E ENVIO PARA O SERVIDOR
             const isDeliveryAvailable = deliveryStatusToggle.checked;
+            // CORRIGIDO: Objeto criado com as chaves corretas 'cedral' e 'outeiro'
+            const deliveryLocations = {
+                cedral: deliveryCedralToggle.checked,
+                outeiro: deliveryOuteiroToggle.checked
+            };
             let messageToSave = closedMessageText.value.trim();
 
             if (messageToSave === '' && currentItemsData.shopInfo && currentItemsData.shopInfo.closedMessage) {
@@ -47,14 +62,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 shopStatusMessage.textContent = 'Salvando status...';
                 shopStatusMessage.style.color = 'orange';
             }
-
-            try {
+try {
                 const response = await fetch('/api/shop-info', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    // O novo status da entrega é incluído aqui
-                    body: JSON.stringify({ isOpen, closedMessage: messageToSave, isDeliveryAvailable })
-                });
+                    body: JSON.stringify({ isOpen, closedMessage: messageToSave, isDeliveryAvailable, deliveryLocations })
+                }); // <-- O parêntese ')' do fetch fecha aqui!
 
                 if (!response.ok) {
                     throw new Error('Falha ao salvar o status da loja. Status: ' + response.status);
@@ -65,7 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     shopStatusMessage.textContent = result.message;
                     shopStatusMessage.style.color = 'green';
                 }
-                await fetchItemsAvailability();
+                
+                // Esta linha atualiza a página com os novos dados salvos.
+                await fetchItemsAvailability(); 
 
             } catch (error) {
                 console.error("Erro ao salvar status da loja:", error);
@@ -432,3 +447,4 @@ document.addEventListener('DOMContentLoaded', () => {
     fetchAndProcessOrders(true);
     updateActiveButton(viewByDayButton);
 });
+
