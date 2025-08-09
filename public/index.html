@@ -348,14 +348,22 @@ label.disabled-item {
                     </div>
                 </fieldset>
 
-                <fieldset id="fsDelivery">
+               <fieldset id="fsDelivery">
                     <legend>9. Entrega ou Retirada <span class="section-status">(Obrigatório)</span></legend>
                     <div class="grid-2">
                         <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
+                        <label><input type="radio" name="delivery" value="Consumo no local" required />Consumo no local</label>
+                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral  (R$ 5.00)</label>
                         <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
-                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral (R$ 5.00)</label>
                     </div>
                 </fieldset>
+            <div id="storeAddressInfo" style="display: none; text-align: center; background-color: #f3e5ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                    <h3 style="color: var(--purple); margin-bottom: 0.5rem;">Nosso Endereço:</h3>
+                    <p>
+                        Rua Brasil, nº 48, Centro - Mirinzal<br>
+                        <strong>Ponto de Referência:</strong> Depósito de Bebidas Ribeiro
+                    </p>
+                </div>
                 
                 <fieldset id="fsAddress" style="display: none;">
                     <legend>10. Endereço para Entrega <span class="section-status">(Obrigatório)</span></legend>
@@ -599,39 +607,39 @@ async function fetchAndApplyItemAvailability() {
         enable(fs.clientName);
         enable(fs.payment);
 
-        // --- LÓGICA DE ENTREGA CORRIGIDA ---
-        const deliveryIsAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
+// --- NOVA LÓGICA DE ENTREGA GRANULAR (CORRIGIDA) ---
         const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+        const shopInfo = allItemsData.shopInfo || {};
+        const masterDeliverySwitch = shopInfo.isDeliveryAvailable !== false;
+        const locations = shopInfo.deliveryLocations || { Cedral : false, Outeiro: false };
 
         deliveryRadios.forEach(radio => {
             const label = radio.closest('label');
             if (!label) return;
 
-            // Tratamento para a opção "Retirada"
-            if (radio.value === 'Retirada') {
-                radio.disabled = false;
-                label.classList.remove('disabled-item');
-                label.style.textDecoration = '';
-                label.style.color = '';
-                label.style.cursor = 'pointer';
+            let isEnabled = true; // Habilitado por padrão para "Retirada" e "Consumo no Local"
+
+            // Verifica "Cedral " e usa a chave "cedral " do 'locations'
+            if (radio.value.includes('Cedral ')) {
+                isEnabled = masterDeliverySwitch && locations.cedral ;
+            } 
+            // Verifica "Outeiro" e usa a chave "outeiro" do 'locations'
+            else if (radio.value.includes('Outeiro')) {
+                isEnabled = masterDeliverySwitch && locations.Outeiro;
             }
-            // Tratamento para qualquer outra opção (as de entrega)
-            else { // <<< AQUI ESTÁ A CORREÇÃO EFETIVA
-                if (deliveryIsAvailable) {
-                    // Habilita a opção de entrega
-                    radio.disabled = false;
-                    label.classList.remove('disabled-item');
-                    label.style.textDecoration = '';
-                    label.style.color = '';
-                    label.style.cursor = 'pointer';
-                } else {
-                    // Desabilita a opção de entrega e FORÇA o estilo visual
-                    radio.disabled = true;
-                    label.classList.add('disabled-item');
-                    label.style.textDecoration = 'line-through';
-                    label.style.color = '#aaa';
-                    label.style.cursor = 'not-allowed';
-                }
+            // Opções como "Retirada" e "Consumo no local" sempre ficam ativas.
+
+            // Aplica o estilo e o estado (disabled)
+            radio.disabled = !isEnabled;
+            label.classList.toggle('disabled-item', !isEnabled);
+            if (!isEnabled) {
+                 label.style.textDecoration = 'line-through';
+                 label.style.color = '#aaa';
+                 label.style.cursor = 'not-allowed';
+            } else {
+                 label.style.textDecoration = '';
+                 label.style.color = '';
+                 label.style.cursor = 'pointer';
             }
         });
 
@@ -774,7 +782,11 @@ async function fetchAndApplyItemAvailability() {
 
    // Substitua esta função inteira no seu index.html
 
+// Substitua esta função inteira no seu index.html
 function setupRadioListener(name, stageToAdvanceOnClick) {
+    // Pega o novo div do endereço da loja que você acabou de criar
+    const storeAddressInfo = document.getElementById('storeAddressInfo');
+
     document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
         if (r.disabled) return;
         if (r._currentListener) r.removeEventListener('change', r._currentListener);
@@ -787,23 +799,21 @@ function setupRadioListener(name, stageToAdvanceOnClick) {
             document.querySelectorAll(`input[name="${name}"]`).forEach(radioEl => radioEl.closest('label')?.classList.remove('selected-radio'));
             ev.target.closest('label:not(.disabled-item)')?.classList.add('selected-radio');
 
-            // ===== INÍCIO DA LÓGICA CORRIGIDA =====
+            // ===== INÍCIO DA LÓGICA ATUALIZADA =====
             if (name === 'delivery') {
-                // Verifica se a opção é de entrega E se a entrega está disponível no sistema
-                const isDeliveryOption = value !== 'Retirada';
-                const isDeliveryGloballyAvailable = allItemsData.shopInfo?.isDeliveryAvailable !== false;
-
-                if (isDeliveryOption && isDeliveryGloballyAvailable) {
-                    // Só mostra o campo de endereço se as duas condições forem verdadeiras
-                    fs.address.style.display = 'block';
-                    enable(fs.address);
-                } else {
-                    // Esconde o campo em todos os outros casos (Retirada ou Entrega Indisponível)
-                    fs.address.style.display = 'none';
-                    addressInput.value = '';
+                // Se for Retirada OU Consumo no local
+                if (value === 'Retirada' || value === 'Consumo no local') {
+                    fs.address.style.display = 'none'; // Esconde o campo de digitar endereço
+                    addressInput.value = ''; // Limpa o campo para não ser salvo por engano
+                    if(storeAddressInfo) storeAddressInfo.style.display = 'block'; // Mostra o endereço da loja
+                } 
+                // Se for qualquer outra opção (entrega)
+                else {
+                    fs.address.style.display = 'block'; // Mostra o campo de digitar endereço
+                    if(storeAddressInfo) storeAddressInfo.style.display = 'none'; // Esconde o endereço da loja
                 }
             }
-            // ===== FIM DA LÓGICA CORRIGIDA =====
+            // ===== FIM DA LÓGICA ATUALIZADA =====
 
             if (name === 'wantAdd' && stageToAdvanceOnClick) advanceStage(stageToAdvanceOnClick);
             if (name === 'payment' && pixInfoDiv) pixInfoDiv.classList.toggle('hidden', value !== 'Pix');
@@ -918,25 +928,26 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
     }
 
 // Substitua esta função para o ajuste final de consistência
+// Substitua esta função para a validação final
 function checkIfCanFinish() {
     const itemValid = validateCurrentOrderItem();
     const clientNameFilled = clientNameInput.value.trim() !== '';
     const paymentSelected = !!state.payment;
     const deliverySelected = !!state.delivery;
 
-    // --- INÍCIO DA LÓGICA DE VALIDAÇÃO 100% CORRIGIDA ---
+    // --- LÓGICA DE VALIDAÇÃO DE ENDEREÇO ATUALIZADA ---
     let addressOk = false;
     if (deliverySelected) {
-        // Se a opção for Retirada, o endereço está sempre OK.
-        if (state.delivery === 'Retirada') {
+        // Se a opção for Retirada ou Consumo no local, o endereço não é necessário
+        if (state.delivery === 'Retirada' || state.delivery === 'Consumo no local') {
             addressOk = true;
         } 
-        // Se for qualquer outra opção (de entrega), só está OK se o endereço estiver preenchido.
+        // Para qualquer outra opção (entrega), o endereço deve ser preenchido
         else {
             addressOk = addressInput.value.trim() !== '';
         }
     }
-    // --- FIM DA CORREÇÃO ---
+    // --- FIM DA ATUALIZAÇÃO ---
 
     const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
     btnAdd.disabled = !canProceed;
@@ -1110,7 +1121,7 @@ function checkIfCanFinish() {
         if (orders.length > 0) {
             renderOrders();
             const summaryTextContent = generateSummaryText();
-            const phoneNumber = '5598985016035';
+            const phoneNumber = '5598970194074';
             const encodedText = encodeURIComponent(summaryTextContent);
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedText}`;
             
