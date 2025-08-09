@@ -18,27 +18,52 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentItemsData = {};
 
     // --- LÓGICA DE STATUS DA LOJA ---
-    function populateShopStatus(shopInfo) {
-        if (!shopInfo) return;
-        if (shopStatusToggle) {
-            shopStatusToggle.checked = shopInfo.isOpen;
+    // Substitua este evento de clique inteiro
+if (saveShopStatusButton) {
+  saveShopStatusButton.addEventListener('click', async () => {
+        // CORREÇÃO: Verificando a variável correta "deliveryOuteiroToggle"
+        if (!shopStatusToggle || !closedMessageText || !deliveryStatusToggle || !deliveryCedralToggle || !deliveryOuteiroToggle) return;
+
+        const isOpen = shopStatusToggle.checked;
+        const isDeliveryAvailable = deliveryStatusToggle.checked;
+        const deliveryLocations = {
+            cedral: deliveryCedralToggle.checked,
+            outeiro: deliveryOuteiroToggle.checked
+        };
+        let messageToSave = closedMessageText.value.trim();
+
+        if (messageToSave === '' && currentItemsData.shopInfo && currentItemsData.shopInfo.closedMessage) {
+            messageToSave = currentItemsData.shopInfo.closedMessage;
         }
-        if (deliveryStatusToggle) {
-            deliveryStatusToggle.checked = shopInfo.isDeliveryAvailable;
+
+        if (shopStatusMessage) {
+            shopStatusMessage.textContent = 'Salvando status...';
+            shopStatusMessage.style.color = 'orange';
         }
-        // CORRIGIDO: Lógica para popular os checkboxes de Cedral e Outeiro
-        if (shopInfo.deliveryLocations) {
-            if (deliveryCedralToggle) {
-                deliveryCedralToggle.checked = shopInfo.deliveryLocations.cedral;
+        try {
+            const response = await fetch('/api/shop-info', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ isOpen, closedMessage: messageToSave, isDeliveryAvailable, deliveryLocations })
+            }); 
+            if (!response.ok) {
+                throw new Error('Falha ao salvar o status da loja. Status: ' + response.status);
             }
-            if (deliveryOuteiroToggle) {
-                deliveryOuteiroToggle.checked = shopInfo.deliveryLocations.Outeiro;
+            const result = await response.json();
+            if (shopStatusMessage) {
+                shopStatusMessage.textContent = result.message;
+                shopStatusMessage.style.color = 'green';
+            }
+            await fetchItemsAvailability(); 
+        } catch (error) {
+            console.error("Erro ao salvar status da loja:", error);
+            if (shopStatusMessage) {
+                shopStatusMessage.textContent = 'Erro ao salvar o status da loja.';
+                shopStatusMessage.style.color = 'red';
             }
         }
-        if (closedMessageText) {
-            closedMessageText.value = shopInfo.closedMessage;
-        }
-    }
+    });
+}
 
     if (saveShopStatusButton) {
       saveShopStatusButton.addEventListener('click', async () => {
@@ -447,4 +472,5 @@ try {
     fetchAndProcessOrders(true);
     updateActiveButton(viewByDayButton);
 });
+
 
