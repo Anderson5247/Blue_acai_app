@@ -1,11 +1,12 @@
-{
-  "shopInfo": {
+"shopInfo": {
     "isOpen": true,
-    "isDeliveryAvailable": false,
-     "deliveryLocations": {
+    "isDeliveryAvailable": true,
+    "deliveryLocations": {
       "cedral": true,
       "outeiro": true
     },
+    "closedMessage": "Horário de Funcionamento da Blue Açaí\n\nSegunda-feira: Fechados.\n\nTerça-feira: Fechados.\n\nQuarta-feira: Fechados.\n\nQuinta-feira: Fechados.\n\nSexta-feira:\nTarde: das 15h00 às 17h00.\nNoite: das 17h30 às 22h00.\n\nSábado e Domingo: Fechados.\n\nEstamos localizados na Rua Brasil nº48 Deposito de Bebidas Ribeiro (casa de Tarciso), Centro-Mirinzal, com opções de retirada na loja ou delivery. Esperamos por você!"
+   },
     "closedMessage": "Horário de Funcionamento da Blue Açaí\n\nSegunda-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h00 às 21h30.\n\nTerça-feira: Fechados.\n\nQuarta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nQuinta-feira:\nNoite: das 18h30 às 21h30.\n\nSexta-feira: Fechados.\n\nSábado e Domingo:\nNoite: das 18h30 às 21h30.\n\nEstamos localizados na Rua do Porto, Outeiro-Cedral, com opções de retirada na loja ou delivery. Esperamos por você!"
   },
   "frutas": [
