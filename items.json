@@ -334,7 +334,7 @@
       "id": "gelado de abacax",
       "name": "Gelado de Abacaxi Cremoso",
       "description": "A doçura natural da fruta combinada com a cremosidade do leite condensado",
-      "price": 9.00,
+      "price": 7.00,
       "img": "/images/geladodeabacaxi.png",
       "available": true,
       "requires_flavor_selection": false,
