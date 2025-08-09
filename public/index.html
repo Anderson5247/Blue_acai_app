@@ -357,11 +357,11 @@ label.disabled-item {
                         <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
                     </div>
                 </fieldset>
-            <div id="storeAddressInfo" style="display: none; text-align: center; background-color: #f3e5ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+          <div id="storeAddressInfo" style="display: none; text-align: center; background-color: #f3e5ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
                     <h3 style="color: var(--purple); margin-bottom: 0.5rem;">Nosso Endereço:</h3>
                     <p>
-                        Rua Brasil, nº 48, Centro - Mirinzal<br>
-                        <strong>Ponto de Referência:</strong> Depósito de Bebidas Ribeiro
+                        Rua do Porto, Outeiro-Cedral<br>
+                        <strong>Ponto de Referência:</strong> depois da casa do fotógrafo Branco Melo
                     </p>
                 </div>
                 
@@ -607,41 +607,38 @@ async function fetchAndApplyItemAvailability() {
         enable(fs.clientName);
         enable(fs.payment);
 
-// --- NOVA LÓGICA DE ENTREGA GRANULAR (CORRIGIDA) ---
-        const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-        const shopInfo = allItemsData.shopInfo || {};
-        const masterDeliverySwitch = shopInfo.isDeliveryAvailable !== false;
-        const locations = shopInfo.deliveryLocations || { Cedral : false, Outeiro: false };
+// --- NOVA LÓGICA DE ENTREGA GRANULAR (FINAL E CORRIGIDA) ---
+const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+const shopInfo = allItemsData.shopInfo || {};
+const masterDeliverySwitch = shopInfo.isDeliveryAvailable !== false;
+// Fallback correto com as chaves em minúsculo
+const locations = shopInfo.deliveryLocations || { cedral: false, outeiro: false };
 
-        deliveryRadios.forEach(radio => {
-            const label = radio.closest('label');
-            if (!label) return;
+deliveryRadios.forEach(radio => {
+    const label = radio.closest('label');
+    if (!label) return;
 
-            let isEnabled = true; // Habilitado por padrão para "Retirada" e "Consumo no Local"
+    let isEnabled = true;
 
-            // Verifica "Cedral " e usa a chave "cedral " do 'locations'
-            if (radio.value.includes('Cedral ')) {
-                isEnabled = masterDeliverySwitch && locations.cedral ;
-            } 
-            // Verifica "Outeiro" e usa a chave "outeiro" do 'locations'
-            else if (radio.value.includes('Outeiro')) {
-                isEnabled = masterDeliverySwitch && locations.Outeiro;
-            }
-            // Opções como "Retirada" e "Consumo no local" sempre ficam ativas.
+    // Lógica corrigida para os novos locais
+    if (radio.value.includes('Cedral')) {
+        isEnabled = masterDeliverySwitch && locations.cedral;
+    } else if (radio.value.includes('Outeiro')) {
+        isEnabled = masterDeliverySwitch && locations.outeiro;
+    }
 
-            // Aplica o estilo e o estado (disabled)
-            radio.disabled = !isEnabled;
-            label.classList.toggle('disabled-item', !isEnabled);
-            if (!isEnabled) {
-                 label.style.textDecoration = 'line-through';
-                 label.style.color = '#aaa';
-                 label.style.cursor = 'not-allowed';
-            } else {
-                 label.style.textDecoration = '';
-                 label.style.color = '';
-                 label.style.cursor = 'pointer';
-            }
-        });
+    radio.disabled = !isEnabled;
+    label.classList.toggle('disabled-item', !isEnabled);
+    if (!isEnabled) {
+         label.style.textDecoration = 'line-through';
+         label.style.color = '#aaa';
+         label.style.cursor = 'not-allowed';
+    } else {
+         label.style.textDecoration = '';
+         label.style.color = '';
+         label.style.cursor = 'pointer';
+    }
+});
 
         // Configura os listeners de clique após a manipulação
         setupRadioListener('delivery');
