@@ -1,7 +1,7 @@
 {
   "shopInfo": {
     "isOpen": true,
-    "isDeliveryAvailable": true,
+    "isDeliveryAvailable": false,
     "deliveryLocations": {
       "cedral": true,
       "outeiro": true
@@ -17,13 +17,13 @@
   ],
   "cremes": [
     { "id": "ninho", "name": "Ninho", "available": true },
-    { "id": "ninho_zero_lactose", "name": "Ninho Zero Lactose", "available": true },
+    { "id": "ninho_zero_lactose", "name": "Ninho Zero Lactose", "available": false },
     { "id": "maracuja", "name": "Maracujá", "available": true },
     { "id": "morango_creme", "name": "Morango (Creme)", "available": true },
     { "id": "abacaxi", "name": "Abacaxi", "available": true },
     { "id": "tutti_frutti_creme", "name": "Tutti Frutti (Creme)", "available": true },
-    { "id": "chocolate_avela", "name": "Chocolate c/Avelã", "available": true },
-    { "id": "chocolate_branco", "name": "Chocolate Branco", "available": true }
+    { "id": "chocolate_avela", "name": "Chocolate c/Avelã", "available": false },
+    { "id": "chocolate_branco", "name": "Chocolate Branco", "available": false }
   ],
   "acompanhamentos": [
     { "id": "amendoim_acomp", "name": "Amendoim", "available": true },
@@ -66,13 +66,13 @@
     { "id": "maçã_add", "name": "Maçã - R$ 1.00", "originalValue": "Maçã - R$ 1.00", "available": true },
     { "id": "uva_add", "name": "Uva - R$ 1.00", "originalValue": "Uva- R$ 1.00", "available": true },
     { "id": "ninho_creme_add", "name": "Ninho (Creme) - R$ 2.00", "originalValue": "Ninho - R$ 2.00", "available": true },
-    { "id": "ninho_creme_zero_lactose_add", "name": "Ninho Zero Lactose (Creme) - R$ 2.00", "originalValue": "Ninho - R$ 2.00", "available": true },
+    { "id": "ninho_creme_zero_lactose_add", "name": "Ninho Zero Lactose (Creme) - R$ 2.00", "originalValue": "Ninho - R$ 2.00", "available": false },
     { "id": "maracuja_creme_add", "name": "Maracujá (Creme) - R$ 2.00", "originalValue": "Maracujá (Creme) - R$ 2.00", "available": true },
     { "id": "morango_creme_add_extra", "name": "Morango (Creme) - R$ 2.00", "originalValue": "Morango (Creme) - R$ 2.00", "available": true },
     { "id": "Abacaxi_creme_add", "name": "Abacaxi (Creme) - R$ 2.00", "originalValue": "Tutti Frutti (Creme) - R$ 2.00", "available": true },
     { "id": "tutti_frutti_creme_add", "name": "Tutti Frutti (Creme) - R$ 2.00", "originalValue": "Tutti Frutti (Creme) - R$ 2.00", "available": true },
-    { "id": "chocolate_avela_add", "name": "Chocolate c/Avelã (Creme) - R$ 2.00", "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00", "available": true },
-    { "id": "chocolate_branco", "name": "Chocolate Branco (Creme) - R$ 2.00", "originalValue": "Chocolate Branco (Creme) - R$ 2.00", "available": true },
+    { "id": "chocolate_avela_add", "name": "Chocolate c/Avelã (Creme) - R$ 2.00", "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00", "available": false },
+    { "id": "chocolate_branco", "name": "Chocolate Branco (Creme) - R$ 2.00", "originalValue": "Chocolate Branco (Creme) - R$ 2.00", "available": false },
     { "id": "kit_kat", "name": "Kit Kat (Creme) - R$ 2.00", "originalValue": "Kit Kat (Creme) - R$ 2.00", "available": true }
   ],
   "produtos_especiais": [
