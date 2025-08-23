@@ -82,7 +82,7 @@
       "description": "A doçura natural da fruta combinada com a cremosidade do leite condensado",
       "price": 7,
       "img": "/images/geladodeabacaxi.png",
-      "available": true,
+      "available": false,
       "requires_flavor_selection": false,
       "flavors": []
     },
@@ -92,7 +92,7 @@
       "description": "O encontro perfeito entre o chocolate cremoso e o limão refrescante",
       "price": 7,
       "img": "/images/tortadelimão.jpg",
-      "available": true,
+      "available": false,
       "requires_flavor_selection": false,
       "flavors": []
     }
