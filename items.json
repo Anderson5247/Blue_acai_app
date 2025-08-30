@@ -44,7 +44,6 @@
   ],
   "adicionais": [
     { "id": "ovomaltine_add", "name": "Ovomaltine - R$ 2.00", "originalValue": "Ovomaltine - R$ 2.00", "available": true },
-    { "id": "escureto_add", "name": "Escureto - R$ 1.00", "originalValue": "Escureto - R$ 1.00", "available": true },
     { "id": "chocoball_add", "name": "Chocoball - R$ 1.00", "originalValue": "Chocoball - R$ 1.00", "available": true },
     { "id": "amendoim_add", "name": "Amendoim (Adicional) - R$ 1.00", "originalValue": "Amendoim - R$ 1.00", "available": true },
     { "id": "pacoca_add", "name": "Paçoca (Adicional) - R$ 1.00", "originalValue": "Paçoca - R$ 1.00", "available": true },
