@@ -17,12 +17,11 @@
   ],
   "cremes": [
     { "id": "ninho", "name": "Ninho", "available": true },
-    { "id": "ninho_zero_lactose", "name": "Ninho Zero Lactose", "available": false },
+    { "id": "ninho_zero_lactose", "name": "Ninho Zero Lactose", "available": true},
     { "id": "maracuja", "name": "Maracujá", "available": true },
     { "id": "morango_creme", "name": "Morango (Creme)", "available": true },
     { "id": "abacaxi", "name": "Abacaxi", "available": true },
     { "id": "tutti_frutti_creme", "name": "Tutti Frutti (Creme)", "available": true },
-    { "id": "chocolate_avela", "name": "Chocolate c/Avelã", "available": false },
     { "id": "chocolate_branco", "name": "Chocolate Branco", "available": false }
   ],
   "acompanhamentos": [
@@ -77,19 +76,19 @@
   ],
   "produtos_especiais": [
     {
-      "id": "gelado de abacax",
-      "name": "Gelado de Abacaxi Cremoso",
-      "description": "A doçura natural da fruta combinada com a cremosidade do leite condensado",
+      "id": "sorvete casquinha",
+      "name": "Sorvete de Casquinha",
+      "description": "Verificar sabores Disponíveis",
       "price": 7,
-      "img": "/images/geladodeabacaxi.png",
-      "available": false,
+      "img": "/images/casquinha.jpg",
+      "available": true,
       "requires_flavor_selection": false,
       "flavors": []
     },
     {
-      "id": "torta de limão com chocolate ao leite",
-      "name": "Torta de Limão com Chocolate ao Leite",
-      "description": "O encontro perfeito entre o chocolate cremoso e o limão refrescante",
+      "id": "sorvete no copo",
+      "name": "Sorvete no copo",
+      "description": "Verificar sabores Disponíveis",
       "price": 7,
       "img": "/images/tortadelimão.jpg",
       "available": false,
