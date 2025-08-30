@@ -286,7 +286,21 @@ label.disabled-item {
         #fsSpecialProductFlavors .grid-2 label span {
             display: inline; font-weight: bold;
         }
-
+/* CSS PARA O BANNER - PODE COLAR NO FINAL DA TAG <STYLE> */
+.produto-card .banner-mais-vendido {
+    position: absolute;
+    top: 10px;
+    left: -8px;
+    background-color: #dc3545; /* Vermelho para destaque */
+    color: white;
+    padding: 5px 15px;
+    font-size: 0.8rem;
+    font-weight: bold;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transform: rotate(-5deg); /* Leve inclinação para estilo */
+    z-index: 3; /* Garante que fique por cima de outros elementos */
+}
     </style>
 </head>
 <body>
@@ -353,16 +367,15 @@ label.disabled-item {
                     <div class="grid-2">
                         <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
                         <label><input type="radio" name="delivery" value="Consumo no local" required />Consumo no local</label>
-                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral  (R$ 5.00)</label>
-                        <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
+                        <label><input type="radio" name="delivery" value="Bairro - R$ 3.00" />Entrega - Bairro (R$ 3.00)</label>
+                        <label><input type="radio" name="delivery" value="Centro - R$ 5.00" />Entrega - Centro (R$ 5.00)</label>
                     </div>
                 </fieldset>
-          <div id="storeAddressInfo" style="display: none; text-align: center; background-color: #f3e5ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+            <div id="storeAddressInfo" style="display: none; text-align: center; background-color: #f3e5ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
                     <h3 style="color: var(--purple); margin-bottom: 0.5rem;">Nosso Endereço:</h3>
                     <p>
-                        Rua do Porto, Outeiro-Cedral<br>
-                        <strong>Ponto de Referência:</strong> Depois da casa do fotógrafo Branco Melo
-                         <strong>Obs.: A opção de consumo no local está disponível apenas aos sábados, domingos e feriados (sujeito a consulta de disponibilidade).</strong>
+                        Rua Brasil, nº 48, Centro - Mirinzal<br>
+                        <strong>Ponto de Referência:</strong> Depósito de Bebidas Ribeiro
                     </p>
                 </div>
                 
@@ -608,38 +621,41 @@ async function fetchAndApplyItemAvailability() {
         enable(fs.clientName);
         enable(fs.payment);
 
-// --- NOVA LÓGICA DE ENTREGA GRANULAR (FINAL E CORRIGIDA) ---
-const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
-const shopInfo = allItemsData.shopInfo || {};
-const masterDeliverySwitch = shopInfo.isDeliveryAvailable !== false;
-// Fallback correto com as chaves em minúsculo
-const locations = shopInfo.deliveryLocations || { cedral: false, outeiro: false };
+// --- NOVA LÓGICA DE ENTREGA GRANULAR (CORRIGIDA) ---
+        const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
+        const shopInfo = allItemsData.shopInfo || {};
+        const masterDeliverySwitch = shopInfo.isDeliveryAvailable !== false;
+        const locations = shopInfo.deliveryLocations || { bairro: false, centro: false };
 
-deliveryRadios.forEach(radio => {
-    const label = radio.closest('label');
-    if (!label) return;
+        deliveryRadios.forEach(radio => {
+            const label = radio.closest('label');
+            if (!label) return;
 
-    let isEnabled = true;
+            let isEnabled = true; // Habilitado por padrão para "Retirada" e "Consumo no Local"
 
-    // Lógica corrigida para os novos locais
-    if (radio.value.includes('Cedral')) {
-        isEnabled = masterDeliverySwitch && locations.cedral;
-    } else if (radio.value.includes('Outeiro')) {
-        isEnabled = masterDeliverySwitch && locations.outeiro;
-    }
+            // Verifica "Bairro" e usa a chave "bairro" do 'locations'
+            if (radio.value.includes('Bairro')) {
+                isEnabled = masterDeliverySwitch && locations.bairro;
+            } 
+            // Verifica "Centro" e usa a chave "centro" do 'locations'
+            else if (radio.value.includes('Centro')) {
+                isEnabled = masterDeliverySwitch && locations.centro;
+            }
+            // Opções como "Retirada" e "Consumo no local" sempre ficam ativas.
 
-    radio.disabled = !isEnabled;
-    label.classList.toggle('disabled-item', !isEnabled);
-    if (!isEnabled) {
-         label.style.textDecoration = 'line-through';
-         label.style.color = '#aaa';
-         label.style.cursor = 'not-allowed';
-    } else {
-         label.style.textDecoration = '';
-         label.style.color = '';
-         label.style.cursor = 'pointer';
-    }
-});
+            // Aplica o estilo e o estado (disabled)
+            radio.disabled = !isEnabled;
+            label.classList.toggle('disabled-item', !isEnabled);
+            if (!isEnabled) {
+                 label.style.textDecoration = 'line-through';
+                 label.style.color = '#aaa';
+                 label.style.cursor = 'not-allowed';
+            } else {
+                 label.style.textDecoration = '';
+                 label.style.color = '';
+                 label.style.cursor = 'pointer';
+            }
+        });
 
         // Configura os listeners de clique após a manipulação
         setupRadioListener('delivery');
@@ -657,7 +673,7 @@ deliveryRadios.forEach(radio => {
 
         const acaiProducts = [
             { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
-            { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', desc: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
+            { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', desc: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, isBestseller: true, },
             { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', desc: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true }
         ];
 
@@ -665,24 +681,30 @@ deliveryRadios.forEach(radio => {
         (allItemsData.produtos_especiais || []).forEach(prod => { boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, 'produto_especial'); });
     }
 
-    function createProductCardHTML(prod, type) {
-        const disabledClass = !prod.available ? 'disabled-item' : '';
-        const inputDisabled = !prod.available ? 'disabled' : '';
-        const title = !prod.available ? 'Produto indisponível' : '';
-        const inputId = `prod-${prod.id}`; 
-        
-        return `
-            <label class="produto-card ${disabledClass}" for="${inputId}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}" title="${title}">
-                <img src="${prod.img || '/images/default-product.png'}" alt="${prod.name}" />
-                <input type="radio" name="produtoPrincipal" value="${prod.name}" id="${inputId}" required ${inputDisabled}/>
-                <div>
-                    <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
-                    <span>${prod.desc || prod.description || ''}</span>
-                </div>
-            </label>
-        `;
-    }
-
+  // Localize esta função no seu public/index.html e substitua-a completamente por este bloco:
+function createProductCardHTML(prod, type) {
+    const disabledClass = !prod.available ? 'disabled-item' : '';
+    const inputDisabled = !prod.available ? 'disabled' : '';
+    const title = !prod.available ? 'Produto indisponível' : '';
+    const inputId = `prod-${prod.id}`; 
+    
+    const bestsellerBanner = prod.isBestseller 
+        ? '<div class="banner-mais-vendido">O MAIS VENDIDO</div>' 
+        : '';
+    
+    return `
+        <label class="produto-card ${disabledClass}" for="${inputId}" data-product-type="${type}" data-product-id="${prod.id}" data-price="${prod.price}" title="${title}">
+            ${bestsellerBanner}
+            
+            <img src="${prod.img || '/images/default-product.png'}" alt="${prod.name}" />
+            <input type="radio" name="produtoPrincipal" value="${prod.name}" id="${inputId}" required ${inputDisabled}/>
+            <div>
+                <strong>${prod.name}</strong> - R$ ${prod.price.toFixed(2).replace('.', ',')}
+                <span>${prod.desc || prod.description || ''}</span>
+            </div>
+        </label>
+    `;
+}
     function updateAndRenderFlavors(product) {
         if (!fs.specialProductFlavors || !product || !product.flavors) {
             disable(fs.specialProductFlavors);
@@ -815,7 +837,6 @@ function setupRadioListener(name, stageToAdvanceOnClick) {
         r._currentListener = new_listener;
     });
 }
-
     function setupChecks(fieldsetElement, max, key) { 
         const box = fieldsetElement.querySelector('.grid-2'); 
         if (!box) return;
@@ -1112,7 +1133,7 @@ function checkIfCanFinish() {
         if (orders.length > 0) {
             renderOrders();
             const summaryTextContent = generateSummaryText();
-            const phoneNumber = '5598985016035';
+            const phoneNumber = '5598970194074';
             const encodedText = encodeURIComponent(summaryTextContent);
             const whatsappURL = `https://wa.me/${phoneNumber}?text=${encodedText}`;
             
