@@ -94,6 +94,26 @@
       "available": false,
       "requires_flavor_selection": false,
       "flavors": []
+    },
+    {
+      "id": "guaraná da amazônia",
+      "name": "Guaraná da Amazônia 300ml",
+      "description": "EM BREVE",
+      "price": R$ 10.00,
+      "img": "/images/copode300ml.jpeg",
+      "available": false,
+      "requires_flavor_selection": false,
+      "flavors": []
+    },
+    {
+      "id": "guaraná da amazônia",
+      "name": "Guaraná da Amazônia 500ml",
+      "description": "EM BREVE",
+      "price": R$ 10.00,
+      "img": "/images/copode500ml.jpeg",
+      "available": false,
+      "requires_flavor_selection": false,
+      "flavors": []
     }
   ]
 }
