@@ -741,16 +741,21 @@
                 productOptionsContainer.style.display = 'block';
 
                 if (productType === 'acai') {
-                    let fMax = 0, cMax = 0, aMax = 0, coMax = 0;
-                    if (productId === 'size-300') { fMax = 1; cMax = 1; aMax = 3; coMax = 1; }
-                    else if (productId === 'size-500') { fMax = 2; cMax = 2; aMax = 3; coMax = 1; }
-                    else if (productId === 'size-1L') { fMax = 3; cMax = 3; aMax = 3; coMax = 2; }
+                    if (productId === 'size-300') {
+                        state.fMax = 1; state.cMax = 1; state.aMax = 3; state.coMax = 1;
+                    } else if (productId === 'size-500') {
+                        state.fMax = 2; state.cMax = 2; state.aMax = 3; state.coMax = 1;
+                    } else if (productId === 'size-1L') {
+                        state.fMax = 3; state.cMax = 3; state.aMax = 3; state.coMax = 2;
+                    }
+                    state.addMax = undefined; // Sem limite para adicionais de açaí
                     
-                    state = { ...state, fMax, cMax, aMax, coMax, addMax: undefined };
                     [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd].forEach(enable);
                     fs.cover.querySelector('legend').textContent = '5. Cobertura(s)';
-                    setupChecks(fs.frutas, fMax, 'frutas'); setupChecks(fs.cremes, cMax, 'cremes');
-                    setupChecks(fs.accomp, aMax, 'accomp'); setupChecks(fs.cover, coMax, 'cover');
+                    setupChecks(fs.frutas, state.fMax, 'frutas'); 
+                    setupChecks(fs.cremes, state.cMax, 'cremes');
+                    setupChecks(fs.accomp, state.aMax, 'accomp'); 
+                    setupChecks(fs.cover, state.coMax, 'cover');
                     setupRadioListener('wantAdd');
                 } else if (productType === 'sorvete') {
                     enable(fs.sorveteSabor); setupRadioListener('sorveteSabor');
@@ -789,7 +794,7 @@
                         setupChecks(fs.add, state.addMax, 'add');
                     } else {
                         disable(fs.add);
-                        state.add = ['Nenhum Adicional'];
+                        state.add = [];
                         clearCheckboxes(fs.add);
                         updateCounter(cnt.add, 0);
                     }
@@ -813,57 +818,43 @@
             noneCheckbox.checked = true;
             state[key] = [noneValue];
         }
-        let initialCount = state[key].includes(noneValue) ? 0 : state[key].length;
+        let initialCount = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
         updateCounter(counterEl, initialCount, max, key);
 
         allCheckboxes.forEach(chk => {
             chk.addEventListener('change', () => {
-                if (chk.disabled && !chk.value.toLowerCase().includes("nenhum")) return;
+                if (chk.disabled) return;
                 
-                if (key === 'add' && max === undefined) { // Lógica para adicionais sem limite
-                    state[key] = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
-                    if (noneCheckbox) {
-                        if(chk === noneCheckbox && chk.checked) {
-                             allCheckboxes.forEach(other => { if(other !== chk) other.checked = false; });
-                             state[key] = [noneValue];
-                        } else if (chk.checked) {
-                            noneCheckbox.checked = false;
-                            state[key] = state[key].filter(v => v !== noneValue);
-                        }
-                    }
-                     if (state[key].length === 0 && noneCheckbox) {
-                        noneCheckbox.checked = true; state[key] = [noneValue];
-                    }
-                    const count = state[key].includes(noneValue) ? 0 : state[key].length;
-                    updateCounter(counterEl, count, max, key);
-                    checkIfCanFinish();
-                    return;
-                }
-                
-                // Lógica para todos os outros com limite
-                const currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')];
+                let currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
+
                 if (noneCheckbox) {
                     if (chk === noneCheckbox && chk.checked) {
+                        currentSelected = [noneValue];
                         allCheckboxes.forEach(other => { if (other !== noneCheckbox) other.checked = false; });
-                    } else if (chk !== noneCheckbox && chk.checked) {
-                        if (noneCheckbox.checked) noneCheckbox.checked = false;
+                    } else if (chk.checked && currentSelected.includes(noneValue)) {
+                        noneCheckbox.checked = false;
+                        currentSelected = currentSelected.filter(v => v !== noneValue);
                     }
                 }
-                state[key] = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
-                if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                
+                if (currentSelected.length === 0 && noneCheckbox && !noneCheckbox.disabled) {
                     noneCheckbox.checked = true;
-                    state[key] = [noneValue];
+                    currentSelected = [noneValue];
                 }
-                let count = state[key].includes(noneValue) ? 0 : state[key].length;
+                
+                state[key] = currentSelected;
+                let count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+
                 if (max !== undefined && count > max) {
                     chk.checked = false;
                     state[key] = state[key].filter(item => item !== chk.value);
                     if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
                         noneCheckbox.checked = true; state[key] = [noneValue];
                     }
-                    count = state[key].includes(noneValue) ? 0 : state[key].length;
+                    count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
                     alert(`Máximo de ${max} ${key === 'cover' ? 'cobertura(s)' : key}.`);
                 }
+
                 updateCounter(counterEl, count, max, key);
                 checkIfCanFinish();
             });
@@ -872,8 +863,8 @@
 
     function updateCounter(element, count, max, key) {
         if (!element) return;
-        if (key === 'add' && max === undefined) {
-             element.textContent = `( ${count} )`; // Sem limite
+        if (key === 'add') { // Para adicionais, nunca mostrar o /max
+             element.textContent = `( ${count} )`;
         } else {
              element.textContent = `( ${count} / ${max ?? '?'} )`;
         }
@@ -918,11 +909,9 @@
                 }
             }
             
-            if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
+            if (orderItem.add && orderItem.add.length > 0 && !orderItem.add.includes('Nenhum Adicional')) {
                 itemDetailsHtml += `Adicionais: ${orderItem.add.map(item => item.split(' - R$ ')[0]).join(', ')}`;
                 orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
-            } else if (type !== 'produto_especial') {
-                 // itemDetailsHtml += `Adicionais: Nenhum Adicional`;
             }
 
             li.innerHTML = `<div class="order-item-header"><strong>Item ${i + 1}: ${orderItem.produtoPrincipal?.name || 'Item'}</strong><button class="repeat-item-btn" data-index="${i}">🔁 Repetir Item</button></div>${itemDetailsHtml}<br><strong>Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}</strong>`;
@@ -960,23 +949,21 @@
             const { name, type } = orderItem.produtoPrincipal;
             summaryText += `*Item ${i + 1}: ${name}*\n`;
             
-            const formatList = (list) => (list.includes('Nenhuma') || list.includes('Nenhuma das opções')) ? 'Nenhuma' : list.join(', ');
+            const formatList = (list) => (list && list.length > 0 && !list.includes('Nenhuma das opções') && !list.includes('Nenhum Adicional')) ? list.join(', ') : 'Nenhuma';
 
             if (type === 'acai') {
                 summaryText += `Frutas: ${formatList(orderItem.frutas)}\nCremes: ${formatList(orderItem.cremes)}\nAcompanhamentos: ${formatList(orderItem.accomp)}\nCoberturas: ${formatList(orderItem.cover)}\n`;
             } else if (type === 'sorvete') {
                 summaryText += `Sabor: ${orderItem.sorveteSabor || 'N/A'}\nCalda: ${formatList(orderItem.cover)}\n`;
             } else if (type === 'bebida') {
-                if (orderItem.cover && !orderItem.cover.includes('Nenhuma das opções')) {
+                if (orderItem.cover && orderItem.cover.length > 0 && !orderItem.cover.includes('Nenhuma das opções')) {
                     summaryText += `Caldas: ${formatList(orderItem.cover)}\n`;
                 }
             }
             
-            if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
+            if (orderItem.add && orderItem.add.length > 0 && !orderItem.add.includes('Nenhum Adicional')) {
                 summaryText += `Adicionais: ${orderItem.add.map(a => a.split(' - R$ ')[0].toUpperCase()).join(', ')}\n`;
                 orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
-            } else if (type !== 'produto_especial' && type) {
-                // Não mostra "Adicionais: Nenhum" se o usuário apenas disse "Não"
             }
             summaryText += `Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}\n\n`;
             totalGeralPedido += subTotalItem;
