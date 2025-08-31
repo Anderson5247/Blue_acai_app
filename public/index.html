@@ -507,7 +507,7 @@
     let orders = [];
     let allItemsData = {};
 
-    // --- DADOS DOS PRODUTOS DE AÇAÍ (FONTE ÚNICA DA VERDADE) ---
+    // --- DADOS DOS PRODUTOS DE AÇAÍ ---
     const ACAI_PRODUCTS = [
         { 
             id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', 
@@ -530,7 +530,7 @@
     const enable = el => { if (el) { el.removeAttribute('disabled'); el.classList.remove('hidden'); } };
     const disable = el => { if (el) { el.setAttribute('disabled', 'true'); el.classList.add('hidden'); } };
     const clearCheckboxes = fieldset => fieldset.querySelectorAll('input[type="checkbox"]:checked:not([disabled])').forEach(chk => chk.checked = false);
-    const clearRadios = name => document.querySelectorAll(`input[name="${name}"]`).forEach(r => { r.checked = false; r.closest('label')?.classList.remove('selected-radio'); });
+    const clearRadios = name => document.querySelectorAll(`input[name="${name}"]:checked`).forEach(r => { r.checked = false; r.closest('label')?.classList.remove('selected-radio'); });
 
     function renderDynamicCheckboxes(containerId, items, noneOptionText) {
         const container = document.getElementById(containerId);
@@ -589,13 +589,11 @@
 
     // --- LÓGICA PRINCIPAL DO FORMULÁRIO ---
     function resetPartialForItemSelection() {
-        const payment = state.payment;
-        const delivery = state.delivery;
-
-        state = {};
-
-        state.payment = payment;
-        state.delivery = delivery;
+        const orderState = {
+            payment: state.payment,
+            delivery: state.delivery
+        };
+        state = { ...orderState }; // Limpa tudo, exceto o estado do pedido geral
 
         productOptionsContainer.style.display = 'none';
         Object.values(fs).forEach(f => {
@@ -605,7 +603,6 @@
                  if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
             }
         });
-
         updateCounter(cnt.frutas, 0, '?');
         updateCounter(cnt.cremes, 0, '?');
         updateCounter(cnt.accomp, 0, '?');
@@ -727,7 +724,7 @@
 
     function setupProdutoPrincipalListeners() {
         document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
-            if (radio.dataset.listenerAttached) return; 
+            if (radio.dataset.listenerAttached) return; // Previne múltiplos listeners
             radio.dataset.listenerAttached = true;
 
             radio.addEventListener('change', (e) => {
@@ -860,9 +857,8 @@
                 checkIfCanFinish();
             });
         });
-        updateCounter(counterEl, count, max, key);
-        checkIfCanFinish();
     }
+
     function updateCounter(element, count, max, key) {
         if (!element) return;
         if (key === 'add') { 
@@ -989,26 +985,29 @@
     btnAdd.onclick = () => {
         if (btnAdd.disabled) return;
         state.address = addressInput.value.trim();
-        state.clientName = clientNameInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
         renderOrders();
         
+        const savedPayment = state.payment, savedDelivery = state.delivery;
         resetPartialForItemSelection();
+        state.payment = savedPayment; 
+        state.delivery = savedDelivery;
 
-        if (state.payment) {
-            const radio = document.querySelector(`input[name="payment"][value="${state.payment}"]`);
-            if(radio) radio.closest('label')?.classList.add('selected-radio');
-        }
-        if (state.delivery) {
-            const radio = document.querySelector(`input[name="delivery"][value="${state.delivery}"]`);
+        if (savedPayment) document.querySelector(`input[name="payment"][value="${savedPayment}"]`)?.closest('label')?.classList.add('selected-radio');
+        if (savedDelivery) {
+            const radio = document.querySelector(`input[name="delivery"][value="${savedDelivery}"]`);
             if (radio) {
                 radio.checked = true;
                 radio.closest('label')?.classList.add('selected-radio');
+                if (!['Retirada', 'Consumo no local'].includes(savedDelivery)) { 
+                    fs.address.style.display = 'block'; 
+                    enable(fs.address); 
+                }
             }
         }
-        
-        clearRadios('produtoPrincipal');
+        if (pixInfoDiv) pixInfoDiv.classList.toggle('hidden', state.payment !== 'Pix');
         document.querySelectorAll('.produto-card.selected').forEach(c => c.classList.remove('selected'));
+        clearRadios('produtoPrincipal');
         checkIfCanFinish();
     };
 
@@ -1016,7 +1015,6 @@
         if (btnFinish.disabled) return alert("Por favor, complete todos os campos obrigatórios.");
         if (!!state.produtoPrincipal) {
              state.address = addressInput.value.trim();
-             state.clientName = clientNameInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
         
@@ -1052,4 +1050,3 @@
 </script>
 </body>
 </html>
-}
