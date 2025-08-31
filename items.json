@@ -75,55 +75,44 @@
   ],
   "produtos_especiais": [
     {
-      "id": "sorvete casquinha",
+      "id": "sorvete-casquinha",
       "name": "Sorvete de Casquinha",
-      "description": " Crocância indescritível e os sabores de sorvete mais deliciosos do mercado",
+      "description": "1 sabor e 1 calda",
       "price": 4.00,
       "img": "/images/casquinha.jpg",
       "available": true,
-      "requires_flavor_selection": false,
-      "flavors": []
+      "type": "sorvete"
     },
     {
-      "id": "sorvete no pote",
+      "id": "sorvete-pote",
       "name": "Sorvete no Pote",
-      "description": "EM BREVE",
+      "description": "1 sabor, 1 calda e adicionais",
       "price": 7.00,
       "img": "/images/copo.jpeg",
-      "available": false,
-      "requires_flavor_selection": false,
-      "flavors": []
+      "available": true,
+      "type": "sorvete"
     },
     {
-      "id": "guaraná da amazônia",
+      "id": "guarana-300",
       "name": "Guaraná da Amazônia 300ml",
       "description": "EM BREVE",
       "price": 10.00,
       "img": "/images/copode300ml.png",
-      "available": false,
-      "requires_flavor_selection": false,
-      "flavors": []
+      "available": false
     },
     {
-      "id": "guaraná da amazônia",
+      "id": "guarana-500",
       "name": "Guaraná da Amazônia 500ml",
       "description": "EM BREVE",
       "price": 15.00,
       "img": "/images/copode500ml.png",
-      "available": false,
-      "requires_flavor_selection": false,
-      "flavors": []
+      "available": false
     }
   ],
   "sorvete_sabores": [
-    { "id": "sv_chocolate", "name": "Chocolate", "available": true },
-    { "id": "sv_morango", "name": "Morango", "available": true },
-    { "id": "sv_creme", "name": "Creme", "available": true },
-    { "id": "sv_flocos", "name": "Flocos", "available": true }
-  ],
-  "sorvete_caldas": [
-    { "id": "sc_chocolate", "name": "Chocolate", "available": true },
-    { "id": "sc_morango", "name": "Morango", "available": true },
-    { "id": "sc_caramelo", "name": "Caramelo", "available": true }
+    { "id": "sv_chocolate", "name": "Chocolate", "available": true, "img": "/images/sabor-chocolate.jpg" },
+    { "id": "sv_morango", "name": "Morango", "available": true, "img": "/images/sabor-morango.jpg" },
+    { "id": "sv_creme", "name": "Creme", "available": true, "img": "/images/sabor-creme.jpg" },
+    { "id": "sv_flocos", "name": "Flocos", "available": true, "img": "/images/sabor-flocos.jpg" }
   ]
 }
