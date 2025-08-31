@@ -600,11 +600,13 @@
         const { type } = state.produtoPrincipal;
 
         const checkAddonsValidity = () => {
-            if (state.wantAdd === undefined) return false;
-            if (state.wantAdd === 'Sim') {
-                const items = state.add || [];
-                if (items.length === 0) return false;
-                return !(items.includes('Nenhum Adicional') && items.length > 1);
+            if (!fs.askAdd.hasAttribute('disabled')) {
+                if (state.wantAdd === undefined) return false;
+                if (state.wantAdd === 'Sim') {
+                    const items = state.add || [];
+                    if (items.length === 0) return false;
+                    return !(items.includes('Nenhum Adicional') && items.length > 1);
+                }
             }
             return true;
         };
@@ -655,7 +657,7 @@
             const shopInfo = allItemsData.shopInfo || {};
             const masterDeliverySwitch = shopInfo.isDeliveryAvailable === true;
             const locations = shopInfo.deliveryLocations || { cedral: false, outeiro: false };
-
+            
             deliveryRadios.forEach(radio => {
                 const label = radio.closest('label');
                 if (!label) return;
@@ -682,7 +684,7 @@
         const acaiProducts = [
             { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, type: 'acai' },
             { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', desc: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, isBestseller: true, type: 'acai' },
-            { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', desc: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true, type: 'acai' }
+            { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', desc: 'Até 3 frutas, até 3 cremes,<br>até 3 acompanhamentos,<br>até 2 coberturas', available: true, type: 'acai' }
         ];
         acaiProducts.forEach(prod => { boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, 'acai'); });
         (allItemsData.produtos_especiais || []).forEach(prod => { boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, prod.type || 'produto_especial'); });
@@ -742,7 +744,7 @@
                     let fMax = 0, cMax = 0, aMax = 0, coMax = 0;
                     if (productId === 'size-300') { fMax = 1; cMax = 1; aMax = 3; coMax = 1; }
                     else if (productId === 'size-500') { fMax = 2; cMax = 2; aMax = 3; coMax = 1; }
-                    else if (productId === 'size-1L') { fMax = 3; cMax = 3; aMax = 4; coMax = 2; }
+                    else if (productId === 'size-1L') { fMax = 3; cMax = 3; aMax = 3; coMax = 2; }
                     
                     state = { ...state, fMax, cMax, aMax, coMax, addMax: undefined };
                     [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd].forEach(enable);
@@ -778,7 +780,7 @@
                 if (name === 'delivery') {
                     const isDelivery = !['Retirada', 'Consumo no local'].includes(ev.target.value);
                     fs.address.style.display = isDelivery ? 'block' : 'none';
-                    if (isDelivery) enable(fs.address); else { document.getElementById('addressInput').value = ''; }
+                    if (isDelivery) { enable(fs.address); } else { document.getElementById('addressInput').value = ''; }
                     storeAddressInfo.style.display = isDelivery ? 'none' : 'block';
                 }
                 if (name === 'wantAdd') {
@@ -817,6 +819,28 @@
         allCheckboxes.forEach(chk => {
             chk.addEventListener('change', () => {
                 if (chk.disabled && !chk.value.toLowerCase().includes("nenhum")) return;
+                
+                if (key === 'add' && max === undefined) { // Lógica para adicionais sem limite
+                    state[key] = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
+                    if (noneCheckbox) {
+                        if(chk === noneCheckbox && chk.checked) {
+                             allCheckboxes.forEach(other => { if(other !== chk) other.checked = false; });
+                             state[key] = [noneValue];
+                        } else if (chk.checked) {
+                            noneCheckbox.checked = false;
+                            state[key] = state[key].filter(v => v !== noneValue);
+                        }
+                    }
+                     if (state[key].length === 0 && noneCheckbox) {
+                        noneCheckbox.checked = true; state[key] = [noneValue];
+                    }
+                    const count = state[key].includes(noneValue) ? 0 : state[key].length;
+                    updateCounter(counterEl, count, max, key);
+                    checkIfCanFinish();
+                    return;
+                }
+                
+                // Lógica para todos os outros com limite
                 const currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')];
                 if (noneCheckbox) {
                     if (chk === noneCheckbox && chk.checked) {
@@ -898,7 +922,7 @@
                 itemDetailsHtml += `Adicionais: ${orderItem.add.map(item => item.split(' - R$ ')[0]).join(', ')}`;
                 orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
             } else if (type !== 'produto_especial') {
-                 itemDetailsHtml += `Adicionais: Nenhum Adicional`;
+                 // itemDetailsHtml += `Adicionais: Nenhum Adicional`;
             }
 
             li.innerHTML = `<div class="order-item-header"><strong>Item ${i + 1}: ${orderItem.produtoPrincipal?.name || 'Item'}</strong><button class="repeat-item-btn" data-index="${i}">🔁 Repetir Item</button></div>${itemDetailsHtml}<br><strong>Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}</strong>`;
@@ -951,8 +975,8 @@
             if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
                 summaryText += `Adicionais: ${orderItem.add.map(a => a.split(' - R$ ')[0].toUpperCase()).join(', ')}\n`;
                 orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
-            } else if (type !== 'produto_especial' && type) { // Apenas mostra 'Nenhum' para tipos customizáveis
-                summaryText += `Adicionais: Nenhum Adicional\n`;
+            } else if (type !== 'produto_especial' && type) {
+                // Não mostra "Adicionais: Nenhum" se o usuário apenas disse "Não"
             }
             summaryText += `Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}\n\n`;
             totalGeralPedido += subTotalItem;
