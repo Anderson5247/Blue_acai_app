@@ -507,7 +507,7 @@
     let orders = [];
     let allItemsData = {};
 
-    // --- DADOS DOS PRODUTOS DE AÇAÍ ---
+    // --- DADOS DOS PRODUTOS DE AÇAÍ (FONTE ÚNICA DA VERDADE) ---
     const ACAI_PRODUCTS = [
         { 
             id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', 
@@ -530,7 +530,7 @@
     const enable = el => { if (el) { el.removeAttribute('disabled'); el.classList.remove('hidden'); } };
     const disable = el => { if (el) { el.setAttribute('disabled', 'true'); el.classList.add('hidden'); } };
     const clearCheckboxes = fieldset => fieldset.querySelectorAll('input[type="checkbox"]:checked:not([disabled])').forEach(chk => chk.checked = false);
-    const clearRadios = name => document.querySelectorAll(`input[name="${name}"]:checked`).forEach(r => { r.checked = false; r.closest('label')?.classList.remove('selected-radio'); });
+    const clearRadios = name => document.querySelectorAll(`input[name="${name}"]`).forEach(r => { r.checked = false; r.closest('label')?.classList.remove('selected-radio'); });
 
     function renderDynamicCheckboxes(containerId, items, noneOptionText) {
         const container = document.getElementById(containerId);
@@ -573,14 +573,12 @@
             label.classList.toggle('disabled-item', !item.available);
             label.title = item.available ? item.name : 'Sabor indisponível';
             label.htmlFor = `radio-${item.id}`;
-
             const radio = document.createElement('input');
             radio.type = 'radio';
             radio.name = name;
             radio.value = item.name;
             radio.id = `radio-${item.id}`;
             radio.disabled = !item.available;
-            
             label.innerHTML = `<img src="${item.img || '/images/default-product.png'}" alt="${item.name}"><span class="item-name">${item.name}</span>`;
             label.appendChild(radio);
             container.appendChild(label);
@@ -589,11 +587,11 @@
 
     // --- LÓGICA PRINCIPAL DO FORMULÁRIO ---
     function resetPartialForItemSelection() {
-        const orderState = {
-            payment: state.payment,
-            delivery: state.delivery
-        };
-        state = { ...orderState }; // Limpa tudo, exceto o estado do pedido geral
+        const payment = state.payment;
+        const delivery = state.delivery;
+        state = {};
+        state.payment = payment;
+        state.delivery = delivery;
 
         productOptionsContainer.style.display = 'none';
         Object.values(fs).forEach(f => {
@@ -603,12 +601,12 @@
                  if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
             }
         });
+
         updateCounter(cnt.frutas, 0, '?');
         updateCounter(cnt.cremes, 0, '?');
         updateCounter(cnt.accomp, 0, '?');
         updateCounter(cnt.cover, 0, '?');
         updateCounter(cnt.add, 0);
-          
         btnAdd.disabled = true;
         btnFinish.disabled = orders.length > 0;
     }
@@ -616,7 +614,6 @@
     function validateCurrentOrderItem() {
         if (!state.produtoPrincipal || !state.produtoPrincipal.type) return false;
         const { type } = state.produtoPrincipal;
-
         const checkAddonsValidity = () => {
             if (!fs.askAdd.hasAttribute('disabled')) {
                 if (state.wantAdd === undefined) return false;
@@ -628,7 +625,6 @@
             }
             return true;
         };
-
         if (type === 'acai') {
             const checkSection = (key) => (state[key] || []).length > 0;
             return checkSection('frutas') && checkSection('cremes') && checkSection('accomp') && checkSection('cover') && checkAddonsValidity();
@@ -647,7 +643,6 @@
             const response = await fetch('/api/items');
             if (!response.ok) throw new Error(`Erro na API: ${response.statusText}`);
             allItemsData = await response.json();
-
             if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
                 formCard.style.display = 'none';
                 shopClosedContainer.style.display = 'block';
@@ -656,26 +651,22 @@
             }
             formCard.style.display = 'block';
             shopClosedContainer.style.display = 'none';
-            
             renderDynamicCheckboxes('boxFrutas', allItemsData.frutas, 'Nenhuma das opções');
             renderDynamicCheckboxes('boxCremes', allItemsData.cremes, 'Nenhuma das opções');
             renderDynamicCheckboxes('boxAccomp', allItemsData.acompanhamentos, 'Nenhuma das opções');
             renderDynamicCheckboxes('boxCoverage', allItemsData.coberturas, 'Nenhuma das opções');
             renderDynamicCheckboxes('boxAdd', allItemsData.adicionais, 'Nenhum Adicional');
             renderFlavorCards('boxSorveteSabor', allItemsData.sorvete_sabores, 'sorveteSabor');
-            
             renderProdutosPrincipais();
             setupProdutoPrincipalListeners();
             setupRadioListener('payment');
             clientNameInput.addEventListener('input', checkIfCanFinish);
             addressInput.addEventListener('input', checkIfCanFinish);
             enable(fs.clientName); enable(fs.payment);
-
             const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
             const shopInfo = allItemsData.shopInfo || {};
             const masterDeliverySwitch = shopInfo.isDeliveryAvailable === true;
             const locations = shopInfo.deliveryLocations || { cedral: false, outeiro: false };
-            
             deliveryRadios.forEach(radio => {
                 const label = radio.closest('label');
                 if (!label) return;
@@ -685,7 +676,6 @@
                 } else if (radio.value.toLowerCase().includes('outeiro')) {
                     isEnabled = masterDeliverySwitch && locations.outeiro;
                 }
-                
                 radio.disabled = !isEnabled;
                 label.classList.toggle('disabled-item', !isEnabled);
             });
@@ -724,19 +714,15 @@
 
     function setupProdutoPrincipalListeners() {
         document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
-            if (radio.dataset.listenerAttached) return; // Previne múltiplos listeners
+            if (radio.dataset.listenerAttached) return; 
             radio.dataset.listenerAttached = true;
-
             radio.addEventListener('change', (e) => {
                 document.querySelectorAll('.produto-card').forEach(label => label.classList.remove('selected'));
                 const selectedCard = e.target.closest('.produto-card:not(.disabled-item)');
                 selectedCard?.classList.add('selected');
-
                 resetPartialForItemSelection(); 
-
                 const productType = selectedCard?.dataset.productType;
                 const productId = selectedCard?.dataset.productId; 
-
                 state.produtoPrincipal = { 
                     type: productType, 
                     name: e.target.value, 
@@ -744,7 +730,6 @@
                     id: productId 
                 };
                 productOptionsContainer.style.display = 'block';
-
                 if (productType === 'acai') {
                     const productData = ACAI_PRODUCTS.find(p => p.id === productId);
                     if (productData) {
@@ -753,7 +738,6 @@
                         state.aMax = productData.limits.aMax;
                         state.coMax = productData.limits.coMax;
                         state.addMax = undefined; 
-                        
                         [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd].forEach(enable);
                         fs.cover.querySelector('legend').textContent = '5. Cobertura(s)';
                         setupChecks(fs.frutas, state.fMax, 'frutas'); 
@@ -809,8 +793,8 @@
         });
     }
 
-    function setupChecks(fieldsetElement, max, key) { 
-        const box = fieldsetElement.querySelector('.grid-2, .options-grid'); 
+    function setupChecks(fieldsetElement, max, key) {
+        const box = fieldsetElement.querySelector('.grid-2, .options-grid');
         if (!box) return;
         const counterEl = cnt[key];
         const allCheckboxes = box.querySelectorAll('input[type=checkbox]');
@@ -826,7 +810,10 @@
         updateCounter(counterEl, initialCount, max, key);
 
         allCheckboxes.forEach(chk => {
-            chk.addEventListener('change', () => {
+            if (chk._currentListener) {
+                chk.removeEventListener('change', chk._currentListener);
+            }
+            const newListener = () => {
                 if (chk.disabled) return;
                 let currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
                 if (noneCheckbox) {
@@ -855,10 +842,12 @@
                 }
                 updateCounter(counterEl, count, max, key);
                 checkIfCanFinish();
-            });
+            };
+            
+            chk.addEventListener('change', newListener);
+            chk._currentListener = newListener; 
         });
     }
-
     function updateCounter(element, count, max, key) {
         if (!element) return;
         if (key === 'add') { 
@@ -868,7 +857,6 @@
         }
     }
 
-    // --- LÓGICA DE GESTÃO DO PEDIDO ---
     function checkIfCanFinish() {
         const itemValid = validateCurrentOrderItem();
         const clientNameFilled = clientNameInput.value.trim() !== '';
@@ -985,29 +973,26 @@
     btnAdd.onclick = () => {
         if (btnAdd.disabled) return;
         state.address = addressInput.value.trim();
+        state.clientName = clientNameInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
         renderOrders();
         
-        const savedPayment = state.payment, savedDelivery = state.delivery;
         resetPartialForItemSelection();
-        state.payment = savedPayment; 
-        state.delivery = savedDelivery;
 
-        if (savedPayment) document.querySelector(`input[name="payment"][value="${savedPayment}"]`)?.closest('label')?.classList.add('selected-radio');
-        if (savedDelivery) {
-            const radio = document.querySelector(`input[name="delivery"][value="${savedDelivery}"]`);
+        if (state.payment) {
+            const radio = document.querySelector(`input[name="payment"][value="${state.payment}"]`);
+            if(radio) radio.closest('label')?.classList.add('selected-radio');
+        }
+        if (state.delivery) {
+            const radio = document.querySelector(`input[name="delivery"][value="${state.delivery}"]`);
             if (radio) {
                 radio.checked = true;
                 radio.closest('label')?.classList.add('selected-radio');
-                if (!['Retirada', 'Consumo no local'].includes(savedDelivery)) { 
-                    fs.address.style.display = 'block'; 
-                    enable(fs.address); 
-                }
             }
         }
-        if (pixInfoDiv) pixInfoDiv.classList.toggle('hidden', state.payment !== 'Pix');
-        document.querySelectorAll('.produto-card.selected').forEach(c => c.classList.remove('selected'));
+        
         clearRadios('produtoPrincipal');
+        document.querySelectorAll('.produto-card.selected').forEach(c => c.classList.remove('selected'));
         checkIfCanFinish();
     };
 
@@ -1015,6 +1000,7 @@
         if (btnFinish.disabled) return alert("Por favor, complete todos os campos obrigatórios.");
         if (!!state.produtoPrincipal) {
              state.address = addressInput.value.trim();
+             state.clientName = clientNameInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
         
