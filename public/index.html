@@ -588,43 +588,33 @@
     }
 
     // --- LÓGICA PRINCIPAL DO FORMULÁRIO ---
-  function resetPartialForItemSelection() {
-    // Zera individualmente cada propriedade do item, mantendo o objeto 'state' principal
-    state.produtoPrincipal = undefined;
-    state.fMax = undefined;
-    state.cMax = undefined;
-    state.aMax = undefined;
-    state.coMax = undefined;
-    state.addMax = undefined;
-    state.frutas = [];
-    state.cremes = [];
-    state.accomp = [];
-    state.cover = [];
-    state.add = [];
-    state.wantAdd = undefined;
-    state.sorveteSabor = undefined;
+    function resetPartialForItemSelection() {
+        const payment = state.payment;
+        const delivery = state.delivery;
 
-    // Esconde e desabilita as seções de opções
-    productOptionsContainer.style.display = 'none';
-    Object.values(fs).forEach(f => {
-        if (!['fsProdutoPrincipal', 'fsClientName', 'fsDelivery', 'fsAddress', 'fsPayment'].includes(f.id)) {
-             disable(f);
-             if (f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
-             if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
-        }
-    });
+        state = {};
 
-    // Zera os contadores da interface
-    updateCounter(cnt.frutas, 0, '?');
-    updateCounter(cnt.cremes, 0, '?');
-    updateCounter(cnt.accomp, 0, '?');
-    updateCounter(cnt.cover, 0, '?');
-    updateCounter(cnt.add, 0);
-      
-    // Reseta o estado dos botões
-    btnAdd.disabled = true;
-    btnFinish.disabled = orders.length > 0;
-}
+        state.payment = payment;
+        state.delivery = delivery;
+
+        productOptionsContainer.style.display = 'none';
+        Object.values(fs).forEach(f => {
+            if (!['fsProdutoPrincipal', 'fsClientName', 'fsDelivery', 'fsAddress', 'fsPayment'].includes(f.id)) {
+                 disable(f);
+                 if (f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
+                 if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
+            }
+        });
+
+        updateCounter(cnt.frutas, 0, '?');
+        updateCounter(cnt.cremes, 0, '?');
+        updateCounter(cnt.accomp, 0, '?');
+        updateCounter(cnt.cover, 0, '?');
+        updateCounter(cnt.add, 0);
+          
+        btnAdd.disabled = true;
+        btnFinish.disabled = orders.length > 0;
+    }
 
     function validateCurrentOrderItem() {
         if (!state.produtoPrincipal || !state.produtoPrincipal.type) return false;
@@ -822,64 +812,65 @@
         });
     }
 
-function setupChecks(fieldsetElement, max, key) { 
-    const box = fieldsetElement.querySelector('.grid-2, .options-grid'); 
-    if (!box) return;
-    const counterEl = cnt[key];
-    const allCheckboxes = box.querySelectorAll('input[type=checkbox]');
-    const noneValue = key === 'add' ? 'Nenhum Adicional' : 'Nenhuma das opções';
-    const noneCheckbox = Array.from(allCheckboxes).find(c => c.value === noneValue);
+    function setupChecks(fieldsetElement, max, key) { 
+        const box = fieldsetElement.querySelector('.grid-2, .options-grid'); 
+        if (!box) return;
+        const counterEl = cnt[key];
+        const allCheckboxes = box.querySelectorAll('input[type=checkbox]');
+        const noneValue = key === 'add' ? 'Nenhum Adicional' : 'Nenhuma das opções';
+        const noneCheckbox = Array.from(allCheckboxes).find(c => c.value === noneValue);
 
-    state[key] = (state[key] || []).filter(itemName => Array.from(allCheckboxes).some(c => c.value === itemName && !c.disabled));
-    if (!fieldsetElement.hasAttribute('disabled') && state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
-        noneCheckbox.checked = true;
-        state[key] = [noneValue];
-    }
-    let initialCount = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
-    updateCounter(counterEl, initialCount, max, key);
-
-    allCheckboxes.forEach(chk => {
-        // Remove o "fiscal" (listener) antigo para evitar conflitos
-        if (chk._currentListener) {
-            chk.removeEventListener('change', chk._currentListener);
+        state[key] = (state[key] || []).filter(itemName => Array.from(allCheckboxes).some(c => c.value === itemName && !c.disabled));
+        if (!fieldsetElement.hasAttribute('disabled') && state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+            noneCheckbox.checked = true;
+            state[key] = [noneValue];
         }
+        let initialCount = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+        updateCounter(counterEl, initialCount, max, key);
 
-        // Adiciona o "fiscal" (listener) novo com as regras corretas
-        const newListener = () => {
-            if (chk.disabled) return;
-            let currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
-            if (noneCheckbox) {
-                if (chk === noneCheckbox && chk.checked) {
+        allCheckboxes.forEach(chk => {
+            chk.addEventListener('change', () => {
+                if (chk.disabled) return;
+                let currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
+                if (noneCheckbox) {
+                    if (chk === noneCheckbox && chk.checked) {
+                        currentSelected = [noneValue];
+                        allCheckboxes.forEach(other => { if (other !== noneCheckbox) other.checked = false; });
+                    } else if (chk.checked && currentSelected.includes(noneValue)) {
+                        noneCheckbox.checked = false;
+                        currentSelected = currentSelected.filter(v => v !== noneValue);
+                    }
+                }
+                if (currentSelected.length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                    noneCheckbox.checked = true;
                     currentSelected = [noneValue];
-                    allCheckboxes.forEach(other => { if (other !== noneCheckbox) other.checked = false; });
-                } else if (chk.checked && currentSelected.includes(noneValue)) {
-                    noneCheckbox.checked = false;
-                    currentSelected = currentSelected.filter(v => v !== noneValue);
                 }
-            }
-            if (currentSelected.length === 0 && noneCheckbox && !noneCheckbox.disabled) {
-                noneCheckbox.checked = true;
-                currentSelected = [noneValue];
-            }
-            state[key] = currentSelected;
-            let count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
-            if (max !== undefined && count > max) {
-                chk.checked = false;
-                state[key] = state[key].filter(item => item !== chk.value);
-                if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
-                    noneCheckbox.checked = true; state[key] = [noneValue];
+                state[key] = currentSelected;
+                let count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+                if (max !== undefined && count > max) {
+                    chk.checked = false;
+                    state[key] = state[key].filter(item => item !== chk.value);
+                    if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                        noneCheckbox.checked = true; state[key] = [noneValue];
+                    }
+                    count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+                    alert(`Máximo de ${max} ${key === 'cover' ? 'cobertura(s)' : key}.`);
                 }
-                count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
-                alert(`Máximo de ${max} ${key === 'cover' ? 'cobertura(s)' : key}.`);
-            }
-            updateCounter(counterEl, count, max, key);
-            checkIfCanFinish();
-        };
-        
-        chk.addEventListener('change', newListener);
-        chk._currentListener = newListener; // Guarda uma referência ao listener atual
-    });
-}
+                updateCounter(counterEl, count, max, key);
+                checkIfCanFinish();
+            });
+        });
+        updateCounter(counterEl, count, max, key);
+        checkIfCanFinish();
+    }
+    function updateCounter(element, count, max, key) {
+        if (!element) return;
+        if (key === 'add') { 
+             element.textContent = `( ${count} )`;
+        } else {
+             element.textContent = `( ${count} / ${max ?? '?'} )`;
+        }
+    }
 
     // --- LÓGICA DE GESTÃO DO PEDIDO ---
     function checkIfCanFinish() {
@@ -1061,3 +1052,4 @@ function setupChecks(fieldsetElement, max, key) {
 </script>
 </body>
 </html>
+}
