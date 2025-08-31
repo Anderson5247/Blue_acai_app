@@ -588,34 +588,43 @@
     }
 
     // --- LÓGICA PRINCIPAL DO FORMULÁRIO ---
-    function resetPartialForItemSelection() {
-        const payment = state.payment;
-        const delivery = state.delivery;
+  function resetPartialForItemSelection() {
+    // Zera individualmente cada propriedade do item, mantendo o objeto 'state' principal
+    state.produtoPrincipal = undefined;
+    state.fMax = undefined;
+    state.cMax = undefined;
+    state.aMax = undefined;
+    state.coMax = undefined;
+    state.addMax = undefined;
+    state.frutas = [];
+    state.cremes = [];
+    state.accomp = [];
+    state.cover = [];
+    state.add = [];
+    state.wantAdd = undefined;
+    state.sorveteSabor = undefined;
 
-        state = {}; // Limpa completamente o estado do item
+    // Esconde e desabilita as seções de opções
+    productOptionsContainer.style.display = 'none';
+    Object.values(fs).forEach(f => {
+        if (!['fsProdutoPrincipal', 'fsClientName', 'fsDelivery', 'fsAddress', 'fsPayment'].includes(f.id)) {
+             disable(f);
+             if (f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
+             if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
+        }
+    });
 
-        state.payment = payment; // Restaura apenas os dados do pedido geral
-        state.delivery = delivery;
-
-        productOptionsContainer.style.display = 'none';
-        Object.values(fs).forEach(f => {
-            if (!['fsProdutoPrincipal', 'fsClientName', 'fsDelivery', 'fsAddress', 'fsPayment'].includes(f.id)) {
-                 disable(f);
-                 if (f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
-                 if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
-            }
-        });
-
-        updateCounter(cnt.frutas, 0, '?');
-        updateCounter(cnt.cremes, 0, '?');
-        updateCounter(cnt.accomp, 0, '?');
-        updateCounter(cnt.cover, 0, '?');
-        updateCounter(cnt.add, 0);
-          
-        btnAdd.disabled = true;
-        btnFinish.disabled = orders.length > 0;
-    }
-
+    // Zera os contadores da interface
+    updateCounter(cnt.frutas, 0, '?');
+    updateCounter(cnt.cremes, 0, '?');
+    updateCounter(cnt.accomp, 0, '?');
+    updateCounter(cnt.cover, 0, '?');
+    updateCounter(cnt.add, 0);
+      
+    // Reseta o estado dos botões
+    btnAdd.disabled = true;
+    btnFinish.disabled = orders.length > 0;
+}
 
     function validateCurrentOrderItem() {
         if (!state.produtoPrincipal || !state.produtoPrincipal.type) return false;
