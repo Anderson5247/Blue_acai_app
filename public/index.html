@@ -507,7 +507,7 @@
     let orders = [];
     let allItemsData = {};
 
-   // --- DADOS DOS PRODUTOS DE AÇAÍ (FONTE ÚNICA DA VERDADE) ---
+    // --- DADOS DOS PRODUTOS DE AÇAÍ (FONTE ÚNICA DA VERDADE) ---
     const ACAI_PRODUCTS = [
         { 
             id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', 
@@ -530,7 +530,7 @@
     const enable = el => { if (el) { el.removeAttribute('disabled'); el.classList.remove('hidden'); } };
     const disable = el => { if (el) { el.setAttribute('disabled', 'true'); el.classList.add('hidden'); } };
     const clearCheckboxes = fieldset => fieldset.querySelectorAll('input[type="checkbox"]:checked:not([disabled])').forEach(chk => chk.checked = false);
-    const clearRadios = name => document.querySelectorAll(`input[name="${name}"]:checked`).forEach(r => { r.checked = false; r.closest('label')?.classList.remove('selected-radio'); });
+    const clearRadios = name => document.querySelectorAll(`input[name="${name}"]`).forEach(r => { r.checked = false; r.closest('label')?.classList.remove('selected-radio'); });
 
     function renderDynamicCheckboxes(containerId, items, noneOptionText) {
         const container = document.getElementById(containerId);
@@ -588,19 +588,15 @@
     }
 
     // --- LÓGICA PRINCIPAL DO FORMULÁRIO ---
-function resetPartialForItemSelection() {
-        // Salva os dados do PEDIDO GERAL que devem persistir
+    function resetPartialForItemSelection() {
         const payment = state.payment;
         const delivery = state.delivery;
 
-        // ZERA completamente o estado do ITEM ATUAL
-        state = {}; 
+        state = {}; // Limpa completamente o estado do item
 
-        // Restaura apenas os dados do PEDIDO GERAL
-        state.payment = payment;
+        state.payment = payment; // Restaura apenas os dados do pedido geral
         state.delivery = delivery;
 
-        // Esconde e desabilita as seções de opções
         productOptionsContainer.style.display = 'none';
         Object.values(fs).forEach(f => {
             if (!['fsProdutoPrincipal', 'fsClientName', 'fsDelivery', 'fsAddress', 'fsPayment'].includes(f.id)) {
@@ -610,17 +606,16 @@ function resetPartialForItemSelection() {
             }
         });
 
-        // Zera os contadores
         updateCounter(cnt.frutas, 0, '?');
         updateCounter(cnt.cremes, 0, '?');
         updateCounter(cnt.accomp, 0, '?');
         updateCounter(cnt.cover, 0, '?');
         updateCounter(cnt.add, 0);
           
-        // Reseta o estado dos botões
         btnAdd.disabled = true;
         btnFinish.disabled = orders.length > 0;
     }
+
 
     function validateCurrentOrderItem() {
         if (!state.produtoPrincipal || !state.produtoPrincipal.type) return false;
@@ -733,7 +728,7 @@ function resetPartialForItemSelection() {
 
     function setupProdutoPrincipalListeners() {
         document.querySelectorAll('input[name="produtoPrincipal"]').forEach(radio => {
-            if (radio.dataset.listenerAttached) return; // Previne múltiplos listeners
+            if (radio.dataset.listenerAttached) return; 
             radio.dataset.listenerAttached = true;
 
             radio.addEventListener('change', (e) => {
@@ -994,29 +989,26 @@ function resetPartialForItemSelection() {
     btnAdd.onclick = () => {
         if (btnAdd.disabled) return;
         state.address = addressInput.value.trim();
+        state.clientName = clientNameInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
         renderOrders();
         
-        const savedPayment = state.payment, savedDelivery = state.delivery;
         resetPartialForItemSelection();
-        state.payment = savedPayment; 
-        state.delivery = savedDelivery;
 
-        if (savedPayment) document.querySelector(`input[name="payment"][value="${savedPayment}"]`)?.closest('label')?.classList.add('selected-radio');
-        if (savedDelivery) {
-            const radio = document.querySelector(`input[name="delivery"][value="${savedDelivery}"]`);
+        if (state.payment) {
+            const radio = document.querySelector(`input[name="payment"][value="${state.payment}"]`);
+            if(radio) radio.closest('label')?.classList.add('selected-radio');
+        }
+        if (state.delivery) {
+            const radio = document.querySelector(`input[name="delivery"][value="${state.delivery}"]`);
             if (radio) {
                 radio.checked = true;
                 radio.closest('label')?.classList.add('selected-radio');
-                if (!['Retirada', 'Consumo no local'].includes(savedDelivery)) { 
-                    fs.address.style.display = 'block'; 
-                    enable(fs.address); 
-                }
             }
         }
-        if (pixInfoDiv) pixInfoDiv.classList.toggle('hidden', state.payment !== 'Pix');
-        document.querySelectorAll('.produto-card.selected').forEach(c => c.classList.remove('selected'));
+        
         clearRadios('produtoPrincipal');
+        document.querySelectorAll('.produto-card.selected').forEach(c => c.classList.remove('selected'));
         checkIfCanFinish();
     };
 
@@ -1024,6 +1016,7 @@ function resetPartialForItemSelection() {
         if (btnFinish.disabled) return alert("Por favor, complete todos os campos obrigatórios.");
         if (!!state.produtoPrincipal) {
              state.address = addressInput.value.trim();
+             state.clientName = clientNameInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
         
