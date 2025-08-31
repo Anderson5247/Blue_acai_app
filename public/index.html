@@ -822,63 +822,64 @@
         });
     }
 
-function setupChecks(fieldsetElement, max, key) {
-        if (!fieldsetElement) return;
+function setupChecks(fieldsetElement, max, key) { 
+    const box = fieldsetElement.querySelector('.grid-2, .options-grid'); 
+    if (!box) return;
+    const counterEl = cnt[key];
+    const allCheckboxes = box.querySelectorAll('input[type=checkbox]');
+    const noneValue = key === 'add' ? 'Nenhum Adicional' : 'Nenhuma das opções';
+    const noneCheckbox = Array.from(allCheckboxes).find(c => c.value === noneValue);
 
-        // Se já existe um "gerente" (listener), demite ele antes de contratar um novo
-        if (fieldsetElement._currentListener) {
-            fieldsetElement.removeEventListener('click', fieldsetElement._currentListener);
+    state[key] = (state[key] || []).filter(itemName => Array.from(allCheckboxes).some(c => c.value === itemName && !c.disabled));
+    if (!fieldsetElement.hasAttribute('disabled') && state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+        noneCheckbox.checked = true;
+        state[key] = [noneValue];
+    }
+    let initialCount = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+    updateCounter(counterEl, initialCount, max, key);
+
+    allCheckboxes.forEach(chk => {
+        // Remove o "fiscal" (listener) antigo para evitar conflitos
+        if (chk._currentListener) {
+            chk.removeEventListener('change', chk._currentListener);
         }
 
-        // Contrata o novo "gerente"
-        const newListener = (event) => {
-            const target = event.target;
-            // O gerente só age se o clique foi em um checkbox
-            if (target.type !== 'checkbox' || target.disabled) {
-                return;
-            }
-
-            const box = fieldsetElement.querySelector('.grid-2, .options-grid');
-            const allCheckboxes = box.querySelectorAll('input[type=checkbox]');
-            const noneValue = key === 'add' ? 'Nenhum Adicional' : 'Nenhuma das opções';
-            const noneCheckbox = Array.from(allCheckboxes).find(c => c.value === noneValue);
-            const currentMax = state[key.replace('s', '') + 'Max']; // Busca o limite atual direto do state (ex: state.fMax)
-
+        // Adiciona o "fiscal" (listener) novo com as regras corretas
+        const newListener = () => {
+            if (chk.disabled) return;
             let currentSelected = [...box.querySelectorAll('input[type=checkbox]:checked:not([disabled])')].map(c => c.value);
-
             if (noneCheckbox) {
-                if (target === noneCheckbox && target.checked) {
+                if (chk === noneCheckbox && chk.checked) {
                     currentSelected = [noneValue];
                     allCheckboxes.forEach(other => { if (other !== noneCheckbox) other.checked = false; });
-                } else if (target.checked && currentSelected.includes(noneValue)) {
+                } else if (chk.checked && currentSelected.includes(noneValue)) {
                     noneCheckbox.checked = false;
                     currentSelected = currentSelected.filter(v => v !== noneValue);
                 }
             }
-
             if (currentSelected.length === 0 && noneCheckbox && !noneCheckbox.disabled) {
                 noneCheckbox.checked = true;
                 currentSelected = [noneValue];
             }
-            
-            let count = (key !== 'add' && currentSelected.includes(noneValue)) ? 0 : currentSelected.length;
-
-            if (currentMax !== undefined && count > currentMax) {
-                target.checked = false; // Desfaz a última ação
-                currentSelected = currentSelected.filter(item => item !== target.value);
-                alert(`Máximo de ${currentMax} ${key === 'cover' ? 'cobertura(s)' : key}.`);
-            }
-            
             state[key] = currentSelected;
-            count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
-
-            updateCounter(cnt[key], count, currentMax, key);
+            let count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+            if (max !== undefined && count > max) {
+                chk.checked = false;
+                state[key] = state[key].filter(item => item !== chk.value);
+                if (state[key].length === 0 && noneCheckbox && !noneCheckbox.disabled) {
+                    noneCheckbox.checked = true; state[key] = [noneValue];
+                }
+                count = (key !== 'add' && state[key].includes(noneValue)) ? 0 : state[key].length;
+                alert(`Máximo de ${max} ${key === 'cover' ? 'cobertura(s)' : key}.`);
+            }
+            updateCounter(counterEl, count, max, key);
             checkIfCanFinish();
         };
-
-        fieldsetElement.addEventListener('click', newListener);
-        fieldsetElement._currentListener = newListener;
-    }
+        
+        chk.addEventListener('change', newListener);
+        chk._currentListener = newListener; // Guarda uma referência ao listener atual
+    });
+}
 
     // --- LÓGICA DE GESTÃO DO PEDIDO ---
     function checkIfCanFinish() {
