@@ -114,5 +114,16 @@
       "requires_flavor_selection": false,
       "flavors": []
     }
+  ],
+  "sorvete_sabores": [
+    { "id": "sv_chocolate", "name": "Chocolate", "available": true },
+    { "id": "sv_morango", "name": "Morango", "available": true },
+    { "id": "sv_creme", "name": "Creme", "available": true },
+    { "id": "sv_flocos", "name": "Flocos", "available": true }
+  ],
+  "sorvete_caldas": [
+    { "id": "sc_chocolate", "name": "Chocolate", "available": true },
+    { "id": "sc_morango", "name": "Morango", "available": true },
+    { "id": "sc_caramelo", "name": "Caramelo", "available": true }
   ]
 }
