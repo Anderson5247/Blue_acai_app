@@ -507,7 +507,7 @@
     let orders = [];
     let allItemsData = {};
 
-    // --- DADOS DOS PRODUTOS DE AÇAÍ ---
+   // --- DADOS DOS PRODUTOS DE AÇAÍ (FONTE ÚNICA DA VERDADE) ---
     const ACAI_PRODUCTS = [
         { 
             id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', 
@@ -588,13 +588,19 @@
     }
 
     // --- LÓGICA PRINCIPAL DO FORMULÁRIO ---
-    function resetPartialForItemSelection() {
-        const orderState = {
-            payment: state.payment,
-            delivery: state.delivery
-        };
-        state = { ...orderState }; // Limpa tudo, exceto o estado do pedido geral
+function resetPartialForItemSelection() {
+        // Salva os dados do PEDIDO GERAL que devem persistir
+        const payment = state.payment;
+        const delivery = state.delivery;
 
+        // ZERA completamente o estado do ITEM ATUAL
+        state = {}; 
+
+        // Restaura apenas os dados do PEDIDO GERAL
+        state.payment = payment;
+        state.delivery = delivery;
+
+        // Esconde e desabilita as seções de opções
         productOptionsContainer.style.display = 'none';
         Object.values(fs).forEach(f => {
             if (!['fsProdutoPrincipal', 'fsClientName', 'fsDelivery', 'fsAddress', 'fsPayment'].includes(f.id)) {
@@ -603,12 +609,15 @@
                  if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
             }
         });
+
+        // Zera os contadores
         updateCounter(cnt.frutas, 0, '?');
         updateCounter(cnt.cremes, 0, '?');
         updateCounter(cnt.accomp, 0, '?');
         updateCounter(cnt.cover, 0, '?');
         updateCounter(cnt.add, 0);
           
+        // Reseta o estado dos botões
         btnAdd.disabled = true;
         btnFinish.disabled = orders.length > 0;
     }
