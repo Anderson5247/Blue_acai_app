@@ -343,6 +343,17 @@ label.disabled-item {
     <legend>5. Cobertura(s) <span id="cntCover" class="counter">(0/?)</span></legend>
     <div class="grid-2" id="boxCoverage"></div>
 </fieldset>
+
+<fieldset id="fsSorveteSabor" disabled>
+    <legend>Sabor do Sorvete <span class="section-status">(Obrigatório)</span></legend>
+    <div class="grid-2" id="boxSorveteSabor"></div>
+</fieldset>
+
+<fieldset id="fsSorveteCalda" disabled>
+    <legend>Calda <span class="section-status">(Obrigatório)</span></legend>
+    <div class="grid-2" id="boxSorveteCalda"></div>
+</fieldset>
+
 <fieldset id="fsAskAdd" disabled>
     <legend>6. Deseja Adicionais?</legend>
     <div class="grid-2">
@@ -469,6 +480,34 @@ label.disabled-item {
             container.appendChild(noneLabel);
         }
     }
+    
+    function renderDynamicRadios(containerId, categoryKey, items, name) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        container.innerHTML = ''; // Limpa o conteúdo antigo
+
+        items.forEach(item => {
+            const label = document.createElement('label');
+            const radio = document.createElement('input');
+
+            radio.type = 'radio';
+            radio.name = name;
+            radio.value = item.name;
+            radio.id = `radio-${item.id}`;
+            radio.dataset.itemId = item.id;
+
+            radio.disabled = !item.available;
+            label.classList.toggle('disabled-item', !item.available);
+            label.title = item.available ? '' : 'Item indisponível';
+
+            label.htmlFor = radio.id;
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(` ${item.name}`));
+
+            container.appendChild(label);
+        });
+    }
+
     // --- SELETORES ---
     const fs = {
         produtoPrincipal: document.getElementById('fsProdutoPrincipal'),
@@ -477,6 +516,8 @@ label.disabled-item {
         cremes: document.getElementById('fsCremes'),
         accomp: document.getElementById('fsAccomp'),
         cover: document.getElementById('fsCoverage'),
+        sorveteSabor: document.getElementById('fsSorveteSabor'),
+        sorveteCalda: document.getElementById('fsSorveteCalda'),
         askAdd: document.getElementById('fsAskAdd'),
         add: document.getElementById('fsAdd'),
         clientName: document.getElementById('fsClientName'),
@@ -519,7 +560,8 @@ label.disabled-item {
 
     function disableAllAcaiAndAddonFieldsets() {
           [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add].forEach(f => {
-              disable(f); clearCheckboxes(f);
+              disable(f); 
+              if(f && f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
           });
           state.frutas = []; updateCounter(cnt.frutas, 0, '?');
           state.cremes = []; updateCounter(cnt.cremes, 0, '?');
@@ -529,6 +571,17 @@ label.disabled-item {
           state.wantAdd = undefined; clearRadios('wantAdd');
     }
 
+    function disableAllSorveteFieldsets() {
+        [fs.sorveteSabor, fs.sorveteCalda].forEach(f => {
+            disable(f);
+            if (f && f.querySelector('input[type="radio"]')) {
+                clearRadios(f.querySelector('input[type="radio"]').name);
+            }
+        });
+        state.sorveteSabor = undefined;
+        state.sorveteCalda = undefined;
+    }
+
     function resetPartialForItemSelection() {
           state.produtoPrincipal = undefined;
           state.size = undefined;
@@ -536,8 +589,10 @@ label.disabled-item {
           state.frutas = []; state.cremes = []; state.accomp = []; state.cover = []; state.add = [];
           state.wantAdd = undefined;
           state.selectedSpecialFlavor = undefined;
+          state.sorveteSabor = undefined;
+          state.sorveteCalda = undefined;
 
-          [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add, fs.specialProductFlavors].forEach(f => {
+          [fs.frutas, fs.cremes, fs.accomp, fs.cover, fs.askAdd, fs.add, fs.specialProductFlavors, fs.sorveteSabor, fs.sorveteCalda].forEach(f => {
               disable(f);
               if (f.querySelectorAll('input[type="checkbox"]').length > 0) clearCheckboxes(f);
               if (f.querySelectorAll('input[type="radio"]').length > 0) clearRadios(f.querySelector('input[type="radio"]').name);
@@ -576,15 +631,26 @@ label.disabled-item {
                 return !!state.selectedSpecialFlavor;
             }
             return true;
+        } else if (state.produtoPrincipal.type === 'sorvete') {
+            const flavorSelected = !!state.sorveteSabor;
+            const toppingSelected = !!state.sorveteCalda;
+            
+            let addOk = true;
+            const isPote = state.produtoPrincipal.id === 'sorvete-pote';
+            if (isPote) {
+                if (state.wantAdd === undefined) return false;
+                if (state.wantAdd === 'Sim') {
+                    if (!fs.add || fs.add.hasAttribute('disabled')) return true;
+                    const itemsSelected = state.add;
+                    if (!itemsSelected || itemsSelected.length === 0) return false;
+                    return !(itemsSelected.includes('Nenhum Adicional') && itemsSelected.length > 1);
+                }
+            }
+            return flavorSelected && toppingSelected && addOk;
         }
         return false;
     }
-    
-    // ... (o restante do seu código javascript antes desta função) ...
 
-   // Substitua esta função inteira no seu index.html
-
-// Substitua esta função inteira no seu código
 async function fetchAndApplyItemAvailability() {
     try {
         const response = await fetch('/api/items');
@@ -593,7 +659,6 @@ async function fetchAndApplyItemAvailability() {
         }
         allItemsData = await response.json();
 
-        // --- Seção de lógica da loja fechada (sem alterações) ---
         if (allItemsData.shopInfo && !allItemsData.shopInfo.isOpen) {
             if (formCard) formCard.style.display = 'none';
             if (shopClosedContainer) shopClosedContainer.style.display = 'block';
@@ -605,15 +670,15 @@ async function fetchAndApplyItemAvailability() {
         if (formCard) formCard.style.display = 'block';
         if (shopClosedContainer) shopClosedContainer.style.display = 'none';
 
-        // --- Seção de renderização de itens (sem alterações) ---
         if (allItemsData.frutas) renderDynamicCheckboxes('boxFrutas', 'frutas', allItemsData.frutas, 'Nenhuma das opções');
         if (allItemsData.cremes) renderDynamicCheckboxes('boxCremes', 'cremes', allItemsData.cremes, 'Nenhuma das opções');
         if (allItemsData.acompanhamentos) renderDynamicCheckboxes('boxAccomp', 'acompanhamentos', allItemsData.acompanhamentos, 'Nenhuma das opções');
         if (allItemsData.coberturas) renderDynamicCheckboxes('boxCoverage', 'coberturas', allItemsData.coberturas, 'Nenhuma das opções');
         if (allItemsData.adicionais) renderDynamicCheckboxes('boxAdd', 'add', allItemsData.adicionais, 'Nenhum Adicional');
+        if (allItemsData.sorvete_sabores) renderDynamicRadios('boxSorveteSabor', 'sorvete_sabores', allItemsData.sorvete_sabores, 'sorveteSabor');
+        if (allItemsData.sorvete_caldas) renderDynamicRadios('boxSorveteCalda', 'sorvete_caldas', allItemsData.sorvete_caldas, 'sorveteCalda');
         renderProdutosPrincipais();
 
-        // --- Configuração dos listeners e habilitação de campos (sem alterações) ---
         setupProdutoPrincipalListeners();
         setupRadioListener('payment');
         clientNameInput.addEventListener('input', checkIfCanFinish);
@@ -621,7 +686,6 @@ async function fetchAndApplyItemAvailability() {
         enable(fs.clientName);
         enable(fs.payment);
 
-// --- NOVA LÓGICA DE ENTREGA GRANULAR (CORRIGIDA) ---
         const deliveryRadios = document.querySelectorAll('input[name="delivery"]');
         const shopInfo = allItemsData.shopInfo || {};
         const masterDeliverySwitch = shopInfo.isDeliveryAvailable !== false;
@@ -631,19 +695,15 @@ async function fetchAndApplyItemAvailability() {
             const label = radio.closest('label');
             if (!label) return;
 
-            let isEnabled = true; // Habilitado por padrão para "Retirada" e "Consumo no Local"
+            let isEnabled = true;
 
-            // Verifica "Bairro" e usa a chave "bairro" do 'locations'
             if (radio.value.includes('Bairro')) {
                 isEnabled = masterDeliverySwitch && locations.bairro;
             } 
-            // Verifica "Centro" e usa a chave "centro" do 'locations'
             else if (radio.value.includes('Centro')) {
                 isEnabled = masterDeliverySwitch && locations.centro;
             }
-            // Opções como "Retirada" e "Consumo no local" sempre ficam ativas.
 
-            // Aplica o estilo e o estado (disabled)
             radio.disabled = !isEnabled;
             label.classList.toggle('disabled-item', !isEnabled);
             if (!isEnabled) {
@@ -656,32 +716,34 @@ async function fetchAndApplyItemAvailability() {
                  label.style.cursor = 'pointer';
             }
         });
-
-        // Configura os listeners de clique após a manipulação
         setupRadioListener('delivery');
-
     } catch (error) {
         console.error("Erro ao carregar o cardápio:", error);
         alert("Erro ao carregar o cardápio. Por favor, recarregue a página.");
     }
 }
-    // ... (o restante do seu código javascript depois desta função) ...
+    
+function renderProdutosPrincipais() {
+    if (!boxProdutosPrincipais) return;
+    boxProdutosPrincipais.innerHTML = '';
 
-    function renderProdutosPrincipais() {
-        if (!boxProdutosPrincipais) return;
-        boxProdutosPrincipais.innerHTML = '';
+    const productsToRender = [
+        { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, type: 'acai' },
+        { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', desc: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, isBestseller: true, type: 'acai' },
+        { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', desc: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true, type: 'acai' },
+        { id: 'sorvete-casquinha', name: 'Sorvete na Casquinha', price: 5.00, img: '/images/sorvete-casquinha.jpg', desc: 'Escolha 1 sabor e 1 calda.', available: true, type: 'sorvete' },
+        { id: 'sorvete-pote', name: 'Pote de Sorvete (300ml)', price: 12.00, img: '/images/sorvete-pote.jpg', desc: 'Escolha 1 sabor, 1 calda e os adicionais que quiser.', available: true, type: 'sorvete' }
+    ];
 
-        const acaiProducts = [
-            { id: 'size-300', name: 'Copo Pequeno (300ml)', price: 10.00, img: '/images/copo-pequeno.jpg', desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true },
-            { id: 'size-500', name: 'Copo Grande (500ml)', price: 15.00, img: '/images/copo-grande.jpg', desc: 'Até 2 frutas, até 2 cremes,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, isBestseller: true, },
-            { id: 'size-1L', name: 'Pote da Felicidade (1 litro)', price: 40.00, img: '/images/pote-felicidade.jpg', desc: 'Até 3 frutas, até 3 cremes,<br>até 4 acompanhamentos,<br>até 2 coberturas', available: true }
-        ];
+    productsToRender.forEach(prod => {
+        boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, prod.type);
+    });
 
-        acaiProducts.forEach(prod => { boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, 'acai'); });
-        (allItemsData.produtos_especiais || []).forEach(prod => { boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, 'produto_especial'); });
-    }
+    (allItemsData.produtos_especiais || []).forEach(prod => {
+        boxProdutosPrincipais.innerHTML += createProductCardHTML(prod, 'produto_especial');
+    });
+}
 
-  // Localize esta função no seu public/index.html e substitua-a completamente por este bloco:
 function createProductCardHTML(prod, type) {
     const disabledClass = !prod.available ? 'disabled-item' : '';
     const inputDisabled = !prod.available ? 'disabled' : '';
@@ -763,9 +825,8 @@ function createProductCardHTML(prod, type) {
                 state.produtoPrincipal = { type: productType, name: productName, price: productPrice, id: productId };
 
                 if (productType === 'acai') {
-                    disable(fs.specialProductFlavors);
-                    clearRadios('specialFlavor');
-                    state.selectedSpecialFlavor = undefined;
+                    disable(fs.specialProductFlavors); clearRadios('specialFlavor'); state.selectedSpecialFlavor = undefined;
+                    disableAllSorveteFieldsets();
 
                     let fMax = 0, cMax = 0, aMax = 0, coMax = 0;
                     if (productId === 'size-300') { fMax = 1; cMax = 1; aMax = 3; coMax = 1; }
@@ -780,8 +841,24 @@ function createProductCardHTML(prod, type) {
                     setupChecks(fs.cover, coMax, 'cover');
                     setupRadioListener('wantAdd', 'askAdd');
                 
-                } else if (productType === 'produto_especial') {
+                } else if (productType === 'sorvete') {
                     disableAllAcaiAndAddonFieldsets();
+                    disable(fs.specialProductFlavors); clearRadios('specialFlavor'); state.selectedSpecialFlavor = undefined;
+                    
+                    enable(fs.sorveteSabor); setupRadioListener('sorveteSabor');
+                    enable(fs.sorveteCalda); setupRadioListener('sorveteCalda');
+
+                    if (productId === 'sorvete-pote') {
+                        enable(fs.askAdd);
+                        setupRadioListener('wantAdd', 'askAdd');
+                        state.addMax = 14;
+                    } else {
+                        disable(fs.askAdd); disable(fs.add); clearRadios('wantAdd'); state.wantAdd = undefined;
+                    }
+                }
+                else if (productType === 'produto_especial') {
+                    disableAllAcaiAndAddonFieldsets();
+                    disableAllSorveteFieldsets();
                     const productData = allItemsData.produtos_especiais.find(p => p.id === productId);
 
                     if (productData && productData.requires_flavor_selection && productData.flavors?.length > 0) {
@@ -800,9 +877,6 @@ function createProductCardHTML(prod, type) {
         });
     }
 
-   // Substitua esta função inteira no seu index.html
-
-// Substitua esta função inteira no seu index.html
 function setupRadioListener(name, stageToAdvanceOnClick) {
     const storeAddressInfo = document.getElementById('storeAddressInfo');
     document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
@@ -818,12 +892,12 @@ function setupRadioListener(name, stageToAdvanceOnClick) {
             if (name === 'delivery') {
                 if (value === 'Retirada' || value === 'Consumo no local') {
                     fs.address.style.display = 'none';
-                    disable(fs.address); // Desabilita para garantir
+                    disable(fs.address); 
                     addressInput.value = '';
                     if (storeAddressInfo) storeAddressInfo.style.display = 'block';
-                } else { // Para qualquer opção de entrega
+                } else {
                     fs.address.style.display = 'block';
-                    enable(fs.address); // <<< ESSA É A LINHA QUE FALTAVA
+                    enable(fs.address);
                     if (storeAddressInfo) storeAddressInfo.style.display = 'none';
                 }
             }
@@ -913,10 +987,8 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
     function updateCounter(element, count, max, key) {
     if (element) {
         if (key === 'add') {
-            // Para os adicionais, mostra apenas a contagem atual
             element.textContent = `( ${count} )`;
         } else {
-            // Para todos os outros, mantém o formato original com o máximo
             element.textContent = `( ${count} / ${max !== undefined ? max : '?'} )`;
         }
     }
@@ -939,27 +1011,21 @@ if (key !== 'add' && max !== undefined && actualSelectedCount > max) {          
         checkIfCanFinish();
     }
 
-// Substitua esta função para o ajuste final de consistência
-// Substitua esta função para a validação final
 function checkIfCanFinish() {
     const itemValid = validateCurrentOrderItem();
     const clientNameFilled = clientNameInput.value.trim() !== '';
     const paymentSelected = !!state.payment;
     const deliverySelected = !!state.delivery;
 
-    // --- LÓGICA DE VALIDAÇÃO DE ENDEREÇO ATUALIZADA ---
     let addressOk = false;
     if (deliverySelected) {
-        // Se a opção for Retirada ou Consumo no local, o endereço não é necessário
         if (state.delivery === 'Retirada' || state.delivery === 'Consumo no local') {
             addressOk = true;
         } 
-        // Para qualquer outra opção (entrega), o endereço deve ser preenchido
         else {
             addressOk = addressInput.value.trim() !== '';
         }
     }
-    // --- FIM DA ATUALIZAÇÃO ---
 
     const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
     btnAdd.disabled = !canProceed;
@@ -982,18 +1048,21 @@ function checkIfCanFinish() {
             let itemDetailsHtml = '';
             let subTotalItem = orderItem.produtoPrincipal?.price || 0;
 
-            if (orderItem.produtoPrincipal?.type === 'produto_especial') {
-                itemDetailsHtml += orderItem.selectedSpecialFlavor ? `Sabor: ${orderItem.selectedSpecialFlavor}` : `(Produto sem opções adicionais)`;
-            } else { 
+            if (orderItem.produtoPrincipal?.type === 'acai') {
                 itemDetailsHtml += `Frutas: ${orderItem.frutas?.join(', ') || 'Nenhuma'}<br>Cremes: ${orderItem.cremes?.join(', ') || 'Nenhum'}<br>Acompanhamentos: ${orderItem.accomp?.join(', ') || 'Nenhum'}<br>Coberturas: ${orderItem.cover?.join(', ') || 'Nenhum'}<br>`;
-                if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
-                    itemDetailsHtml += `Adicionais: ${orderItem.add.map(item => item.split(' - R$ ')[0]).join(', ')}`;
-                    orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
-                } else {
-                    itemDetailsHtml += `Adicionais: Nenhum Adicional`;
-                }
+            } else if (orderItem.produtoPrincipal?.type === 'sorvete') {
+                itemDetailsHtml += `Sabor: ${orderItem.sorveteSabor || 'Nenhum'}<br>Calda: ${orderItem.sorveteCalda || 'Nenhuma'}<br>`;
+            } else if (orderItem.produtoPrincipal?.type === 'produto_especial') {
+                itemDetailsHtml += orderItem.selectedSpecialFlavor ? `Sabor: ${orderItem.selectedSpecialFlavor}` : `(Produto sem opções adicionais)`;
             }
             
+            if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
+                itemDetailsHtml += `Adicionais: ${orderItem.add.map(item => item.split(' - R$ ')[0]).join(', ')}`;
+                orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
+            } else if (orderItem.produtoPrincipal?.type !== 'produto_especial') {
+                 itemDetailsHtml += `Adicionais: Nenhum Adicional`;
+            }
+
             li.innerHTML = `
                 <div class="order-item-header">
                     <strong>Item ${i + 1}: ${orderItem.produtoPrincipal?.name || 'Item'}</strong>
@@ -1047,20 +1116,25 @@ function checkIfCanFinish() {
             let subTotalItem = orderItem.produtoPrincipal?.price || 0;
             summaryText += `*Item ${i + 1}: ${orderItem.produtoPrincipal?.name}*\n`;
 
-            if (orderItem.produtoPrincipal?.type === 'produto_especial') {
-                if (orderItem.selectedSpecialFlavor) summaryText += `Sabor: ${orderItem.selectedSpecialFlavor}\n`;
-            } else {
+            if (orderItem.produtoPrincipal?.type === 'acai') {
                 summaryText += `Frutas: ${orderItem.frutas?.includes('Nenhuma') ? 'Nenhuma' : orderItem.frutas?.join(', ') || 'N/A'}\n`;
                 summaryText += `Cremes: ${orderItem.cremes?.includes('Nenhuma') ? 'Nenhuma' : orderItem.cremes?.join(', ') || 'N/A'}\n`;
                 summaryText += `Acompanhamentos: ${orderItem.accomp?.includes('Nenhuma') ? 'Nenhuma' : orderItem.accomp?.join(', ') || 'N/A'}\n`;
                 summaryText += `Coberturas: ${orderItem.cover?.includes('Nenhuma') ? 'Nenhuma' : orderItem.cover?.join(', ') || 'N/A'}\n`;
-                if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
-                    summaryText += `Adicionais: ${orderItem.add.map(a => a.split(' - R$ ')[0].toUpperCase()).join(', ')}\n`;
-                    orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
-                } else {
-                    summaryText += `Adicionais: Nenhum Adicional\n`;
-                }
+            } else if (orderItem.produtoPrincipal?.type === 'sorvete') {
+                summaryText += `Sabor: ${orderItem.sorveteSabor || 'N/A'}\n`;
+                summaryText += `Calda: ${orderItem.sorveteCalda || 'N/A'}\n`;
+            } else if (orderItem.produtoPrincipal?.type === 'produto_especial') {
+                if (orderItem.selectedSpecialFlavor) summaryText += `Sabor: ${orderItem.selectedSpecialFlavor}\n`;
             }
+
+            if (orderItem.add && !orderItem.add.includes('Nenhum Adicional')) {
+                summaryText += `Adicionais: ${orderItem.add.map(a => a.split(' - R$ ')[0].toUpperCase()).join(', ')}\n`;
+                orderItem.add.forEach(addon => { if (addon.includes('R$')) subTotalItem += parseFloat(addon.match(/R\$ (\d+[,.]\d{2})/)[1].replace(',', '.')); });
+            } else if (orderItem.produtoPrincipal?.type !== 'produto_especial') {
+                summaryText += `Adicionais: Nenhum Adicional\n`;
+            }
+            
             summaryText += `Subtotal do Item: R$ ${subTotalItem.toFixed(2).replace('.', ',')}\n\n`;
             totalGeralPedido += subTotalItem;
 
@@ -1085,9 +1159,8 @@ function checkIfCanFinish() {
         return summaryText;
     }
 
-    // ##### BOTÃO 'ADICIONAR' CORRIGIDO #####
     btnAdd.onclick = () => {
-        if (btnAdd.disabled) return; // Não faz nada se o botão estiver desabilitado
+        if (btnAdd.disabled) return; 
 
         state.address = addressInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
