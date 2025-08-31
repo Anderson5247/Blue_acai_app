@@ -1,7 +1,7 @@
 {
   "shopInfo": {
     "isOpen": true,
-    "isDeliveryAvailable": false,
+    "isDeliveryAvailable": true,
     "deliveryLocations": {
       "cedral": true,
       "outeiro": true
@@ -86,7 +86,7 @@
     {
       "id": "sorvete-pote",
       "name": "Sorvete no Pote",
-      "description": "1 sabor, 1 calda e adicionais",
+      "description": "1 sabor, 1 calda e adicionais sem limite",
       "price": 7.00,
       "img": "/images/copo.jpeg",
       "available": true,
@@ -95,18 +95,20 @@
     {
       "id": "guarana-300",
       "name": "Guaraná da Amazônia 300ml",
-      "description": "EM BREVE",
+      "description": "Turbine com caldas e adicionais!",
       "price": 10.00,
       "img": "/images/copode300ml.png",
-      "available": false
+      "available": true,
+      "type": "bebida"
     },
     {
       "id": "guarana-500",
       "name": "Guaraná da Amazônia 500ml",
-      "description": "EM BREVE",
+      "description": "Turbine com caldas e adicionais!",
       "price": 15.00,
       "img": "/images/copode500ml.png",
-      "available": false
+      "available": true,
+      "type": "bebida"
     }
   ],
   "sorvete_sabores": [
