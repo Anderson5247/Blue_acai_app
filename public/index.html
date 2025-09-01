@@ -755,7 +755,7 @@
                     }
                 } else if (productType === 'bebida') {
                     state.addMax = undefined;
-                    enable(fs.cover); fs.cover.querySelector('legend').textContent = 'Turbine sua Bebida (até 2 caldas)'; setupChecks(fs.cover, 2, 'cover');
+                    enable(fs.cover); fs.cover.querySelector('legend').textContent = 'Turbine sua Bebida (até 2 coberturas)'; setupChecks(fs.cover, 2, 'cover');
                     enable(fs.askAdd); setupRadioListener('wantAdd');
                 }
                 checkIfCanFinish();
@@ -888,10 +888,10 @@
             if (type === 'acai') {
                 itemDetailsHtml += `Frutas: ${orderItem.frutas?.join(', ') || 'Nenhuma'}<br>Cremes: ${orderItem.cremes?.join(', ') || 'Nenhum'}<br>Acompanhamentos: ${orderItem.accomp?.join(', ') || 'Nenhum'}<br>Coberturas: ${orderItem.cover?.join(', ') || 'Nenhum'}<br>`;
             } else if (type === 'sorvete') {
-                itemDetailsHtml += `Sabor: ${orderItem.sorveteSabor || 'Nenhum'}<br>Calda: ${orderItem.cover?.join(', ') || 'Nenhuma'}<br>`;
+                itemDetailsHtml += `Sabor: ${orderItem.sorveteSabor || 'Nenhum'}<br>Cobertura: ${orderItem.cover?.join(', ') || 'Nenhuma'}<br>`;
             } else if (type === 'bebida') {
                 if (orderItem.cover && orderItem.cover.length > 0 && !orderItem.cover.includes('Nenhuma das opções')) {
-                    itemDetailsHtml += `Caldas: ${orderItem.cover.join(', ')}<br>`;
+                    itemDetailsHtml += `Coberturas: ${orderItem.cover.join(', ')}<br>`;
                 }
             }
             
@@ -940,10 +940,10 @@
             if (type === 'acai') {
                 summaryText += `Frutas: ${formatList(orderItem.frutas)}\nCremes: ${formatList(orderItem.cremes)}\nAcompanhamentos: ${formatList(orderItem.accomp)}\nCoberturas: ${formatList(orderItem.cover)}\n`;
             } else if (type === 'sorvete') {
-                summaryText += `Sabor: ${orderItem.sorveteSabor || 'N/A'}\nCalda: ${formatList(orderItem.cover)}\n`;
+                summaryText += `Sabor: ${orderItem.sorveteSabor || 'N/A'}\nCobertura: ${formatList(orderItem.cover)}\n`;
             } else if (type === 'bebida') {
                 if (orderItem.cover && orderItem.cover.length > 0 && !orderItem.cover.includes('Nenhuma das opções')) {
-                    summaryText += `Caldas: ${formatList(orderItem.cover)}\n`;
+                    summaryText += `Coberturas: ${formatList(orderItem.cover)}\n`;
                 }
             }
             
