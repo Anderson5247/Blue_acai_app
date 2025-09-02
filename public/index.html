@@ -751,7 +751,7 @@
                 } else if (productType === 'sorvete') {
                     enable(fs.sorveteSabor); setupRadioListener('sorveteSabor');
                     enable(fs.cover); fs.cover.querySelector('legend').textContent = '3. Coberturas (1 opção)'; setupChecks(fs.cover, 1, 'cover');
-                    if (productId === 'sorvete-pote') {
+                   if (productId === 'sorvete-pote' || productId === 'milk-shake') {
                         state.addMax = undefined;
                         enable(fs.askAdd); setupRadioListener('wantAdd');
                     }
