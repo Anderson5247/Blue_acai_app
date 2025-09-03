@@ -124,6 +124,6 @@
     { "id": "sv_chocolate", "name": "Chocolate", "available": true, "img": "/images/sabor-chocolate.jpg" },
     { "id": "sv_morango", "name": "Morango", "available": true, "img": "/images/sabor-morango.jpg" },
     { "id": "sv_creme", "name": "Creme", "available": true, "img": "/images/sabor-creme.jpg" },
-    { "id": "sv_flocos", "name": "Flocos", "available": true, "img": "/images/sabor-flocos.jpg" }
+    { "id": "sv_flocos", "name": "Tapioca", "available": true, "img": "/images/sabor-flocos.jpg" }
   ]
 }
