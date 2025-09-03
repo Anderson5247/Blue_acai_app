@@ -405,8 +405,8 @@
                     <div class="grid-2">
                         <label><input type="radio" name="delivery" value="Retirada" required />Retirada</label>
                         <label><input type="radio" name="delivery" value="Consumo no local" required />Consumo no local</label>
-                        <label><input type="radio" name="delivery" value="Cedral - R$ 3.00" />Entrega - Cedral (R$ 3.00)</label>
-                        <label><input type="radio" name="delivery" value="Outeiro - R$ 5.00" />Entrega - Outeiro (R$ 5.00)</label>
+                        <label><input type="radio" name="delivery" value="Cedral - R$ 5.00" />Entrega - Cedral (R$ 5.00)</label>
+                        <label><input type="radio" name="delivery" value="Outeiro - R$ 3.00" />Entrega - Outeiro (R$ 3.00)</label>
                     </div>
                 </fieldset>
             <div id="storeAddressInfo" style="display: none; text-align: center; background-color: #f3e5ff; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
@@ -864,7 +864,7 @@
         const clientNameFilled = clientNameInput.value.trim() !== '';
         const paymentSelected = !!state.payment;
         const deliverySelected = !!state.delivery;
-        let addressOk = !deliverySelected || !['Cedral - R$ 3.00', 'Outeiro - R$ 5.00'].includes(state.delivery) || addressInput.value.trim() !== '';
+        let addressOk = !deliverySelected || !['Cedral - R$ 5.00', 'Outeiro - R$ 3.00'].includes(state.delivery) || addressInput.value.trim() !== '';
         
         const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
         btnAdd.disabled = !canProceed;
