@@ -565,7 +565,7 @@
         }
     }
 
-    function renderFlavorCards(containerId, items, name) {
+  function renderFlavorCards(containerId, items, name) {
         const container = document.getElementById(containerId);
         if (!container) return;
         container.innerHTML = '';
@@ -574,15 +574,15 @@
             label.className = 'option-card';
             label.classList.toggle('disabled-item', !item.available);
             label.title = item.available ? item.name : 'Sabor indisponível';
-            label.htmlFor = `radio-${item.id}`;
-            const radio = document.createElement('input');
-            radio.type = 'radio';
-            radio.name = name;
-            radio.value = item.name;
-            radio.id = `radio-${item.id}`;
-            radio.disabled = !item.available;
+            label.htmlFor = `chk-flavor-${item.id}`; // Renomeado para clareza
+            const checkbox = document.createElement('input'); // Variável renomeada
+            checkbox.type = 'checkbox'; // <-- MUDANÇA 1: Agora é checkbox
+            // checkbox.name = name; // <-- MUDANÇA 2: Removido (setupChecks não precisa disso)
+            checkbox.value = item.name;
+            checkbox.id = `chk-flavor-${item.id}`;
+            checkbox.disabled = !item.available;
             label.innerHTML = `<img src="${item.img || '/images/default-product.png'}" alt="${item.name}"><span class="item-name">${item.name}</span>`;
-            label.appendChild(radio);
+            label.appendChild(checkbox); // <-- MUDANÇA 3
             container.appendChild(label);
         });
     }
@@ -633,7 +633,7 @@
         } else if (type === 'sorvete') {
             const isPote = state.produtoPrincipal.id === 'sorvete-pote';
             const addonsOk = isPote ? checkAddonsValidity() : true;
-            return !!state.sorveteSabor && (state.cover || []).length > 0 && addonsOk;
+            return (state.sorveteSabor || []).length > 0 && (state.cover || []).length > 0 && addonsOk; // <-- LINHA CORRIGIDA
         } else if (type === 'bebida') {
              return checkAddonsValidity();
         }
@@ -748,8 +748,21 @@
                         setupChecks(fs.cover, state.coMax, 'cover');
                         setupRadioListener('wantAdd');
                     }
-                } else if (productType === 'sorvete') {
-                    enable(fs.sorveteSabor); setupRadioListener('sorveteSabor');
+} else if (productType === 'sorvete') {
+                    // --- INÍCIO DA MUDANÇA ---
+                    // Agora usamos a lógica de IF para definir o limite de sabores
+                    if (productId === 'sorvete-pote') {
+                        enable(fs.sorveteSabor); 
+                        fs.sorveteSabor.querySelector('legend').textContent = '2. Escolha os Sabores (Até 2 opções)'; 
+                        setupChecks(fs.sorveteSabor, 2, 'sorveteSabor'); // Limite 2 para o Pote
+                    } else {
+                        // Para Casquinha e Milk Shake, usamos setupChecks com limite 1
+                        enable(fs.sorveteSabor); 
+                        fs.sorveteSabor.querySelector('legend').textContent = '2. Escolha o Sabor (1 opção)'; 
+                        setupChecks(fs.sorveteSabor, 1, 'sorveteSabor'); // Limite 1 para os outros
+                    }
+                    // --- FIM DA MUDANÇA ---
+                    
                     enable(fs.cover); fs.cover.querySelector('legend').textContent = '3. Coberturas (1 opção)'; setupChecks(fs.cover, 1, 'cover');
                    if (productId === 'sorvete-pote' || productId === 'milk-shake') {
                         state.addMax = undefined;
@@ -890,7 +903,7 @@
             if (type === 'acai') {
                 itemDetailsHtml += `Frutas: ${orderItem.frutas?.join(', ') || 'Nenhuma'}<br>Cremes: ${orderItem.cremes?.join(', ') || 'Nenhum'}<br>Acompanhamentos: ${orderItem.accomp?.join(', ') || 'Nenhum'}<br>Coberturas: ${orderItem.cover?.join(', ') || 'Nenhum'}<br>`;
             } else if (type === 'sorvete') {
-                itemDetailsHtml += `Sabor: ${orderItem.sorveteSabor || 'Nenhum'}<br>Cobertura: ${orderItem.cover?.join(', ') || 'Nenhuma'}<br>`;
+                itemDetailsHtml += `Sabores: ${(orderItem.sorveteSabor || []).join(', ') || 'Nenhum'}<br>Cobertura: ${orderItem.cover?.join(', ') || 'Nenhuma'}<br>`; // <-- LINHA CORRIGIDA
             } else if (type === 'bebida') {
                 if (orderItem.cover && orderItem.cover.length > 0 && !orderItem.cover.includes('Nenhuma das opções')) {
                     itemDetailsHtml += `Coberturas: ${orderItem.cover.join(', ')}<br>`;
@@ -942,7 +955,7 @@
             if (type === 'acai') {
                 summaryText += `Frutas: ${formatList(orderItem.frutas)}\nCremes: ${formatList(orderItem.cremes)}\nAcompanhamentos: ${formatList(orderItem.accomp)}\nCoberturas: ${formatList(orderItem.cover)}\n`;
             } else if (type === 'sorvete') {
-                summaryText += `Sabor: ${orderItem.sorveteSabor || 'N/A'}\nCobertura: ${formatList(orderItem.cover)}\n`;
+             summaryText += `Sabores: ${formatList(orderItem.sorveteSabor) || 'N/A'}\nCobertura: ${formatList(orderItem.cover)}\n`; // <-- LINHA CORRIGIDA
             } else if (type === 'bebida') {
                 if (orderItem.cover && orderItem.cover.length > 0 && !orderItem.cover.includes('Nenhuma das opções')) {
                     summaryText += `Coberturas: ${formatList(orderItem.cover)}\n`;
