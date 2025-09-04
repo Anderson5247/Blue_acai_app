@@ -9,7 +9,7 @@
     "closedMessage": "Horário de Funcionamento da Blue Açaí\n\nSegunda-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h00 às 21h30.\n\nTerça-feira: Fechados.\n\nQuarta-feira:\nManhã: das 08h30 às 11h00.\nNoite: das 18h30 às 21h30.\n\nQuinta-feira:\nNoite: das 18h30 às 21h30.\n\nSexta-feira: Fechados.\n\nSábado e Domingo:\nNoite: das 18h30 às 21h30.\n\nEstamos localizados na Rua do Porto, Outeiro-Cedral, com opções de retirada na loja ou delivery. Esperamos por você!"
   },
   "frutas": [
-    { "id": "GELEIA morango", "name": " GELEIA Morango", "available": false },
+    { "id": "GELEIA de morango", "name": " GELEIA de Morango", "available": true },
     { "id": "banana", "name": "Banana", "available": true },
     { "id": "kiwi", "name": "Kiwi", "available": true },
     { "id": "maca", "name": "Maçã", "available": true },
@@ -58,7 +58,7 @@
     { "id": "jujubas_add", "name": "Jujubas - R$ 1.00", "originalValue": "Jujubas - R$ 1.00", "available": true },
     { "id": "marshmallow_add", "name": "Marshmallow - R$ 1.00", "originalValue": "Marshmallow - R$ 1.00", "available": true },
     { "id": "doce_leite_add", "name": "Doce de leite - R$ 1.00", "originalValue": "Doce de leite - R$ 1.00", "available": true },
-    { "id": "GELEIA morango_add", "name": "GELEIA Morango - R$ 1.00", "originalValue": "GELEIA Morango - R$ 1.00", "available": false },
+    { "id": "GELEIA de morango_add", "name": "GELEIA de Morango - R$ 1.00", "originalValue": "GELEIA de Morango - R$ 1.00", "available": false },
     { "id": "banana_add", "name": "Banana - R$ 1.00", "originalValue": "Banana - R$ 1.00", "available": true },
     { "id": "kiwi_add", "name": "Kiwi - R$ 1.00", "originalValue": "Kiwi - R$ 1.00", "available": true },
     { "id": "maçã_add", "name": "Maçã - R$ 1.00", "originalValue": "Maçã - R$ 1.00", "available": true },
