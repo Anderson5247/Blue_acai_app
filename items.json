@@ -72,6 +72,12 @@
     { "id": "chocolate_avela_add", "name": "Chocolate c/Avelã (Creme) - R$ 2.00", "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00", "available": true },
     { "id": "chocolate_branco_add", "name": "Chocolate Branco (Creme) - R$ 2.00", "originalValue": "Chocolate Branco (Creme) - R$ 2.00", "available": true },
     { "id": "kit_kat", "name": "Kit Kat (Creme) - R$ 2.00", "originalValue": "Kit Kat (Creme) - R$ 2.00", "available": true }
+    { "id": "bola-de-sorvete-tapioca", "name": "Bola de Sorvete Tapioca - R$ 1.50", "originalValue": "Bola de Sorvete Tapioca - R$ 1.50", "available": true }
+    { "id": "bola-de-sorvete-Creme-com-passas", "name": "Bola de Sorvete Creme com passas - R$ 1.50", "originalValue": "Bola de Sorvete Creme com passas - R$ 1.50", "available": true }
+    { "id": "bola-de-sorvete-ninho", "name": "Bola de Sorvete Ninho - R$ 1.50", "originalValue": "Bola de Sorvete Ninho - R$ 1.50", "available": true }
+    { "id": "bola-de-sorvete-choconinho", "name": "Bola de Sorvete Choconinho - R$ 1.50", "originalValue": "Bola de Sorvete Choconinho - R$ 1.50", "available": true }
+    { "id": "bola-de-sorvete-sonho-de-valsa", "name": "Bola de Sorvete Sonho de Valsa - R$ 1.50", "originalValue": "Bola de Sorvete Sonho de Valsa - R$ 1.50", "available": true }
+    { "id": "bola-de-sorvete-ferrero-rocher", "name": "Bola de Sorvete Ferrero Rocher - R$ 1.50", "originalValue": "Bola de Sorvete Ferrero Rocher - R$ 1.50", "available": true }
   ],
   "produtos_especiais": [
     {
@@ -121,9 +127,11 @@
     }
   ],
   "sorvete_sabores": [
-    { "id": "sv_chocolate", "name": "Chocolate", "available": true, "img": "/images/sabor-chocolate.jpg" },
-    { "id": "sv_morango", "name": "Morango", "available": true, "img": "/images/sabor-morango.jpg" },
-    { "id": "sv_creme", "name": "Creme", "available": true, "img": "/images/sabor-creme.jpg" },
+    { "id": "sv_ninho", "name": "Ninho", "available": true, "img": "/images/sabor-ninho.jpg" },
+    { "id": "sv_choconinho", "name": "Choconinho", "available": true, "img": "/images/sabor-choconinho.jpg" },
+    { "id": "sv_Sonho-de-valsa", "name": "Sonho de Valsa", "available": true, "img": "/images/sabor-sonhodevalsa.jpg" },
+    { "id": "sv_ferrero-rocher", "name": "Ferrero Rocher", "available": true, "img": "/images/sabor-ferrerorocher.jpg" },
+    { "id": "sv_creme-com-passas", "name": "Creme com passas", "available": true, "img": "/images/sabor-cremecompassas.jpg" },
     { "id": "sv_flocos", "name": "Tapioca", "available": true, "img": "/images/sabor-flocos.jpg" }
   ]
 }
