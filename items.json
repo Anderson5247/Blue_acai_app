@@ -346,9 +346,9 @@
       "available": true
     },
     {
-      "id": "bola-de-sorvete-sonho-de-valsa",
-      "name": "Bola de Sorvete Sonho de Valsa - R$ 1.50",
-      "originalValue": "Bola de Sorvete Sonho de Valsa - R$ 1.50",
+      "id": "bola-de-sorvete-napolitano",
+      "name": "Bola de Sorvete Napolitano - R$ 1.50",
+      "originalValue": "Bola de Sorvete Napolitano - R$ 1.50",
       "available": true
     },
     {
@@ -419,10 +419,10 @@
       "img": "/images/sabor-choconinho.jpg"
     },
     {
-      "id": "sv_sonho-de-valsa",
-      "name": "Sonho de Valsa",
+      "id": "sv_Napolitano",
+      "name": "Napolitano",
       "available": true,
-      "img": "/images/sabor-sonhodevalsa.jpg"
+      "img": "/images/sabor-napolitano.jpg"
     },
     {
       "id": "sv_ferrero-rocher",
