@@ -71,13 +71,13 @@
     { "id": "tutti_frutti_creme_add", "name": "Tutti Frutti (Creme) - R$ 2.00", "originalValue": "Tutti Frutti (Creme) - R$ 2.00", "available": true },
     { "id": "chocolate_avela_add", "name": "Chocolate c/Avelã (Creme) - R$ 2.00", "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00", "available": true },
     { "id": "chocolate_branco_add", "name": "Chocolate Branco (Creme) - R$ 2.00", "originalValue": "Chocolate Branco (Creme) - R$ 2.00", "available": true },
-    { "id": "kit_kat", "name": "Kit Kat (Creme) - R$ 2.00", "originalValue": "Kit Kat (Creme) - R$ 2.00", "available": true }
-    { "id": "bola-de-sorvete-tapioca", "name": "Bola de Sorvete Tapioca - R$ 1.50", "originalValue": "Bola de Sorvete Tapioca - R$ 1.50", "available": true }
-    { "id": "bola-de-sorvete-Creme-com-passas", "name": "Bola de Sorvete Creme com passas - R$ 1.50", "originalValue": "Bola de Sorvete Creme com passas - R$ 1.50", "available": true }
-    { "id": "bola-de-sorvete-ninho", "name": "Bola de Sorvete Ninho - R$ 1.50", "originalValue": "Bola de Sorvete Ninho - R$ 1.50", "available": true }
-    { "id": "bola-de-sorvete-choconinho", "name": "Bola de Sorvete Choconinho - R$ 1.50", "originalValue": "Bola de Sorvete Choconinho - R$ 1.50", "available": true }
-    { "id": "bola-de-sorvete-sonho-de-valsa", "name": "Bola de Sorvete Sonho de Valsa - R$ 1.50", "originalValue": "Bola de Sorvete Sonho de Valsa - R$ 1.50", "available": true }
-    { "id": "bola-de-sorvete-ferrero-rocher", "name": "Bola de Sorvete Ferrero Rocher - R$ 1.50", "originalValue": "Bola de Sorvete Ferrero Rocher - R$ 1.50", "available": true }
+    { "id": "kit_kat", "name": "Kit Kat (Creme) - R$ 2.00", "originalValue": "Kit Kat (Creme) - R$ 2.00", "available": true },
+    { "id": "bola-de-sorvete-tapioca", "name": "Bola de Sorvete Tapioca - R$ 1.50", "originalValue": "Bola de Sorvete Tapioca - R$ 1.50", "available": true },
+    { "id": "bola-de-sorvete-Creme-com-passas", "name": "Bola de Sorvete Creme com passas - R$ 1.50", "originalValue": "Bola de Sorvete Creme com passas - R$ 1.50", "available": true },
+    { "id": "bola-de-sorvete-ninho", "name": "Bola de Sorvete Ninho - R$ 1.50", "originalValue": "Bola de Sorvete Ninho - R$ 1.50", "available": true },
+    { "id": "bola-de-sorvete-choconinho", "name": "Bola de Sorvete Choconinho - R$ 1.50", "originalValue": "Bola de Sorvete Choconinho - R$ 1.50", "available": true },
+    { "id": "bola-de-sorvete-sonho-de-valsa", "name": "Bola de Sorvete Sonho de Valsa - R$ 1.50", "originalValue": "Bola de Sorvete Sonho de Valsa - R$ 1.50", "available": true },
+    { "id": "bola-de-sorvete-ferrero-rocher", "name": "Bola de Sorvete Ferrero Rocher - R$ 1.50", "originalValue": "Bola de Sorvete Ferrero Rocher - R$ 1.50", "available": true },
   ],
   "produtos_especiais": [
     {
