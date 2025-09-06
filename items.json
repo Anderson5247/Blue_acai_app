@@ -1,7 +1,7 @@
 {
   "shopInfo": {
     "isOpen": true,
-    "isDeliveryAvailable": true,
+    "isDeliveryAvailable": false,
     "deliveryLocations": {
       "cedral": true,
       "outeiro": true
