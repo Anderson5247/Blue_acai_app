@@ -209,18 +209,6 @@
       "available": true
     },
     {
-      "id": "jujubas_add",
-      "name": "Jujubas - R$ 1.00",
-      "originalValue": "Jujubas - R$ 1.00",
-      "available": true
-    },
-    {
-      "id": "marshmallow_add",
-      "name": "Marshmallow - R$ 1.00",
-      "originalValue": "Marshmallow - R$ 1.00",
-      "available": true
-    },
-    {
       "id": "doce_leite_add",
       "name": "Doce de leite - R$ 1.00",
       "originalValue": "Doce de leite - R$ 1.00",
@@ -299,12 +287,6 @@
       "available": true
     },
     {
-      "id": "kit_kat_add",
-      "name": "Kit Kat (Creme) - R$ 2.00",
-      "originalValue": "Kit Kat (Creme) - R$ 2.00",
-      "available": true
-    },
-    {
       "id": "bola-de-sorvete-tapioca",
       "name": "Bola de Sorvete Tapioca - R$ 1.50",
       "originalValue": "Bola de Sorvete Tapioca - R$ 1.50",
@@ -338,6 +320,12 @@
       "id": "bola-de-sorvete-ferrero-rocher",
       "name": "Bola de Sorvete Ferrero Rocher - R$ 1.50",
       "originalValue": "Bola de Sorvete Ferrero Rocher - R$ 1.50",
+      "available": true
+     },
+    {
+      "id": "bola-de-sorvete-nutella",
+      "name": "Bola de Sorvete Nutella - R$ 1.50",
+      "originalValue": "Bola de Sorvete Nutella - R$ 1.50",
       "available": true
     }
   ],
@@ -421,6 +409,12 @@
       "name": "Ferrero Rocher",
       "available": true,
       "img": "/images/sabor-ferrerorocher.jpg"
+    },
+    {
+      "id": "sv_nutella",
+      "name": "Nutella",
+      "available": true,
+      "img": "/images/sabor-nutella.jpg"
     },
     {
       "id": "sv_creme-com-passas",
