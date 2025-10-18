@@ -1,4 +1,4 @@
-{
+V{
   "shopInfo": {
     "isOpen": false,
     "isDeliveryAvailable": false,
@@ -330,7 +330,7 @@
     {
       "id": "bola-de-sorvete-ovomaltine",
       "name": "Bola de Sorvete Ovomaltine - R$ 1.50",
-      "originalValue": "Bola de Sorvete Nutella - R$ 1.50",
+      "originalValue": "Bola de Sorvete Ovomaltine - R$ 1.50",
       "available": true
     }
   ],
