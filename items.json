@@ -376,7 +376,7 @@
       "name": "Guaraná da Amazônia 300ml",
       "description": "EM BREVE Turbine com caldas e adicionais!",
       "price": 12.00,
-      "img": "/images/copode300ml.png",
+      "img": "/images/copode300ml.jpg",
       "available": true,
       "type": "bebida"
     },
@@ -385,7 +385,7 @@
       "name": "Guaraná da Amazônia 500ml",
       "description": "EM BREVE Turbine com caldas e adicionais!",
       "price": 17.00,
-      "img": "/images/copode500ml.png",
+      "img": "/images/copode500ml.jpg",
       "available": true,
       "type": "bebida"
     }
