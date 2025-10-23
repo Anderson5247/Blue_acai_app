@@ -354,8 +354,8 @@
       "type": "sorvete"
     },
     {
-      "id": "sorvete-pote",
-      "name": "Sorvete no Pote",
+      "id": "sorvete-copo",
+      "name": "Sorvete no Copo",
       "description": "180g de puro sabor, 1 calda e adicionais sem limites",
       "price": 8.00,
       "img": "/images/copo.jpeg",
