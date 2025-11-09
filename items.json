@@ -59,7 +59,7 @@
     {
       "id": "abacaxi",
       "name": "Abacaxi",
-      "available": true
+      "available": false
     },
     {
       "id": "chocolate_branco",
@@ -69,7 +69,7 @@
     {
       "id": "chocolate_com_avela",
       "name": "Chocolate Com Avelã",
-      "available": true
+      "available": false
     }
   ],
   "acompanhamentos": [
@@ -101,16 +101,11 @@
     {
       "id": "confetes_acomp",
       "name": "Confetes",
-      "available": true
+      "available": false
     },
     {
       "id": "tapioca_acomp",
       "name": "Tapioca",
-      "available": true
-    },
-    {
-      "id": "doce_de_leite",
-      "name": "Doce de Leite",
       "available": true
     }
   ],
@@ -136,14 +131,9 @@
       "available": true
     },
     {
-      "id": "ice_blue_cob",
-      "name": "Ice Blue",
-      "available": true
-    },
-    {
       "id": "kiwi_cob",
       "name": "Kiwi (Cobertura)",
-      "available": true
+      "available": false
     }
   ],
   "adicionais": [
@@ -169,7 +159,7 @@
       "id": "farinha_lactea_add",
       "name": "Farinha Láctea (Adicional) - R$ 1.00",
       "originalValue": "Farinha Láctea - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "leite_po_add",
@@ -205,13 +195,7 @@
       "id": "mms_add",
       "name": "M&MS - R$ 2.00",
       "originalValue": "M&MS - R$ 2.00",
-      "available": true
-    },
-    {
-      "id": "doce_leite_add",
-      "name": "Doce de leite - R$ 1.00",
-      "originalValue": "Doce de leite - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "geleia_de_morango_add",
@@ -229,7 +213,7 @@
       "id": "kiwi_add",
       "name": "Kiwi - R$ 1.00",
       "originalValue": "Kiwi - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "maca_add",
@@ -268,158 +252,10 @@
       "available": true
     },
     {
-      "id": "chocolate_avela_add",
-      "name": "Chocolate c/Avelã (Creme) - R$ 2.00",
-      "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00",
-      "available": true
-    },
-    {
       "id": "chocolate_branco_add",
       "name": "Chocolate Branco (Creme) - R$ 2.00",
       "originalValue": "Chocolate Branco (Creme) - R$ 2.00",
       "available": true
-    },
-    {
-      "id": "bola-de-sorvete-tapioca",
-      "name": "Bola de Sorvete Tapioca - R$ 1.50",
-      "originalValue": "Bola de Sorvete Tapioca - R$ 1.50",
-      "available": true
-    },
-    {
-      "id": "bola-de-sorvete-creme-com-passas",
-      "name": "Bola de Sorvete Creme com passas - R$ 1.50",
-      "originalValue": "Bola de Sorvete Creme com passas - R$ 1.50",
-      "available": false
-    },
-    {
-      "id": "bola-de-sorvete-ninho",
-      "name": "Bola de Sorvete Ninho - R$ 1.50",
-      "originalValue": "Bola de Sorvete Ninho - R$ 1.50",
-      "available": false
-    },
-    {
-      "id": "bola-de-sorvete-choconinho",
-      "name": "Bola de Sorvete Choconinho - R$ 1.50",
-      "originalValue": "Bola de Sorvete Choconinho - R$ 1.50",
-      "available": true
-    },
-    {
-      "id": "bola-de-sorvete-napolitano",
-      "name": "Bola de Sorvete Napolitano - R$ 1.50",
-      "originalValue": "Bola de Sorvete Napolitano - R$ 1.50",
-      "available": false
-    },
-    {
-      "id": "bola-de-sorvete-ferrero-rocher",
-      "name": "Bola de Sorvete Ferrero Rocher - R$ 1.50",
-      "originalValue": "Bola de Sorvete Ferrero Rocher - R$ 1.50",
-      "available": true
-     },
-    {
-      "id": "bola-de-sorvete-ovomaltine",
-      "name": "Bola de Sorvete Ovomaltine - R$ 1.50",
-      "originalValue": "Bola de Sorvete Ovomaltine - R$ 1.50",
-      "available": true
-    }
-  ],
-  "produtos_especiais": [
-    {
-       "id": "AÇAÍ TRUFADO",
-      "name": "AÇAÍ TRUFADO",
-      "description": "DELICIOSO AÇAÍ COM MUITO CREME DE NINHO, CREME DE CHOCOLATE COM AVELÃ E LEITE EM PÓ EM UM COPO DE 300ML",
-      "price": 15.00,
-      "img": "/images/acaitrufado.jpg",
-      "available": true,
-      "type": "bebida"
-    },
-    {
-      "id": "sorvete-casquinha",
-      "name": "Sorvete de Casquinha",
-      "description": "1 sabor e 1 calda",
-      "price": 4.00,
-      "img": "/images/casquinha.jpg",
-      "available": false,
-      "type": "sorvete"
-    },
-    {
-      "id": "sorvete-copo",
-      "name": "Sorvete no Copo",
-      "description": "180g de puro sabor, 1 calda e adicionais sem limites",
-      "price": 8.00,
-      "img": "/images/copo.jpeg",
-      "available": true,
-      "type": "sorvete"
-    },
-    {
-      "id": "milk-shake",
-      "name": "Milk Shake 300ml",
-      "description": "1 sabor, 1 calda e adicionais sem limites",
-      "price": 9.00,
-      "img": "/images/copodemilk.jpeg",
-      "available": true,
-      "type": "sorvete"
-    },
-    {
-      "id": "guarana-300",
-      "name": "Guaraná da Amazônia Tradicional 300ml",
-      "description": "Turbine com caldas e adicionais!",
-      "price": 12.00,
-      "img": "/images/copode300ml.jpg",
-      "available": true,
-      "type": "bebida"
-    },
-    {
-      "id": "guarana-500",
-      "name": "Guaraná da Amazônia Tradicional 500ml",
-      "description": "Turbine com caldas e adicionais!",
-      "price": 17.00,
-      "img": "/images/copode500ml.jpg",
-      "available": true,
-      "type": "bebida"
-    }
-  ],
-  "sorvete_sabores": [
-    {
-      "id": "sv_ninho",
-      "name": "Ninho",
-      "available": false,
-      "img": "/images/sabor-ninho.jpg"
-    },
-    {
-      "id": "sv_choconinho",
-      "name": "Choconinho",
-      "available": true,
-      "img": "/images/sabor-choconinho.jpg"
-    },
-    {
-      "id": "sv_Napolitano",
-      "name": "Napolitano",
-      "available": false,
-      "img": "/images/sabor-napolitano.jpg"
-    },
-    {
-      "id": "sv_ferrero-rocher",
-      "name": "Ferrero Rocher",
-      "available": true,
-      "img": "/images/sabor-ferrerorocher.jpg"
-    },
-    {
-      "id": "sv_ovomaltine",
-      "name": "Ovomaltine",
-      "available": true,
-      "img": "/images/sabor-ovomaltine.jpg"
-    },
-    {
-      "id": "sv_creme-com-passas",
-      "name": "Creme com passas",
-      "available": false,
-      "img": "/images/sabor-cremecompassas.jpg"
-    },
-    {
-      "id": "sv_flocos",
-      "name": "Tapioca",
-      "available": true,
-      "img": "/images/sabor-flocos.jpg"
     }
   ]
 }
