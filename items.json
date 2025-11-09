@@ -3,11 +3,11 @@
     "isOpen": false,
     "isDeliveryAvailable": false,
     "deliveryLocations": {
-      "cedral": true,
-      "outeiro": true
+      "bairro": true,
+      "centro": true
     },
-    "closedMessage": "MAS INFORMAÇÕES SOBRE NOSSO HORÁRIO DE FUNCIONAMENTO CHAME NO WHATSAPP: (98) 98501-6035"
-  },
+  "closedMessage": "Chame no WHATSAPP (98) 98501-6035 para fazer seu pedido"
+   },
   "frutas": [
     {
       "id": "geleia_de_morango",
@@ -22,7 +22,7 @@
     {
       "id": "kiwi",
       "name": "Kiwi",
-      "available": true
+      "available": false
     },
     {
       "id": "maca",
@@ -64,7 +64,7 @@
     {
       "id": "chocolate_branco",
       "name": "Chocolate Branco",
-      "available": true
+      "available": false
     },
     {
       "id": "chocolate_com_avela",
@@ -91,7 +91,7 @@
     {
       "id": "farinha_lactea_acomp",
       "name": "Farinha Láctea",
-      "available": true
+      "available": false
     },
     {
       "id": "leite_po_acomp",
@@ -118,7 +118,7 @@
     {
       "id": "morango_cob",
       "name": "Morango (Cobertura)",
-      "available": true
+      "available": false
     },
     {
       "id": "leite_condensado_cob",
@@ -177,13 +177,13 @@
       "id": "confetes_add",
       "name": "Confetes (Adicional) - R$ 1.00",
       "originalValue": "Confetes - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "tapioca_add",
       "name": "Tapioca (Adicional) - R$ 1.00",
       "originalValue": "Tapioca - R$ 1.00",
-      "available": true
+      "available": false
     },
     {
       "id": "uva_passa_add",
@@ -249,13 +249,29 @@
       "id": "abacaxi_creme_add",
       "name": "Abacaxi (Creme) - R$ 2.00",
       "originalValue": "Abacaxi (Creme) - R$ 2.00",
-      "available": true
+      "available": false
+    },
+    {
+      "id": "chocolate_avela_add",
+      "name": "Chocolate c/Avelã (Creme) - R$ 2.00",
+      "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00",
+      "available": false
     },
     {
       "id": "chocolate_branco_add",
       "name": "Chocolate Branco (Creme) - R$ 2.00",
       "originalValue": "Chocolate Branco (Creme) - R$ 2.00",
-      "available": true
+      "available": false
+    }
+  ],
+  "produtos_especiais": [
+    {
+     
+    }
+  ],
+  "sorvete_sabores": [
+    {
+     
     }
   ]
 }
