@@ -266,12 +266,12 @@
   ],
   "produtos_especiais": [
     {
-....
+  "id": "sorvete-copo",
     }
   ],
   "sorvete_sabores": [
     {
-.....
+ "id": "sv_creme-com-passas",
     }
   ]
 }
