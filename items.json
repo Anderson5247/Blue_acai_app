@@ -269,9 +269,18 @@
   "id": "sorvete-copo",
     }
   ],
-  "sorvete_sabores": [
+      "id": "sorvete-copo",
+      "name": " ",
+      "description": "",
+      "price": ,
+      "img": " ",
+      "available": false,
+      "type": "sorvete"
     {
- "id": "sv_creme-com-passas",
+  "id": "sv_creme-com-passas",
+      "name": " ",
+      "available": false,
+      "img": "
     }
   ]
 }
