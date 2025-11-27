@@ -264,23 +264,23 @@
       "available": false
     }
   ],
-  "produtos_especiais": [
+    "produtos_especiais": [
     {
-  "id": "sorvete-copo",
+      "id": "sorvete-copo",
+      "name": "......",
+      "description": "",
+      "price": 8.00,
+      "img": "/images/.jpeg",
+      "available": true,
+      "type": "sorvete"
     }
   ],
-      "id": "sorvete-copo",
-      "name": " ",
-      "description": "",
-      "price": ,
-      "img": " ",
-      "available": false,
-      "type": "sorvete"
+  "sorvete_sabores": [
     {
-  "id": "sv_creme-com-passas",
-      "name": " ",
+      "id": "sv_ninho",
+      "name": "......",
       "available": false,
-      "img": "
+      "img": "/images/.jpg"
     }
   ]
 }
