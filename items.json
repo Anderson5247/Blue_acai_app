@@ -263,24 +263,6 @@
       "originalValue": "Chocolate Branco (Creme) - R$ 2.00",
       "available": false
     }
-  ],
-    "produtos_especiais": [
-    {
-      "id": "sorvete-copo",
-      "name": "......",
-      "description": "",
-      "price": ....,
-      "img": "/images/.jpeg",
-      "available": false,
-      "type": "sorvete"
-    }
-  ],
-  "sorvete_sabores": [
-    {
-      "id": "sv_ninho",
-      "name": "......",
-      "available": false,
-      "img": "/images/.jpg"
-    }
-  ]
+     ],
+    "produtos_especiais": []
 }
