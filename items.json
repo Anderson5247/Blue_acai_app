@@ -269,9 +269,9 @@
       "id": "sorvete-copo",
       "name": "......",
       "description": "",
-      "price": 8.00,
+      "price": ,
       "img": "/images/.jpeg",
-      "available": true,
+      "available": false,
       "type": "sorvete"
     }
   ],
