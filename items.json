@@ -64,12 +64,12 @@
     {
       "id": "chocolate_branco",
       "name": "Chocolate Branco",
-      "available": false
+      "available": true
     },
     {
       "id": "chocolate_com_avela",
       "name": "Chocolate Com Avelã",
-      "available": false
+      "available": true
     }
   ],
   "acompanhamentos": [
@@ -255,13 +255,13 @@
       "id": "chocolate_avela_add",
       "name": "Chocolate c/Avelã (Creme) - R$ 2.00",
       "originalValue": "Chocolate c/Avelã (Creme) - R$ 2.00",
-      "available": false
+      "available": true
     },
     {
       "id": "chocolate_branco_add",
       "name": "Chocolate Branco (Creme) - R$ 2.00",
       "originalValue": "Chocolate Branco (Creme) - R$ 2.00",
-      "available": false
+      "available": true
     }
      ],
    "produtos_especiais": [],
