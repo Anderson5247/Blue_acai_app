@@ -340,6 +340,15 @@
             right: 8px;
             transform: scale(1.3);
             accent-color: var(--purple);
+            .produto-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border 0.3s ease;
+        }
+
+        .produto-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 20px rgba(90, 15, 141, 0.25);
+            border: 1px solid var(--purple);
+            cursor: pointer;
         }
     </style>
 </head>
