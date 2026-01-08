@@ -510,6 +510,15 @@
     // --- DADOS DOS PRODUTOS DE AÇAÍ (FONTE ÚNICA DA VERDADE) ---
     const ACAI_PRODUCTS = [
         { 
+            id: 'size-250', 
+            name: 'Copo Mini (250ml)', 
+            price: 10.00,
+            img: '/images/copo-pequeno.jpg', 
+            desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', 
+            available: true, 
+            type: 'acai',
+            limits: { fMax: 1, cMax: 1, aMax: 3, coMax: 1 } // <--- Ajuste os limites aqui se necessário
+        },
             id: 'size-300', name: 'Copo Pequeno (300ml)', price: 12.00, img: '/images/copo-pequeno.jpg', 
             desc: 'Até 1 fruta, até 1 creme,<br>até 3 acompanhamentos,<br>até 1 cobertura', available: true, type: 'acai',
             limits: { fMax: 1, cMax: 1, aMax: 3, coMax: 1 }
