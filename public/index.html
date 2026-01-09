@@ -408,6 +408,15 @@
             transform: scale(0.96); /* Diminui levemente (efeito de apertar) */
             box-shadow: none; /* Remove a sombra momentaneamente */
         }
+        /* --- PASSO 4: Botão "Bloqueado" Inteligente --- */
+        .btn-blocked {
+            background: #ccc !important; /* Fundo cinza */
+            background-image: none !important; /* Remove o degradê */
+            color: #666 !important;
+            cursor: help !important; /* Mostra um "?" no mouse */
+            box-shadow: none !important;
+            transform: none !important;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
