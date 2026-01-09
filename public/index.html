@@ -1124,25 +1124,40 @@
             const encodedText = encodeURIComponent(summaryTextContent);
             
             // --- AQUI ESTÁ A NOVA MENSAGEM BONITA E CLARA ---
+         // --- NOTIFICAÇÃO PREMIUM ---
             Swal.fire({
-                title: 'Tudo pronto! 😋',
+                // Título Roxo e Personalizado
+                title: '<span style="color: #5A0F8D; font-weight: bold;">Quase lá! 💜</span>',
+                
+                // Sua Logo no lugar do ícone padrão
+                imageUrl: '/images/logo.png', 
+                imageWidth: 100,
+                imageAlt: 'Logo Blue Açaí',
+                
+                // Texto com HTML estilizado
                 html: `
-                    Seu pedido foi gerado com sucesso.<br><br>
-                    <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; border: 1px solid #4caf50; color: #1b5e20;">
-                        <strong>⚠️ IMPORTANTE:</strong><br>
-                        Nós vamos abrir o seu WhatsApp.<br>
-                        Você precisa clicar em <strong>ENVIAR</strong> a mensagem para recebermos o pedido!
+                    <p style="color: #555; font-size: 1.1em; margin-bottom: 15px;">Seu pedido foi montado com sucesso!</p>
+                    
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; border: 2px dashed #ffc107; color: #856404; text-align: left; display: flex; align-items: center; gap: 12px;">
+                        <span style="font-size: 2.5em;">📲</span>
+                        <div style="line-height: 1.4;">
+                            <strong>ATENÇÃO:</strong><br>
+                            O WhatsApp vai abrir, mas você precisa clicar em <strong>ENVIAR</strong> para confirmarmos seu pedido!
+                        </div>
                     </div>
                 `,
-                icon: 'success',
+                
+                // Botões e Cores
                 showCancelButton: true,
-                confirmButtonColor: '#25D366', // Cor do WhatsApp
-                cancelButtonColor: '#d33',
-                confirmButtonText: 'Abrir WhatsApp e Enviar 📲',
-                cancelButtonText: 'Voltar'
+                confirmButtonColor: '#25D366', // Verde do WhatsApp
+                cancelButtonColor: '#d33',     // Vermelho
+                confirmButtonText: '<strong>Abrir WhatsApp e Enviar</strong> 🚀',
+                cancelButtonText: 'Voltar',
+                
+                // Fundo com leve toque de roxo
+                backdrop: `rgba(90, 15, 141, 0.2)`
             }).then(async (result) => {
                 if (result.isConfirmed) {
-                    // Só reseta e envia se a pessoa clicar no botão verde
                     window.location.href = `https://wa.me/${phoneNumber}?text=${encodedText}`;
                     await resetForm(); 
                 }
