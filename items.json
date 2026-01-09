@@ -264,6 +264,34 @@
       "available": true
     }
      ],
-   "produtos_especiais": [],
+  "produtos_especiais": [
+    {
+      "id": "bolo-choco",
+      "name": "Bolo de Pote - Chocolate",
+      "price": 7.00,
+      "img": "/images/bolo-chocolate.jpg",
+      "desc": "Massa fofinha de chocolate com recheio cremoso de brigadeiro.",
+      "available": true,
+      "type": "doce"
+    },
+    {
+      "id": "bolo-morango",
+      "name": "Bolo de Pote - Morango",
+      "price": 7.00,
+      "img": "/images/bolo-morango.jpg",
+      "desc": "Massa branca suave com pedaços de morango fresco e creme.",
+      "available": true,
+      "type": "doce"
+    },
+    {
+      "id": "bolo-ninho",
+      "name": "Bolo de Pote - Leite Ninho",
+      "price": 7.00,
+      "img": "/images/bolo-ninho.jpg",
+      "desc": "O queridinho! Massa branca com muito recheio de Leite Ninho.",
+      "available": true,
+      "type": "doce"
+    }
+  ],
   "sorvete_sabores": []
 }
