@@ -973,17 +973,38 @@
         }
     }
 
-    function checkIfCanFinish() {
-        const itemValid = validateCurrentOrderItem();
-        const clientNameFilled = clientNameInput.value.trim() !== '';
-        const paymentSelected = !!state.payment;
-        const deliverySelected = !!state.delivery;
-        let addressOk = !deliverySelected || !['Cedral - R$ 5.00', 'Outeiro - R$ 3.00'].includes(state.delivery) || addressInput.value.trim() !== '';
+// Função Inteligente: Muda a cor do botão mas deixa clicável
+    async function checkIfCanFinish() {
+        const hasOrder = orders.length > 0;
         
-        const canProceed = itemValid && clientNameFilled && paymentSelected && deliverySelected && addressOk;
-        btnAdd.disabled = !canProceed;
-        const hasItemsInCart = orders.length > 0;
-        btnFinish.disabled = !( (hasItemsInCart && clientNameFilled && paymentSelected && deliverySelected && addressOk) || canProceed );
+        // --- 1. Botão FINALIZAR ---
+        btnFinish.disabled = false; // Sempre destravado tecnicamente
+
+        // Verificações
+        const nameOk = clientNameInput.value.trim().length > 0;
+        const deliveryOk = document.querySelector('input[name="delivery"]:checked');
+        // Se for entrega (tem cifrão $), exige endereço.
+        const addressOk = (deliveryOk && deliveryOk.value.includes('R$')) ? addressInput.value.trim().length > 0 : true;
+        const paymentOk = document.querySelector('input[name="payment"]:checked');
+
+        // Se faltar algo, "veste" a roupa de bloqueado (Cinza)
+        if ((!hasOrder && !state.produtoPrincipal) || !nameOk || !deliveryOk || !addressOk || !paymentOk) {
+            btnFinish.classList.add('btn-blocked');
+        } else {
+            btnFinish.classList.remove('btn-blocked');
+        }
+
+        // --- 2. Botão ADICIONAR ITEM ---
+        btnAdd.disabled = false;
+        
+        // Verifica se tem um produto principal selecionado para liberar a adição
+        const productSelected = state.produtoPrincipal && state.produtoPrincipal.name;
+        
+        if (!productSelected) {
+            btnAdd.classList.add('btn-blocked');
+        } else {
+            btnAdd.classList.remove('btn-blocked');
+        }
     }
 
     function renderOrders() {
@@ -1086,127 +1107,149 @@
     }
 
     // --- BOTÕES DE AÇÃO ---
-    btnAdd.onclick = () => {
-        if (btnAdd.disabled) return;
+  btnAdd.onclick = () => {
+        // 1. SE O BOTÃO ESTIVER CINZA (Bloqueado), AVISA O ERRO
+        if (btnAdd.classList.contains('btn-blocked')) {
+            Swal.fire({
+                icon: 'info',
+                title: 'Selecione um produto',
+                text: 'Escolha um tamanho de Açaí ou Sorvete para começar!',
+                confirmButtonColor: '#5A0F8D'
+            });
+            return; // Para o código aqui e não adiciona nada
+        }
+
+        // 2. SE ESTIVER LIBERADO, ADICIONA O ITEM NORMALMENTE
         state.address = addressInput.value.trim();
         state.clientName = clientNameInput.value.trim();
         orders.push(JSON.parse(JSON.stringify(state)));
         renderOrders();
         
-        resetPartialForItemSelection();
+        // Animaçãozinha de sucesso no canto da tela
+        const Toast = Swal.mixin({
+            toast: true, position: 'top-end', showConfirmButton: false, timer: 1500,
+            didOpen: (toast) => { toast.onmouseenter = Swal.stopTimer; toast.onmouseleave = Swal.resumeTimer; }
+        });
+        Toast.fire({ icon: 'success', title: 'Item adicionado!' });
 
-        if (state.payment) {
-            const radio = document.querySelector(`input[name="payment"][value="${state.payment}"]`);
-            if(radio) radio.closest('label')?.classList.add('selected-radio');
-        }
-        if (state.delivery) {
-            const radio = document.querySelector(`input[name="delivery"][value="${state.delivery}"]`);
-            if (radio) {
-                radio.checked = true;
-                radio.closest('label')?.classList.add('selected-radio');
-            }
-        }
-        
-        clearRadios('produtoPrincipal');
-        document.querySelectorAll('.produto-card.selected').forEach(c => c.classList.remove('selected'));
-        checkIfCanFinish();
+        // 3. LIMPA APENAS O ITEM (Mantém nome e endereço)
+        resetForm(false); 
     };
 
 btnFinish.onclick = async () => {
-        // 1. Validação Básica de Nome
+        // --- O DETETIVE: INVESTIGA O QUE FALTA ---
+        
+        // 1. Falta o Nome?
         if (!clientNameInput.value.trim()) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Falta seu nome!',
-                text: 'Por favor, digite seu nome para identificarmos o pedido.',
-                confirmButtonColor: '#5A0F8D'
-            });
+            Swal.fire({ title: 'Falta seu nome', text: 'Por favor, digite seu nome lá em cima.', icon: 'warning', confirmButtonColor: '#5A0F8D' });
             clientNameInput.focus();
             return;
         }
 
-        // 2. CORREÇÃO DO ERRO DO "ITEM FANTASMA"
-        // Só adiciona o item atual se ele tiver um PRODUTO selecionado (ignora se tiver só pagamento/entrega)
+        // 2. Falta escolher Entrega ou Retirada?
+        const deliveryType = document.querySelector('input[name="delivery"]:checked');
+        if (!deliveryType) {
+            Swal.fire({ title: 'Entrega ou Retirada?', text: 'Selecione se vai retirar ou quer entrega.', icon: 'warning', confirmButtonColor: '#5A0F8D' });
+            document.getElementById('fsDelivery').scrollIntoView({behavior: "smooth"});
+            return;
+        }
+
+        // 3. É entrega paga e falta o Endereço?
+        if (deliveryType.value.includes('R$') && !addressInput.value.trim()) {
+            Swal.fire({ title: 'Falta o endereço', text: 'Para entrega, precisamos saber onde levar! Digite seu endereço.', icon: 'warning', confirmButtonColor: '#5A0F8D' });
+            addressInput.focus();
+            return;
+        }
+
+        // 4. Falta o Pagamento?
+        if (!document.querySelector('input[name="payment"]:checked')) {
+            Swal.fire({ title: 'Pagamento', text: 'Selecione a forma de pagamento.', icon: 'warning', confirmButtonColor: '#5A0F8D' });
+            document.getElementById('fsPayment').scrollIntoView({behavior: "smooth"});
+            return;
+        }
+
+        // --- TUDO CERTO! ENVIA O PEDIDO ---
+        
+        // Se tiver um item montado na tela mas não adicionado à lista, adiciona agora
         if (state.produtoPrincipal && state.produtoPrincipal.name) {
              state.clientName = clientNameInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
         
-        // 3. Verifica se existe algum pedido na lista
         if (orders.length > 0) {
             try {
-                // Atualiza visual e gera texto
                 renderOrders();
                 const summaryTextContent = generateSummaryText();
                 const phoneNumber = '5598985016035'; 
                 const encodedText = encodeURIComponent(summaryTextContent);
                 
-                // 4. NOTIFICAÇÃO LINDA E FUNCIONAL
+                // NOTIFICAÇÃO DE SUCESSO (PREMIUM)
                 Swal.fire({
-                    // Cabeçalho Roxo
                     title: '<span style="color: #5A0F8D; font-size: 1.5rem;">Pedido Pronto! 💜</span>',
-                    
-                    // Se a imagem falhar, não quebra o layout. Se tiver a logo, ela aparece.
-                    imageUrl: '/images/logo.png', 
-                    imageWidth: 100,
-                    imageAlt: 'Logo Blue Açaí',
-                    // Caso não tenha logo, o SweetAlert usa o ícone abaixo como fallback visual
-                    icon: 'success', 
-                    
+                    imageUrl: '/images/logo.png', imageWidth: 100, imageAlt: 'Logo Blue Açaí', icon: 'success',
                     html: `
-                        <div style="font-size: 1.1em; color: #444; margin-bottom: 20px;">
-                            Seu açaí foi montado com sucesso!
-                        </div>
-                        
+                        <div style="font-size: 1.1em; color: #444; margin-bottom: 20px;">Seu açaí foi montado com sucesso!</div>
                         <div style="background-color: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; border-radius: 4px; text-align: left; display: flex; align-items: center; gap: 15px;">
                             <div style="font-size: 2rem;">📲</div>
                             <div style="font-size: 0.95em; color: #664d03; line-height: 1.4;">
                                 <strong>ATENÇÃO:</strong><br>
-                                O WhatsApp vai abrir agora.<br>
-                                Você precisa clicar em <strong>ENVIAR</strong> lá na conversa!
+                                O WhatsApp vai abrir agora.<br>Você precisa clicar em <strong>ENVIAR</strong> lá na conversa!
                             </div>
                         </div>
                     `,
-                    
-                    // Botões Estilizados
-                    showCancelButton: true,
-                    confirmButtonText: 'Abrir WhatsApp e Enviar 🚀',
-                    cancelButtonText: 'Revisar pedido',
-                    confirmButtonColor: '#25D366', // Verde Zap
-                    cancelButtonColor: '#d33',     // Vermelho
-                    reverseButtons: true,          // Botão de ação na direita (padrão UX)
-                    
-                    // Fundo elegante
+                    showCancelButton: true, confirmButtonText: 'Abrir WhatsApp e Enviar 🚀', cancelButtonText: 'Revisar',
+                    confirmButtonColor: '#25D366', cancelButtonColor: '#d33', reverseButtons: true,
                     backdrop: `rgba(90, 15, 141, 0.15)`
                 }).then(async (result) => {
                     if (result.isConfirmed) {
                         window.location.href = `https://wa.me/${phoneNumber}?text=${encodedText}`;
-                        await resetForm(); 
+                        await resetForm(true); // Reset Total
                     }
                 });
-
             } catch (error) {
-                console.error("Erro ao gerar pedido:", error);
-                Swal.fire('Erro Técnico', 'Houve um erro ao processar o pedido. Tente remover os itens e adicionar novamente.', 'error');
+                console.error("Erro:", error);
+                Swal.fire('Erro', 'Houve um erro técnico. Tente novamente.', 'error');
             }
-            
         } else {
-            Swal.fire('Carrinho vazio', 'Selecione pelo menos um açaí ou sorvete antes de finalizar!', 'info');
+            Swal.fire('Carrinho vazio', 'Adicione pelo menos um item antes de finalizar!', 'info');
         }
     };
     btnCancel.onclick = async () => { if (confirm("Deseja cancelar o pedido e limpar tudo?")) await resetForm(); };
 
-    async function resetForm() {
-        state = {}; orders = [];
-        form.reset();
-        clientNameInput.value = ''; addressInput.value = '';
-        fs.address.style.display = 'none';
+async function resetForm(fullReset = true) {
+        state = {}; 
+        
+        if (fullReset) {
+            // SE FOR RESET TOTAL (Finalizou o pedido ou clicou em Cancelar)
+            orders = [];
+            form.reset(); // Limpa todos os campos
+            clientNameInput.value = ''; 
+            addressInput.value = '';
+            fs.address.style.display = 'none';
+            if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
+        } else {
+            // SE FOR RESET PARCIAL (Apenas adicionou um item ao carrinho)
+            // Mantém o Nome e Endereço, limpa apenas as seleções de produtos
+            document.querySelectorAll('.options-grid input:checked').forEach(el => el.checked = false);
+            document.querySelectorAll('input[name="produtoPrincipal"]').forEach(el => el.checked = false);
+            
+            // Também desmarca os radios de "Deseja adicionais?"
+            document.querySelectorAll('input[name="wantAdd"]').forEach(el => el.checked = false);
+        }
+
         renderOrders();
-        if(pixInfoDiv) pixInfoDiv.classList.add('hidden');
+        
+        // Remove classes visuais de seleção (a borda roxa dos cards)
         document.querySelectorAll('.selected-radio, .produto-card.selected').forEach(el => el.classList.remove('selected', 'selected-radio'));
+        
+        // Esconde as opções de sabores/frutas até escolher um novo produto
         productOptionsContainer.style.display = 'none';
+        
+        // Recarrega a disponibilidade (para garantir que nada esgotou nesse meio tempo)
         await fetchAndApplyItemAvailability();
-        btnAdd.disabled = true; btnFinish.disabled = true;
+        
+        // Roda a verificação para atualizar as cores dos botões (Cinza ou Colorido)
+        checkIfCanFinish();
     }
 
     document.addEventListener('DOMContentLoaded', () => { fetchAndApplyItemAvailability(); });
