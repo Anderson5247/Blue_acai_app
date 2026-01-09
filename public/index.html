@@ -409,6 +409,7 @@
             box-shadow: none; /* Remove a sombra momentaneamente */
         }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body>
     <header>
@@ -1103,9 +1104,15 @@
     };
 
     btnFinish.onclick = async () => {
-        if (btnFinish.disabled) return alert("Por favor, complete todos os campos obrigatórios.");
-        if (!!state.produtoPrincipal) {
-             state.address = addressInput.value.trim();
+        // Validação básica
+        if (!clientNameInput.value.trim()) {
+            Swal.fire('Ops!', 'Por favor, digite seu nome.', 'warning');
+            clientNameInput.focus();
+            return;
+        }
+
+        // Adiciona o pedido atual à lista
+        if (Object.keys(state).length > 0) {
              state.clientName = clientNameInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
@@ -1113,16 +1120,39 @@
         if (orders.length > 0) {
             renderOrders();
             const summaryTextContent = generateSummaryText();
-            const phoneNumber = '5598985016035';
+            const phoneNumber = '5598985016035'; // Seu número
             const encodedText = encodeURIComponent(summaryTextContent);
-            alert("Pedido finalizado! Você será redirecionado para o WhatsApp.");
-            window.location.href = `https://wa.me/${phoneNumber}?text=${encodedText}`;
-            await resetForm(); 
+            
+            // --- AQUI ESTÁ A NOVA MENSAGEM BONITA E CLARA ---
+            Swal.fire({
+                title: 'Tudo pronto! 😋',
+                html: `
+                    Seu pedido foi gerado com sucesso.<br><br>
+                    <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; border: 1px solid #4caf50; color: #1b5e20;">
+                        <strong>⚠️ IMPORTANTE:</strong><br>
+                        Nós vamos abrir o seu WhatsApp.<br>
+                        Você precisa clicar em <strong>ENVIAR</strong> a mensagem para recebermos o pedido!
+                    </div>
+                `,
+                icon: 'success',
+                showCancelButton: true,
+                confirmButtonColor: '#25D366', // Cor do WhatsApp
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Abrir WhatsApp e Enviar 📲',
+                cancelButtonText: 'Voltar'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    // Só reseta e envia se a pessoa clicar no botão verde
+                    window.location.href = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+                    await resetForm(); 
+                }
+            });
+            // ------------------------------------------------
+            
         } else {
-            alert("Adicione um item antes de finalizar.");
+            Swal.fire('Carrinho vazio', 'Adicione pelo menos um açaí antes de finalizar.', 'info');
         }
     };
-
     btnCancel.onclick = async () => { if (confirm("Deseja cancelar o pedido e limpar tudo?")) await resetForm(); };
 
     async function resetForm() {
