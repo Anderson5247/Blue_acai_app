@@ -1103,69 +1103,86 @@
         checkIfCanFinish();
     };
 
-    btnFinish.onclick = async () => {
-        // Validação básica
+btnFinish.onclick = async () => {
+        // 1. Validação Básica de Nome
         if (!clientNameInput.value.trim()) {
-            Swal.fire('Ops!', 'Por favor, digite seu nome.', 'warning');
+            Swal.fire({
+                icon: 'warning',
+                title: 'Falta seu nome!',
+                text: 'Por favor, digite seu nome para identificarmos o pedido.',
+                confirmButtonColor: '#5A0F8D'
+            });
             clientNameInput.focus();
             return;
         }
 
-        // Adiciona o pedido atual à lista
-        if (Object.keys(state).length > 0) {
+        // 2. CORREÇÃO DO ERRO DO "ITEM FANTASMA"
+        // Só adiciona o item atual se ele tiver um PRODUTO selecionado (ignora se tiver só pagamento/entrega)
+        if (state.produtoPrincipal && state.produtoPrincipal.name) {
              state.clientName = clientNameInput.value.trim();
              orders.push(JSON.parse(JSON.stringify(state)));
         }
         
+        // 3. Verifica se existe algum pedido na lista
         if (orders.length > 0) {
-            renderOrders();
-            const summaryTextContent = generateSummaryText();
-            const phoneNumber = '5598985016035'; // Seu número
-            const encodedText = encodeURIComponent(summaryTextContent);
-            
-            // --- AQUI ESTÁ A NOVA MENSAGEM BONITA E CLARA ---
-         // --- NOTIFICAÇÃO PREMIUM ---
-            Swal.fire({
-                // Título Roxo e Personalizado
-                title: '<span style="color: #5A0F8D; font-weight: bold;">Quase lá! 💜</span>',
+            try {
+                // Atualiza visual e gera texto
+                renderOrders();
+                const summaryTextContent = generateSummaryText();
+                const phoneNumber = '5598985016035'; 
+                const encodedText = encodeURIComponent(summaryTextContent);
                 
-                // Sua Logo no lugar do ícone padrão
-                imageUrl: '/images/logo.png', 
-                imageWidth: 100,
-                imageAlt: 'Logo Blue Açaí',
-                
-                // Texto com HTML estilizado
-                html: `
-                    <p style="color: #555; font-size: 1.1em; margin-bottom: 15px;">Seu pedido foi montado com sucesso!</p>
+                // 4. NOTIFICAÇÃO LINDA E FUNCIONAL
+                Swal.fire({
+                    // Cabeçalho Roxo
+                    title: '<span style="color: #5A0F8D; font-size: 1.5rem;">Pedido Pronto! 💜</span>',
                     
-                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; border: 2px dashed #ffc107; color: #856404; text-align: left; display: flex; align-items: center; gap: 12px;">
-                        <span style="font-size: 2.5em;">📲</span>
-                        <div style="line-height: 1.4;">
-                            <strong>ATENÇÃO:</strong><br>
-                            O WhatsApp vai abrir, mas você precisa clicar em <strong>ENVIAR</strong> para confirmarmos seu pedido!
+                    // Se a imagem falhar, não quebra o layout. Se tiver a logo, ela aparece.
+                    imageUrl: '/images/logo.png', 
+                    imageWidth: 100,
+                    imageAlt: 'Logo Blue Açaí',
+                    // Caso não tenha logo, o SweetAlert usa o ícone abaixo como fallback visual
+                    icon: 'success', 
+                    
+                    html: `
+                        <div style="font-size: 1.1em; color: #444; margin-bottom: 20px;">
+                            Seu açaí foi montado com sucesso!
                         </div>
-                    </div>
-                `,
-                
-                // Botões e Cores
-                showCancelButton: true,
-                confirmButtonColor: '#25D366', // Verde do WhatsApp
-                cancelButtonColor: '#d33',     // Vermelho
-                confirmButtonText: '<strong>Abrir WhatsApp e Enviar</strong> 🚀',
-                cancelButtonText: 'Voltar',
-                
-                // Fundo com leve toque de roxo
-                backdrop: `rgba(90, 15, 141, 0.2)`
-            }).then(async (result) => {
-                if (result.isConfirmed) {
-                    window.location.href = `https://wa.me/${phoneNumber}?text=${encodedText}`;
-                    await resetForm(); 
-                }
-            });
-            // ------------------------------------------------
+                        
+                        <div style="background-color: #fff8e1; border-left: 5px solid #ffc107; padding: 15px; border-radius: 4px; text-align: left; display: flex; align-items: center; gap: 15px;">
+                            <div style="font-size: 2rem;">📲</div>
+                            <div style="font-size: 0.95em; color: #664d03; line-height: 1.4;">
+                                <strong>ATENÇÃO:</strong><br>
+                                O WhatsApp vai abrir agora.<br>
+                                Você precisa clicar em <strong>ENVIAR</strong> lá na conversa!
+                            </div>
+                        </div>
+                    `,
+                    
+                    // Botões Estilizados
+                    showCancelButton: true,
+                    confirmButtonText: 'Abrir WhatsApp e Enviar 🚀',
+                    cancelButtonText: 'Revisar pedido',
+                    confirmButtonColor: '#25D366', // Verde Zap
+                    cancelButtonColor: '#d33',     // Vermelho
+                    reverseButtons: true,          // Botão de ação na direita (padrão UX)
+                    
+                    // Fundo elegante
+                    backdrop: `rgba(90, 15, 141, 0.15)`
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = `https://wa.me/${phoneNumber}?text=${encodedText}`;
+                        await resetForm(); 
+                    }
+                });
+
+            } catch (error) {
+                console.error("Erro ao gerar pedido:", error);
+                Swal.fire('Erro Técnico', 'Houve um erro ao processar o pedido. Tente remover os itens e adicionar novamente.', 'error');
+            }
             
         } else {
-            Swal.fire('Carrinho vazio', 'Adicione pelo menos um açaí antes de finalizar.', 'info');
+            Swal.fire('Carrinho vazio', 'Selecione pelo menos um açaí ou sorvete antes de finalizar!', 'info');
         }
     };
     btnCancel.onclick = async () => { if (confirm("Deseja cancelar o pedido e limpar tudo?")) await resetForm(); };
