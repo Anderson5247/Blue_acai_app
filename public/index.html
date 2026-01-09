@@ -371,6 +371,43 @@
         .produto-card:nth-child(2) { animation-delay: 0.2s; }
         .produto-card:nth-child(3) { animation-delay: 0.3s; }
         .produto-card:nth-child(4) { animation-delay: 0.4s; }
+        /* --- PASSO 3: Botões Modernos e Atraentes --- */
+        
+        /* Estilo Geral para Botões Principais (Roxo) */
+        .buttons button:not(#btnCancel) {
+            background-image: linear-gradient(135deg, var(--purple) 0%, #8e44ad 100%); /* Degradê Roxo */
+            box-shadow: 0 4px 15px rgba(90, 15, 141, 0.3); /* Sombra colorida */
+            font-weight: bold;
+            letter-spacing: 0.5px;
+            border: none;
+            transition: all 0.2s ease;
+        }
+
+        /* Estilo Específico para o Botão Cancelar (Vermelho) */
+        .buttons button#btnCancel {
+            background-image: linear-gradient(135deg, var(--danger-red) 0%, #ff4b5c 100%); /* Degradê Vermelho */
+            box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+        }
+
+        /* Botão Pequeno de Repetir Item (Verde) */
+        .repeat-item-btn {
+            background-image: linear-gradient(135deg, var(--success-green) 0%, #34d058 100%);
+            box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+            font-weight: bold;
+            border: none;
+        }
+
+        /* Efeito Hover (Mouse em cima) - Brilho extra */
+        .buttons button:hover:not(:disabled), .repeat-item-btn:hover {
+            filter: brightness(1.1); /* Fica um pouco mais claro */
+            transform: translateY(-2px); /* Sobe levemente */
+        }
+
+        /* Efeito Active (Ao Clicar) - Sensação física */
+        .buttons button:active:not(:disabled), .repeat-item-btn:active {
+            transform: scale(0.96); /* Diminui levemente (efeito de apertar) */
+            box-shadow: none; /* Remove a sombra momentaneamente */
+        }
     </style>
 </head>
 <body>
