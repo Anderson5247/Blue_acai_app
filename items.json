@@ -10,19 +10,9 @@
    },
   "frutas": [
     {
-      "id": "geleia_de_morango",
-      "name": "Geleia de Morango",
-      "available": true
-    },
-    {
       "id": "banana",
       "name": "Banana",
       "available": true
-    },
-    {
-      "id": "kiwi",
-      "name": "Kiwi",
-      "available": false
     },
     {
       "id": "maca",
@@ -124,16 +114,6 @@
       "id": "leite_condensado_cob",
       "name": "Leite Condensado",
       "available": true
-    },
-    {
-      "id": "tutti_frutti_cob",
-      "name": "Tutti Frutti (Cobertura)",
-      "available": true
-    },
-    {
-      "id": "kiwi_cob",
-      "name": "Kiwi (Cobertura)",
-      "available": false
     }
   ],
   "adicionais": [
@@ -198,22 +178,10 @@
       "available": true
     },
     {
-      "id": "geleia_de_morango_add",
-      "name": "Geleia de Morango - R$ 1.00",
-      "originalValue": "Geleia de Morango - R$ 1.00",
-      "available": true
-    },
-    {
       "id": "banana_add",
       "name": "Banana - R$ 1.00",
       "originalValue": "Banana - R$ 1.00",
       "available": true
-    },
-    {
-      "id": "kiwi_add",
-      "name": "Kiwi - R$ 1.00",
-      "originalValue": "Kiwi - R$ 1.00",
-      "available": false
     },
     {
       "id": "maca_add",
