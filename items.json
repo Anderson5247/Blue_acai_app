@@ -108,7 +108,7 @@
     {
       "id": "morango_cob",
       "name": "Morango (Cobertura)",
-      "available": false
+      "available": true
     },
     {
       "id": "leite_condensado_cob",
