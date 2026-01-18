@@ -52,11 +52,6 @@
       "available": true
     },
     {
-      "id": "chocolate_branco",
-      "name": "Chocolate Branco",
-      "available": true
-    },
-    {
       "id": "chocolate_com_avela",
       "name": "Chocolate Com Avelã",
       "available": true
@@ -240,15 +235,6 @@
       "img": "/images/bolo-chocolate.jpg",
       "desc": "Massa branca fofinha com recheio cremoso de chocolate com avelã.",
       "available": true,
-      "type": "doce"
-    },
-    {
-      "id": "bolo-morango",
-      "name": "Bolo de Pote - Morango",
-      "price": 7.00,
-      "img": "/images/bolo-morango.jpg",
-      "desc": "Massa branca suave com pedaços de morango fresco e creme.",
-      "available": false,
       "type": "doce"
     },
     {
