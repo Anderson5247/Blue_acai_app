@@ -109,6 +109,16 @@
       "id": "leite_condensado_cob",
       "name": "Leite Condensado",
       "available": true
+    },
+    {
+      "id": "kiwi_cob",
+      "name": "kiwi",
+      "available": true 
+    },
+    {
+      "id": "Ice blue_cob",
+      "name": "Ice blue",
+      "available": true
     }
   ],
   "adicionais": [
